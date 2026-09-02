@@ -43,6 +43,38 @@ R: A necessidade de acompanhar o uso de suplementos e/ou anabolizantes de forma 
   5. Personalidade, identidade e experiência
   R: Essas características influenciarão principalmente na linguagem do texto, na apresentação dos alertas e na facilidade do uso do aplicativo.
 
-  6. 
+  6. R: Funcionalidade: Cadastro de suplemento e/ou anabolizante.
+Necessidade atendida: permite que o usuário gerencie o conjunto de suplementos e anabolizantes que usa. 
+
+Funcionalidade:Listar os suplementos ativos
+Necessidade atendida: permite visualizar rapidamente os suplementos que estão sendo utilizados. 
+
+Funcionalidade: Registro de stacks e dosagens diárias. 
+Necessidade atendida: permite organizar e acompanhar o conjunto de suplementos e anabolizantes utilizados.  
+
+Funcionalidade: Calculadora de ingestão de água  
+Necessidade atendida: ajuda o usuário a estimar uma quantidade adequada de água com base em seus dados e consumo de suplementos.  
+
+Funcionalidade: Alertas de riscos e possíveis interações 
+Necessidade atendida: informa o usuário sobre possíveis riscos relacionados ao consumo excessivo ou à combinação de substâncias. 
+
+Funcionalidade: Notificações educativas 
+Necessidade atendida: ajuda o usuário a entender melhor os riscos e a utilizar suplementos de forma mais consciente. 
+
+Funcionalidade: Registro de sintomas e efeitos colaterais 
+Necessidade atendida: permite acompanhar alterações no corpo relacionadas ao consumo das substâncias. 
+
+Funcionalidade: Linha do tempo de sintomas 
+Necessidade atendida: facilita o acompanhamento da evolução dos sintomas ao longo do tempo. 
+
+Funcionalidade: Artigos educativos 
+Necessidade atendida: oferece informações sobre suplementos, anabolizantes, riscos e uso consciente. 
+
+Funcionalidade: funcionamento offline 
+Necessidade atendida: permite registrar informações mesmo sem conexão com a internet, como em academias e vestiários. 
+
+Funcionalidade: Sincronização dos dados com a nuvem 
+Necessidade atendida: permite enviar os registros armazenados no dispositivo para a nuvem quando houver conexão Wi-Fi.
+
 
 
