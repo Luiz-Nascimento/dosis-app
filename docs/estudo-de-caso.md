@@ -37,10 +37,12 @@ R: A necessidade de acompanhar o uso de suplementos e/ou anabolizantes de forma 
    3. Como o contexto dado influencia o desenvolvimento?
     R: O Dosis poderá ser utilizado principalmente em academias e vestiários, durante ou após os treinos. Como o usuário pode estar cansado, suado e com pouca atenção, a interface deve ser simples, com botões grandes, fonte legível e alto contraste. O aplicativo também precisa funcionar em smartphones básicos e offline, permitindo registrar doses e sintomas sem internet e sincronizar os dados posteriormente. Em situações de possível risco, os alertas devem ser rápidos, claros e sem causar alarmismo. Esses contextos influenciam diretamente o desenvolvimento, principalmente na interface, acessibilidade, funcionamento offline, desempenho e segurança dos dados.
 
-  4.
+  4. Objetivo e proposta de valor  
     R:O aplicativo permite que o usuário cadastre os suplementos que consome e, com base nessas informações, receba alertas sobre possíveis interações e riscos, como o consumo excessivo de creatina e seus impactos nos rins. Além disso, o aplicativo contará com uma calculadora para estimar o consumo diário adequado de água com base no peso, altura e doses dos suplementos. O usuário também poderá registrar e acompanhar possíveis efeitos colaterais ao longo do tempo.
 
-  5.
+  5. Personalidade, identidade e experiência
   R: Essas características influenciarão principalmente na linguagem do texto, na apresentação dos alertas e na facilidade do uso do aplicativo.
+
+  6. 
 
 
