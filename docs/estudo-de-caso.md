@@ -77,6 +77,16 @@ Necessidade atendida: permite registrar informações mesmo sem conexão com a i
 Funcionalidade: Sincronização dos dados com a nuvem 
 Necessidade atendida: permite enviar os registros armazenados no dispositivo para a nuvem quando houver conexão Wi-Fi.
 
+7.
+ R: 
+  Quantidade de telas: o protótipo deve possuir no máximo 4 telas principais. 
+  Número de interações: as funções principais devem ser realizadas em até 3 interações. 
+  Dispositivos: deve funcionar em smartphones básicos. 
+  Sistema operacional: Android 8.0 ou superior. 
+  Tamanho: o APK não pode ultrapassar 20 MB. 
+  Privacidade: o aplicativo deve permitir o uso anônimo e proteger os dados do usuário com criptografia quando enviados para a nuvem. 
+  Conectividade: deve funcionar offline e sincronizar os dados posteriormente, preferencialmente apenas por Wi-Fi. 
+  Acessibilidade: deve utilizar fontes grandes e alto contraste para facilitar a leitura durante o treino. 
 
-2.8 Pontos de atenção
+8 Pontos de atenção
 O sucesso do app depende de confiança nas informações, simplicidade no uso e acompanhamento personalizado.
