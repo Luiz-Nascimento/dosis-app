@@ -78,4 +78,5 @@ Funcionalidade: Sincronização dos dados com a nuvem
 Necessidade atendida: permite enviar os registros armazenados no dispositivo para a nuvem quando houver conexão Wi-Fi.
 
 
-
+2.8 Pontos de atenção
+O sucesso do app depende de confiança nas informações, simplicidade no uso e acompanhamento personalizado.
