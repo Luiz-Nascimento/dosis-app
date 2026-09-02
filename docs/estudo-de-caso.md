@@ -1,7 +1,12 @@
 Análise do estudo de caso do projeto Dosis
 
 1. Problema
-(a preencher)
+• Qual problema o aplicativo pretende ajudar a solucionar?
+ 	R: Problema do uso descontrolado de suplementos e anabolizantes.
+• Por que esse problema é relevante?
+R: Pois o uso descontrolado desses produtos pode trazer consequências à saúde, como danos graves ao fígado, aos rins, ao coração e ao equilíbrio hormonal do corpo.
+• Qual é a principal necessidade que a solução deverá 
+R: A necessidade de acompanhar o uso de suplementos e/ou anabolizantes de forma mais controlada e consciente.
 
 2. Público e Usuários
 
@@ -28,5 +33,14 @@ Análise do estudo de caso do projeto Dosis
     R: Fonte que traga credibilidade (como ANVISA, SBEM), porque tende a ser mais cético e exige embasamento antes de mudar de comportamento.
  - Situação de uso:
     R: Um curioso que recebeu a recomendação de um colega de treino para tomar creatina, mas nunca usou suplementos antes, abre o app para entender se a dose sugerida é segura e quais riscos existem antes de decidir comprar.
+
+   3. Como o contexto dado influencia o desenvolvimento?
+    R: O Dosis poderá ser utilizado principalmente em academias e vestiários, durante ou após os treinos. Como o usuário pode estar cansado, suado e com pouca atenção, a interface deve ser simples, com botões grandes, fonte legível e alto contraste. O aplicativo também precisa funcionar em smartphones básicos e offline, permitindo registrar doses e sintomas sem internet e sincronizar os dados posteriormente. Em situações de possível risco, os alertas devem ser rápidos, claros e sem causar alarmismo. Esses contextos influenciam diretamente o desenvolvimento, principalmente na interface, acessibilidade, funcionamento offline, desempenho e segurança dos dados.
+
+  4.
+    R:O aplicativo permite que o usuário cadastre os suplementos que consome e, com base nessas informações, receba alertas sobre possíveis interações e riscos, como o consumo excessivo de creatina e seus impactos nos rins. Além disso, o aplicativo contará com uma calculadora para estimar o consumo diário adequado de água com base no peso, altura e doses dos suplementos. O usuário também poderá registrar e acompanhar possíveis efeitos colaterais ao longo do tempo.
+
+  5.
+  R: Essas características influenciarão principalmente na linguagem do texto, na apresentação dos alertas e na facilidade do uso do aplicativo.
 
 
