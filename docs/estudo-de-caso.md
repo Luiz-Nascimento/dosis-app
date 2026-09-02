@@ -77,7 +77,8 @@ Necessidade atendida: permite registrar informações mesmo sem conexão com a i
 Funcionalidade: Sincronização dos dados com a nuvem 
 Necessidade atendida: permite enviar os registros armazenados no dispositivo para a nuvem quando houver conexão Wi-Fi.
 
-7. Restrições e condições 
+7. Restrições e condições
+8. 
  R: 
   Quantidade de telas: o protótipo deve possuir no máximo 4 telas principais.
 
