@@ -22,6 +22,7 @@ R: A necessidade de acompanhar o uso de suplementos e/ou anabolizantes de forma 
     R: Cálculo de necessidade baseado na estrutura corporal porque quer saber a quantidade real que seu corpo processa de forma eficiente, evitando consumir mais do que o necessário por desconhecimento ou insegurança.
   - Situação de uso:
     R: Um atleta amador que já mantém um stack fixo de creatina e whey quer registrar sua dose diária logo após o treino, no vestiário, para acompanhar se está dentro do limite seguro recomendado para seu peso — evitando repetir a dose sem perceber.
+    
 2.2 Curiosos
  - Quem é?
    R: O curioso é um usuário que ainda não possui uma rotina estabelecida de suplementação, mas está avaliando começar a usar algum suplemento (como whey, creatina ou termogênico) por influência de outras pessoas na academia, redes sociais ou conteúdo fitness. Diferente         do atleta amador, ele ainda não tem conhecimento consolidado sobre dosagem ou riscos.
