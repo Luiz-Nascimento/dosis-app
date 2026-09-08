@@ -37,4 +37,3 @@ Essa escolha se justifica porque Rafael tem uma necessidade recorrente e utiliza
 
 Além disso, por já consumir suplementos por conta própria, Rafael está mais exposto ao risco de esquecer doses, duplicar o consumo ou combinar produtos sem conhecer possíveis interações. Atender primeiro esse perfil permite validar o fluxo principal do aplicativo em uma situação real e frequente: o registro rápido da suplementação após o treino.
 
-O curioso também é importante para o projeto, principalmente por precisar de informação confiável antes de começar a consumir suplementos. Entretanto, seu uso tende a ser pontual, enquanto o atleta amador possui maior potencial de engajamento e representa melhor a proposta central de acompanhamento contínuo do Dosis.
