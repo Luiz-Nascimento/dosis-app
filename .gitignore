@@ -1,0 +1,85 @@
+*/venv/*
+.env
+
+Python
+
+pycache/
+*.py[cod]
+*$py.class
+*.so
+
+Virtual environment
+
+venv/
+.venv/
+env/
+ENV/
+
+Environment variables / secrets
+
+.env
+.env.*
+!.env.example
+
+Django
+
+*.log
+db.sqlite3
+db.sqlite3-journal
+
+Static / media files
+
+/staticfiles/
+/media/
+
+Migrations - descomente se NÃO quiser versionar migrations
+/migrations/.py
+!*/migrations/init.py
+Coverage
+
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+Type checkers
+
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+IDEs / editors
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+OS
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+Build / packaging
+
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+Jupyter
+
+.ipynb_checkpoints/
+
+Ruff
+
+.ruff_cache/
+
+PyCharm
+
+*.iml
