@@ -1,4 +1,4 @@
-1- Cronometer 
+# 1- Cronometer 
 O Cronometer permite registrar suplementos como parte do diário alimentar, inclusive por busca ou código de barras. Também acompanha vitaminas, minerais e outros nutrientes, oferecendo metas e gráficos.  
 
 Pontos positivos:
@@ -20,3 +20,25 @@ A ideia de registrar suplementos e mostrar informações de forma organizada.
 
 O que melhorar: 
 Simplificar bastante a experiência e adicionar alertas específicos sobre o uso do suplemento. 
+
+
+# 3-Strong 
+O Strong é um aplicativo voltado para acompanhamento de treinos. Ele permite registrar exercícios, séries, cargas, progresso, medidas corporais e outras informações relacionadas ao treinamento. A proposta do aplicativo é tornar o registro rápido e simples.  
+ 
+Pontos positivos:
+- Interface simples.
+- Registro rápido.
+- Boa visualização de progresso.
+- Focado no público de academia.
+- Possui gráficos e histórico.  
+ 
+Pontos negativos:
+- Não é voltado para suplementos.
+- Não apresenta informações sobre riscos ou segurança de substâncias.
+- O foco é exclusivamente treinamento.  
+ 
+O que podemos aproveitar: 
+A filosofia de “registrar rapidamente e continuar o treino”. Isso combina muito com a ideia do Dosis funcionar bem em um ambiente de academia. 
+ 
+O que melhorar: 
+Aplicar essa simplicidade ao registro de suplementos e adicionar informações educativas e alertas de segurança.
