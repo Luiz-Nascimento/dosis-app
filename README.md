@@ -11,5 +11,5 @@ Antônio Fernandes de Santana Neto.
 Dosis é um aplicativo educacional e de rastreamento para uso consciente de suplementos alimentares, voltado a jovens de 18 a 40 anos que frequentam academia.
 
 # Atividade 2 
-Carlos Audre Santos - Realizou a pesquisa (tópico 2)
-Antônio Fernandes - Realizou pesquisa para o benchmark (tópico 3)
+- Carlos Audre Santos - Realizou a pesquisa (tópico 2)
+- Antônio Fernandes - Realizou pesquisa para o benchmark (tópico 3)
