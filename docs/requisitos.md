@@ -24,10 +24,10 @@ O **Dosis** é um aplicativo desenvolvido para auxiliar praticantes de exercíci
 
 | ID   | Requisito Funcional            | Descrição                                                                                                                                           |
 |------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| RF01 | Cadastro de suplemento         | O sistema deve permitir que o usuário cadastre um suplemento com suas informações básicas.                                                          |
-| RF02 | Edição de suplemento           | O sistema deve permitir a alteração dos dados de um suplemento cadastrado.                                                                          |
-| RF03 | Exclusão de suplemento         | O sistema deve permitir a exclusão de um suplemento cadastrado.                                                                                     |
-| RF04 | Consulta de suplementos        | O sistema deve permitir a visualização dos suplementos cadastrados e ativos.                                                                        |
+| RF01 | Cadastro de suplemento/anabolizante         | O sistema deve permitir que o usuário cadastre um suplemento com suas informações básicas.                                                          |
+| RF02 | Edição de suplemento/anabolizante           | O sistema deve permitir a alteração dos dados de um suplemento cadastrado.                                                                          |
+| RF03 | Exclusão de suplemento/anabolizante         | O sistema deve permitir a exclusão de um suplemento cadastrado.                                                                                     |
+| RF04 | Consulta de suplementos/anabolizante        | O sistema deve permitir a visualização dos suplementos cadastrados e ativos.                                                                        |
 | RF05 | Registro de utilização         | O sistema deve permitir que o usuário registre a utilização de um suplemento.                                                                       |
 | RF06 | Registro de quantidade         | O sistema deve permitir informar a quantidade utilizada de cada suplemento.                                                                         |
 | RF07 | Registro de protocolo          | O sistema deve permitir registrar informações relacionadas à forma e ao período de utilização.                                                      |
