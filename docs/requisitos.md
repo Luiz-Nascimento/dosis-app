@@ -1,6 +1,5 @@
 # 1. Objetivo
 
-O objetivo do **Dosis** é auxiliar praticantes de exercícios físicos a realizar um acompanhamento mais consciente e organizado do uso de suplementos e outras substâncias relacionadas à prática esportiva.
-O aplicativo busca centralizar informações confiáveis sobre os produtos utilizados, permitir o registro e acompanhamento da suplementação, apresentar alertas relacionados a possíveis riscos do uso inadequado e auxiliar o usuário no monitoramento de sua rotina.
-A proposta do Dosis é facilitar o acesso a informações baseadas em evidências e apoiar decisões mais conscientes, sem substituir a orientação de profissionais de saúde.
+O **Dosis** é um aplicativo desenvolvido para auxiliar praticantes de exercícios físicos a realizar um acompanhamento mais consciente, seguro e organizado do uso de suplementos e outras substâncias relacionadas à prática esportiva. A plataforma centraliza informações confiáveis e baseadas em evidências sobre os produtos utilizados, permitindo o registro da rotina de suplementação e o monitoramento de metas diárias. Além disso, o sistema apresenta alertas preventivos sobre possíveis riscos do uso inadequado ou de interações entre substâncias, facilitando o acesso ao conhecimento prático e apoiando decisões mais informadas, sempre de forma complementar e sem substituir a orientação personalizada de profissionais de saúde.
+
 
