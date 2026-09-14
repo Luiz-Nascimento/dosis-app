@@ -55,6 +55,6 @@ Diferentes suplementos e contextos podem apresentar formas distintas de utiliza�
 
 ## 5. Fontes utilizadas
 
-* **Anvisa — Suplemento alimentar: o que você precisa saber para usar com segurança**
-* **International Society of Sports Nutrition — Creatine supplementation and exercise**
-* **Anvisa — Suplementos alimentares**
+* **https://www.gov.br/anvisa/pt-br/assuntos/alimentos/suplementos-alimentares/suplemento-alimentar-o-que-voce-precisa-saber-para-usar-com-seguranca-1**
+* **https://link.springer.com/article/10.1186/s12970-017-0173-z**
+* **https://www.gov.br/anvisa/pt-br/assuntos/alimentos/suplementos-alimentares**
