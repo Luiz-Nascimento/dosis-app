@@ -34,8 +34,8 @@
 
 ### Adicionado
 
-* Definição do **Objetivo (1)** do aplicativo Dosis.
-* Definição das **Funcionalidades (2.1)**.
-* Definição dos **Requisitos Funcionais (2.2)**.
-* Definição dos **Requisitos Não Funcionais (2.3)**.
+* Definição do **Objetivo** do aplicativo Dosis.
+* Definição das **Funcionalidades**.
+* Definição dos **Requisitos Funcionais**.
+* Definição dos **Requisitos Não Funcionais**.
 * Organização da documentação com base nas necessidades identificadas no estudo de caso e nas personas do projeto.
