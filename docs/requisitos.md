@@ -5,7 +5,7 @@ O **Dosis** é um aplicativo desenvolvido para auxiliar praticantes de exercíci
 
 # 2.1 Funcionalidades 
 
-| ID  | Funcionalidade                             | Necessidade do usuário                                                              | Justificativa                                                                                                                  |
+|   | Funcionalidade                             | Necessidade do usuário                                                              | Justificativa                                                                                                                  |
 |-----|--------------------------------------------|-------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
 | F01 | Cadastro de suplementos e/ou anabolizantes | Registrar e organizar os produtos utilizados.                                       | Centraliza as informações dos produtos utilizados pelo usuário, facilitando seu acompanhamento.                                |
 | F02 | Lista de suplementos ativos                | Visualizar rapidamente os produtos atualmente utilizados.                           | Facilita a consulta da rotina de suplementação e reduz o risco de esquecimento.                                                |
@@ -22,7 +22,7 @@ O **Dosis** é um aplicativo desenvolvido para auxiliar praticantes de exercíci
 
 # 2.2 Requisitos funcionais 
 
-| ID   | Requisito Funcional            | Descrição                                                                                                                                           |
+|    | Requisito Funcional            | Descrição                                                                                                                                           |
 |------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | RF01 | Cadastro de suplemento/anabolizante         | O sistema deve permitir que o usuário cadastre um suplemento com suas informações básicas.                                                          |
 | RF02 | Edição de suplemento/anabolizante           | O sistema deve permitir a alteração dos dados de um suplemento cadastrado.                                                                          |
@@ -42,7 +42,7 @@ O **Dosis** é um aplicativo desenvolvido para auxiliar praticantes de exercíci
 
 # 2.3 Requisitos não funcionais
 
-| ID    | Categoria               | Requisito Não Funcional                                                                                                                                           |
+|     | Categoria               | Requisito Não Funcional                                                                                                                                           |
 |-------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | RNF01 | Usabilidade             | As principais funcionalidades devem ser acessíveis em no máximo três interações, priorizando fluxos simples e objetivos.                                          |
 | RNF02 | Acessibilidade          | A interface deve utilizar fontes legíveis, elementos com tamanho adequado e contraste suficiente para facilitar a leitura.                                        |
@@ -58,6 +58,78 @@ O **Dosis** é um aplicativo desenvolvido para auxiliar praticantes de exercíci
 | RNF12 | Privacidade             | O tratamento dos dados do usuário deve considerar os princípios de privacidade e proteção de dados estabelecidos pela LGPD. 
 
 
+# 2.4 CRUD            
+
+C — Criar
+
+O sistema deverá permitir a criação de informações relacionadas à rotina do usuário, como:
+
+* Cadastro de suplementos e/ou anabolizantes;
+* Registro das dosagens utilizadas;
+* Cadastro de protocolos de utilização;
+* Criação de stacks;
+* Registro de ingestão de água;
+* Registro de sintomas e possíveis efeitos colaterais;
+* Cadastro dos dados necessários para a estimativa de ingestão de água;
+* Criação de registros no histórico de utilização.
+
+R — Consultar
+
+O usuário deverá conseguir consultar as informações armazenadas no aplicativo, incluindo:
+
+* Lista de suplementos ativos;
+* Dosagens e protocolos cadastrados;
+* Stacks registrados;
+* Histórico de utilização;
+* Registros de ingestão de água;
+* Sintomas e efeitos colaterais;
+* Linha do tempo de sintomas;
+* Alertas de possíveis riscos e interações;
+* Notificações educativas;
+* Artigos e conteúdos educativos.
+
+U — Atualizar
+
+A operação de atualização será necessária principalmente para informações que podem sofrer alterações ao longo do tempo, como:
+
+* Dados dos suplementos/anabolizantes cadastrados;
+* Dosagens;
+* Protocolos de utilização;
+* Stacks;
+* Registros de ingestão de água;
+* Dados utilizados para o cálculo da hidratação;
+* Informações sincronizadas com a nuvem.
+
+O histórico de utilização e os registros de sintomas não devem ser alterados automaticamente, pois representam acontecimentos já registrados. Caso seja necessário corrigir alguma informação, o sistema poderá permitir a edição do registro original.
+
+D — Excluir
+
+O aplicativo deverá permitir a exclusão de informações inseridas pelo próprio usuário, principalmente:
+
+* Suplementos/anabolizantes cadastrados;
+* Dosagens e protocolos;
+* Stacks;
+* Registros de ingestão de água;
+* Sintomas registrados;
+* Dados pessoais utilizados nos cálculos.
+
+A exclusão deve considerar a privacidade dos dados do usuário, permitindo que informações pessoais ou registros inseridos pelo usuário sejam removidos quando necessário.
+
+
+# 2.5 Priorização
+|  | Funcionalidade | Prioridade |
+|---|---|---|
+| F01 | Cadastro de suplementos e/ou anabolizantes | Essencial |
+| F02 | Lista de suplementos ativos | Essencial |
+| F03 | Registro de stacks e dosagens diárias | Essencial |
+| F04 | Calculadora de ingestão de água | Importante |
+| F05 | Alertas de riscos e possíveis interações | Essencial |
+| F06 | Notificações educativas | Importante |
+| F07 | Registro de sintomas e efeitos colaterais | Essencial |
+| F08 | Linha do tempo de sintomas | Importante |
+| F09 | Artigos educativos | Importante |
+| F10 | Funcionamento offline | Importante |
+| F11 | Sincronização com a nuvem | Secundária |
             
 
  
