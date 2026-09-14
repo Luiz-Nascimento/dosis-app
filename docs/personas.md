@@ -1,39 +1,127 @@
-Personas
-Com base no estudo de caso do Dosis, foram definidas duas personas principais: um atleta amador, que utiliza suplementos regularmente, e um curioso, que ainda está pesquisando antes de começar a consumir esses produtos.
+# Personas
 
-Persona 1 — Rafael Martins
-Nome fictício: Rafael Martins, 24 anos.
+Com base no estudo de caso do Dosis, foram definidas duas personas principais para representar os perfis de usuários mais relevantes para o aplicativo:
 
-Perfil/contexto: Rafael treina musculação cinco vezes por semana e segue uma dieta voltada para ganho de massa muscular. Utiliza creatina e whey protein diariamente, mas organiza seus horários e doses de cabeça. Costuma registrar a suplementação no celular depois do treino, ainda no vestiário.
+* **Rafael Martins:** atleta amador que utiliza suplementos regularmente;
+* **Lucas Almeida:** usuário iniciante que ainda está pesquisando antes de começar a consumir suplementos.
 
-Objetivos: Melhorar o desempenho e os resultados estéticos; manter uma rotina organizada de suplementação; evitar esquecer ou repetir doses; acompanhar a quantidade de água que precisa ingerir.
+---
 
-Necessidades: Registrar as doses diárias; visualizar os suplementos ativos; receber alertas sobre excesso ou possíveis riscos; calcular uma estimativa de ingestão de água; acompanhar sintomas e efeitos colaterais.
+## Persona 1 — Rafael Martins
 
-Dores: Pode esquecer uma dose ou tomar duas vezes por engano; não tem certeza se a quantidade consumida é adequada para seu peso; encontra informações contraditórias na internet; tem pouco tempo e atenção após o treino.
+**Idade:** 24 anos
+**Perfil:** Atleta amador
 
-Comportamentos: Treina regularmente; utiliza suplementos por conta própria; pesquisa informações em redes sociais e sites de fitness; usa o celular durante e depois do treino; prefere processos rápidos e objetivos.
+### Perfil e contexto
 
-Relação com o aplicativo: Usuário frequente, com utilização diária. Rafael usaria o Dosis para registrar suas doses, consultar seus suplementos ativos, acompanhar o consumo de água e verificar alertas de risco.
+Rafael treina musculação cinco vezes por semana e segue uma dieta voltada para ganho de massa muscular. Utiliza creatina e whey protein diariamente, mas costuma organizar seus horários e doses de cabeça.
 
-Persona 2 — Lucas Almeida
-Nome fictício: Lucas Almeida, 19 anos.
+Após o treino, costuma utilizar o celular ainda no vestiário para registrar e acompanhar sua rotina de suplementação.
 
-Perfil/contexto: Lucas começou a frequentar a academia recentemente e ainda não possui uma rotina de suplementação. Ele recebeu de um colega a recomendação para usar creatina e termogênico, mas não sabe quais são os efeitos, riscos ou doses adequadas.
+### Objetivos
 
-Objetivos: Entender se precisa utilizar suplementos; conhecer os possíveis benefícios e riscos; identificar informações confiáveis antes de comprar; evitar tomar uma substância de forma incorreta.
+* Melhorar o desempenho e os resultados estéticos;
+* Manter uma rotina organizada de suplementação;
+* Evitar esquecer ou repetir doses;
+* Acompanhar sua ingestão de água;
+* Ter maior controle sobre sua rotina de consumo.
 
-Necessidades: Consultar artigos educativos; compreender os possíveis efeitos colaterais; encontrar informações baseadas em fontes confiáveis; entender a finalidade dos suplementos; receber orientações claras sobre quando procurar um profissional de saúde.
+### Necessidades
 
-Dores: Não sabe diferenciar informações científicas de recomendações informais; sente insegurança sobre a dose correta; é influenciado por colegas, redes sociais e conteúdos fitness; pode começar a consumir um produto sem conhecer suas contraindicações.
+* Registrar as doses consumidas diariamente;
+* Visualizar rapidamente os suplementos ativos;
+* Receber alertas sobre possíveis riscos e consumo excessivo;
+* Estimar a ingestão de água com base em seus dados;
+* Registrar e acompanhar sintomas e possíveis efeitos colaterais.
 
-Comportamentos: Pesquisa antes de comprar; faz perguntas a colegas de academia; consulta vídeos e redes sociais; utiliza o aplicativo de forma pontual, principalmente quando tem dúvidas sobre algum produto.
+### Dores
 
-Relação com o aplicativo: Usuário ocasional. Lucas acessaria o Dosis antes de iniciar uma suplementação, para pesquisar informações, verificar riscos e tomar uma decisão mais consciente.
+* Pode esquecer uma dose ou consumi-la duas vezes por engano;
+* Não tem certeza se a quantidade consumida é adequada para sua rotina;
+* Encontra informações contraditórias na internet;
+* Possui pouco tempo e atenção disponíveis após o treino.
 
-Persona prioritária: A persona prioritária deve ser Rafael Martins, o atleta amador.
+### Comportamentos
 
-Essa escolha se justifica porque Rafael tem uma necessidade recorrente e utiliza suplementos diariamente. Portanto, ele apresenta maior frequência de uso e pode se beneficiar diretamente das principais funcionalidades do Dosis, como registro de doses, acompanhamento de stacks, alertas de risco, cálculo de ingestão de água e registro de sintomas.
+* Treina regularmente;
+* Utiliza suplementos por conta própria;
+* Pesquisa informações em redes sociais e sites relacionados a fitness;
+* Utiliza o celular durante e após os treinos;
+* Prefere processos rápidos, simples e objetivos.
 
-Além disso, por já consumir suplementos por conta própria, Rafael está mais exposto ao risco de esquecer doses, duplicar o consumo ou combinar produtos sem conhecer possíveis interações. Atender primeiro esse perfil permite validar o fluxo principal do aplicativo em uma situação real e frequente: o registro rápido da suplementação após o treino.
+### Relação com o aplicativo
 
+Rafael é um **usuário frequente**, com potencial de utilização diária.
+
+Ele utilizaria o Dosis principalmente para registrar suas doses, visualizar os suplementos ativos, acompanhar sua ingestão de água e consultar alertas relacionados a possíveis riscos.
+
+---
+
+## Persona 2 — Lucas Almeida
+
+**Idade:** 19 anos
+**Perfil:** Usuário iniciante / curioso
+
+### Perfil e contexto
+
+Lucas começou a frequentar a academia recentemente e ainda não possui uma rotina estabelecida de suplementação.
+
+Ele recebeu de um colega a recomendação para utilizar creatina e termogênico, mas não conhece bem seus efeitos, riscos ou informações relacionadas ao consumo dessas substâncias.
+
+### Objetivos
+
+* Entender se realmente precisa utilizar suplementos;
+* Conhecer possíveis benefícios e riscos;
+* Encontrar informações confiáveis antes de comprar;
+* Compreender a finalidade dos suplementos;
+* Evitar consumir uma substância de forma inadequada.
+
+### Necessidades
+
+* Consultar artigos e conteúdos educativos;
+* Compreender possíveis efeitos colaterais;
+* Encontrar informações baseadas em fontes confiáveis;
+* Entender a finalidade de cada suplemento;
+* Receber informações claras sobre situações em que deve procurar um profissional de saúde.
+
+### Dores
+
+* Tem dificuldade para diferenciar informações científicas de recomendações informais;
+* Possui insegurança sobre o consumo e as dosagens;
+* É influenciado por colegas, redes sociais e conteúdos fitness;
+* Pode começar a consumir um produto sem conhecer seus riscos ou contraindicações.
+
+### Comportamentos
+
+* Pesquisa informações antes de comprar;
+* Faz perguntas a colegas de academia;
+* Consulta vídeos e redes sociais;
+* Utiliza o aplicativo de forma pontual, principalmente quando possui dúvidas sobre determinado produto.
+
+### Relação com o aplicativo
+
+Lucas é um **usuário ocasional**.
+
+Ele acessaria o Dosis principalmente antes de iniciar uma suplementação, buscando informações sobre o produto, possíveis riscos e cuidados necessários para tomar uma decisão mais consciente.
+
+---
+
+# Persona Prioritária — Rafael Martins
+
+A persona prioritária do Dosis é **Rafael Martins, o atleta amador**.
+
+Essa escolha se justifica principalmente pela **frequência e recorrência de suas necessidades**. Diferentemente de Lucas, que utiliza o aplicativo apenas em momentos específicos de dúvida, Rafael possui uma rotina diária de suplementação e, consequentemente, mais oportunidades de utilizar o aplicativo.
+
+As principais funcionalidades do Dosis estão diretamente relacionadas às necessidades desse perfil, como:
+
+* Registro de doses;
+* Acompanhamento de suplementos e stacks;
+* Alertas de possíveis riscos;
+* Estimativa de ingestão de água;
+* Registro e acompanhamento de sintomas.
+
+Além disso, por já utilizar suplementos por conta própria, Rafael pode enfrentar situações como esquecer uma dose, repetir um registro ou combinar diferentes produtos sem conhecer completamente os possíveis riscos envolvidos.
+
+Priorizar esse perfil permite validar o **fluxo principal do aplicativo em uma situação real e recorrente**: o registro rápido da suplementação durante ou após o treino.
+
+Dessa forma, Rafael representa o usuário que possui **maior frequência de uso, maior necessidade de acompanhamento e maior aderência às funcionalidades centrais do Dosis**.
