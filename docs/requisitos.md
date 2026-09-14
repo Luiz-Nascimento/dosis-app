@@ -94,4 +94,23 @@ Necessidade atendida: Necessidade de utilizar o aplicativo em ambientes com cone
 
 Justificativa: O estudo de caso estabelece a necessidade de funcionamento offline, especialmente considerando o contexto de uso em academias e após os treinos. 
 
+
+| ID   | Requisito Funcional            | Descrição                                                                                                                                           |
+|------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| RF01 | Cadastro de suplemento         | O sistema deve permitir que o usuário cadastre um suplemento com suas informações básicas.                                                          |
+| RF02 | Edição de suplemento           | O sistema deve permitir a alteração dos dados de um suplemento cadastrado.                                                                          |
+| RF03 | Exclusão de suplemento         | O sistema deve permitir a exclusão de um suplemento cadastrado.                                                                                     |
+| RF04 | Consulta de suplementos        | O sistema deve permitir a visualização dos suplementos cadastrados e ativos.                                                                        |
+| RF05 | Registro de utilização         | O sistema deve permitir que o usuário registre a utilização de um suplemento.                                                                       |
+| RF06 | Registro de quantidade         | O sistema deve permitir informar a quantidade utilizada de cada suplemento.                                                                         |
+| RF07 | Registro de protocolo          | O sistema deve permitir registrar informações relacionadas à forma e ao período de utilização.                                                      |
+| RF08 | Geração de alertas             | O sistema deve apresentar alertas sobre possíveis riscos relacionados ao uso inadequado ou à combinação de substâncias cadastradas.                 |
+| RF09 | Estimativa de ingestão de água | O sistema deve permitir informar dados do usuário e apresentar uma estimativa de ingestão de água conforme os parâmetros definidos pelo aplicativo. |
+| RF10 | Registro de sintomas           | O sistema deve permitir registrar sintomas ou efeitos adversos percebidos pelo usuário.                                                             |
+| RF11 | Consulta de sintomas           | O sistema deve permitir consultar os sintomas registrados em ordem cronológica.                                                                     |
+| RF12 | Consulta de conteúdo educativo | O sistema deve permitir o acesso aos conteúdos educativos disponibilizados pelo aplicativo.                                                         |
+| RF13 | Funcionamento offline          | O sistema deve permitir a utilização das principais funcionalidades sem conexão com a internet.                                                     |
+| RF14 | Sincronização de dados         | O sistema deve sincronizar os dados registrados offline quando uma conexão estiver disponível.                                                      |
+
+
  
