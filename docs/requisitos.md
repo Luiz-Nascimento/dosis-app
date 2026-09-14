@@ -95,6 +95,8 @@ Necessidade atendida: Necessidade de utilizar o aplicativo em ambientes com cone
 Justificativa: O estudo de caso estabelece a necessidade de funcionamento offline, especialmente considerando o contexto de uso em academias e após os treinos. 
 
 
+# 2.2 Requisitos funcionais 
+
 | ID   | Requisito Funcional            | Descrição                                                                                                                                           |
 |------|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | RF01 | Cadastro de suplemento         | O sistema deve permitir que o usuário cadastre um suplemento com suas informações básicas.                                                          |
@@ -111,6 +113,24 @@ Justificativa: O estudo de caso estabelece a necessidade de funcionamento offlin
 | RF12 | Consulta de conteúdo educativo | O sistema deve permitir o acesso aos conteúdos educativos disponibilizados pelo aplicativo.                                                         |
 | RF13 | Funcionamento offline          | O sistema deve permitir a utilização das principais funcionalidades sem conexão com a internet.                                                     |
 | RF14 | Sincronização de dados         | O sistema deve sincronizar os dados registrados offline quando uma conexão estiver disponível.                                                      |
+
+
+# 2.3 Requisitos não funcionais
+
+| ID    | Categoria               | Requisito Não Funcional                                                                                                                                           |
+|-------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| RNF01 | Usabilidade             | As principais funcionalidades devem ser acessíveis em no máximo três interações, priorizando fluxos simples e objetivos.                                          |
+| RNF02 | Acessibilidade          | A interface deve utilizar fontes legíveis, elementos com tamanho adequado e contraste suficiente para facilitar a leitura.                                        |
+| RNF03 | Desempenho              | O aplicativo deve apresentar tempo de resposta adequado durante a execução das principais funcionalidades, inclusive em dispositivos básicos.                     |
+| RNF04 | Compatibilidade         | O aplicativo deve ser compatível com dispositivos que utilizem Android 8.0 ou superior.                                                                           |
+| RNF05 | Funcionamento offline   | As principais funcionalidades devem permanecer disponíveis sem conexão com a internet, permitindo o armazenamento local dos dados.                                |
+| RNF06 | Segurança e privacidade | Os dados do usuário devem ser protegidos, utilizando mecanismos adequados de segurança e proteção durante o armazenamento e a transmissão para serviços externos. |
+| RNF07 | Armazenamento           | O aplicativo deve possuir armazenamento local suficiente para manter os dados registrados durante períodos sem conexão.                                           |
+| RNF08 | Sincronização           | Os dados armazenados localmente devem ser sincronizados quando uma conexão estiver disponível, priorizando a utilização de Wi-Fi quando aplicável.                |
+| RNF09 | Tamanho do aplicativo   | O tamanho final do APK deve ser de, no máximo, 20 MB.                                                                                                             |
+| RNF10 | Comunicação             | Os alertas e informações apresentadas pelo aplicativo devem utilizar linguagem clara, objetiva e não alarmista.                                                   |
+| RNF11 | Interface               | A interface deve ser simples e adequada ao contexto de utilização durante ou após atividades físicas, considerando situações de cansaço e atenção reduzida.       |
+| RNF12 | Privacidade             | O tratamento dos dados do usuário deve considerar os princípios de privacidade e proteção de dados estabelecidos pela LGPD. 
 
 
  
