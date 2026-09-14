@@ -13,3 +13,6 @@ Dosis é um aplicativo educacional e de rastreamento para uso consciente de supl
 # Atividade 2 
 - Carlos Audre Santos - Realizou a pesquisa (tópico 2)
 - Antônio Fernandes - Realizou pesquisa para o benchmark (tópico 3)
+
+# Atividade 2 
+- Carlos Audre Santos - Definiu o objetivo, funcionalidades, requisitos funcionais e requisitos não funcionais
