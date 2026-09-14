@@ -1,100 +1,226 @@
-Análise do estudo de caso do projeto Dosis
+# Análise do Estudo de Caso — Projeto Dosis
 
-1. Problema
-• Qual problema o aplicativo pretende ajudar a solucionar?
- 	R: Problema do uso descontrolado de suplementos e anabolizantes.
-• Por que esse problema é relevante?
-R: Pois o uso descontrolado desses produtos pode trazer consequências à saúde, como danos graves ao fígado, aos rins, ao coração e ao equilíbrio hormonal do corpo.
-• Qual é a principal necessidade que a solução deverá 
-R: A necessidade de acompanhar o uso de suplementos e/ou anabolizantes de forma mais controlada e consciente.
+## 1. Problema
 
-2. Público e Usuários
+### 1.1 Problema a ser solucionado
 
-2.1 Atletas Amadores
-  - Quem é?
-    R: O atleta amador é um usuário que já treina com regularidade, segue uma dieta especifica e suplementa por conta própria sem necessariamente ser por indicação médica, motivação principal é estética e desempenho esportivo.
-  - Relação com o aplicativo:
-    R: Sua relação com o aplicativo é de uso diário porque ele já tem uma rotina pré-estabelecida de suplementação e app se torna parte de seu hábito.
+O aplicativo Dosis busca auxiliar no **uso mais consciente e controlado de suplementos e anabolizantes**, fornecendo informações, registros e alertas relacionados ao consumo dessas substâncias.
 
-  - Necessidades:
-    R: Rastreamento de suplementação diária porque já utiliza uma grande carga cognitiva para contar calorias de dieta e pode acabar esquecendo das doses de suplementação.
-    R: Informação sobre efeitos colaterais pois quer evitar dosagem errada que comprometa sua saúde (como sobrecarga renal) e consequentemente prejudicar seu desempenho esportivo.
-    R: Cálculo de necessidade baseado na estrutura corporal porque quer saber a quantidade real que seu corpo processa de forma eficiente, evitando consumir mais do que o necessário por desconhecimento ou insegurança.
-  - Situação de uso:
-    R: Um atleta amador que já mantém um stack fixo de creatina e whey quer registrar sua dose diária logo após o treino, no vestiário, para acompanhar se está dentro do limite seguro recomendado para seu peso — evitando repetir a dose sem perceber.
-    
-2.2 Curiosos
- - Quem é?
-   R: O curioso é um usuário que ainda não possui uma rotina estabelecida de suplementação, mas está avaliando começar a usar algum suplemento (como whey, creatina ou termogênico) por influência de outras pessoas na academia, redes sociais ou conteúdo fitness. Diferente         do atleta amador, ele ainda não tem conhecimento consolidado sobre dosagem ou riscos.
- - Relação com o aplicativo:
-   R: Sua relação com o aplicativo é pontual, não diária, já que seu uso costuma estar ligado a um momento específico de dúvida ou decisão. antes de comprar um suplemento, ou logo após ouvir uma recomendação de terceiros.
- - Necessidades:
-    R: Informação confiável sobre o que está considerando consumir, porque normalmente parte de indicações informais (colegas de treino, redes sociais) sem embasamento técnico.
-    R: Entender riscos e efeitos colaterais antes de decidir consumir, porque ainda não tem experiência prévia para avaliar se uma dose é segura.
-    R: Fonte que traga credibilidade (como ANVISA, SBEM), porque tende a ser mais cético e exige embasamento antes de mudar de comportamento.
- - Situação de uso:
-    R: Um curioso que recebeu a recomendação de um colega de treino para tomar creatina, mas nunca usou suplementos antes, abre o app para entender se a dose sugerida é segura e quais riscos existem antes de decidir comprar.
+### 1.2 Relevância do problema
 
-   3. Como o contexto dado influencia o desenvolvimento?
-    R: O Dosis poderá ser utilizado principalmente em academias e vestiários, durante ou após os treinos. Como o usuário pode estar cansado, suado e com pouca atenção, a interface deve ser simples, com botões grandes, fonte legível e alto contraste. O aplicativo também precisa funcionar em smartphones básicos e offline, permitindo registrar doses e sintomas sem internet e sincronizar os dados posteriormente. Em situações de possível risco, os alertas devem ser rápidos, claros e sem causar alarmismo. Esses contextos influenciam diretamente o desenvolvimento, principalmente na interface, acessibilidade, funcionamento offline, desempenho e segurança dos dados.
+O uso descontrolado de suplementos e anabolizantes pode trazer riscos à saúde, principalmente quando há consumo excessivo, dosagens inadequadas ou combinações de substâncias sem orientação adequada. Entre as possíveis consequências estão problemas relacionados ao fígado, rins, sistema cardiovascular e equilíbrio hormonal.
 
-  4. Objetivo e proposta de valor  
-    R:O aplicativo permite que o usuário cadastre os suplementos que consome e, com base nessas informações, receba alertas sobre possíveis interações e riscos, como o consumo excessivo de creatina e seus impactos nos rins. Além disso, o aplicativo contará com uma calculadora para estimar o consumo diário adequado de água com base no peso, altura e doses dos suplementos. O usuário também poderá registrar e acompanhar possíveis efeitos colaterais ao longo do tempo.
+### 1.3 Principal necessidade
 
-  5. Personalidade, identidade e experiência
-  R: Essas características influenciarão principalmente na linguagem do texto, na apresentação dos alertas e na facilidade do uso do aplicativo.
+A principal necessidade é **permitir que o usuário acompanhe o consumo de suplementos e/ou anabolizantes de maneira organizada, consciente e informada**.
 
-  6. R: Funcionalidade: Cadastro de suplemento e/ou anabolizante.
-Necessidade atendida: permite que o usuário gerencie o conjunto de suplementos e anabolizantes que usa. 
+---
 
-Funcionalidade:Listar os suplementos ativos
-Necessidade atendida: permite visualizar rapidamente os suplementos que estão sendo utilizados. 
+# 2. Público e Usuários
 
-Funcionalidade: Registro de stacks e dosagens diárias. 
-Necessidade atendida: permite organizar e acompanhar o conjunto de suplementos e anabolizantes utilizados.  
+O aplicativo possui dois públicos principais:
 
-Funcionalidade: Calculadora de ingestão de água  
-Necessidade atendida: ajuda o usuário a estimar uma quantidade adequada de água com base em seus dados e consumo de suplementos.  
+* Atletas amadores;
+* Curiosos ou iniciantes no uso de suplementos.
 
-Funcionalidade: Alertas de riscos e possíveis interações 
-Necessidade atendida: informa o usuário sobre possíveis riscos relacionados ao consumo excessivo ou à combinação de substâncias. 
+## 2.1 Atletas Amadores
 
-Funcionalidade: Notificações educativas 
-Necessidade atendida: ajuda o usuário a entender melhor os riscos e a utilizar suplementos de forma mais consciente. 
+### Quem é?
 
-Funcionalidade: Registro de sintomas e efeitos colaterais 
-Necessidade atendida: permite acompanhar alterações no corpo relacionadas ao consumo das substâncias. 
+É o usuário que já treina regularmente, possui uma rotina de alimentação e suplementação e pode utilizar suplementos por conta própria, sem necessariamente possuir indicação médica. Sua principal motivação costuma estar relacionada à **estética, desempenho esportivo e evolução física**.
 
-Funcionalidade: Linha do tempo de sintomas 
-Necessidade atendida: facilita o acompanhamento da evolução dos sintomas ao longo do tempo. 
+### Relação com o aplicativo
 
-Funcionalidade: Artigos educativos 
-Necessidade atendida: oferece informações sobre suplementos, anabolizantes, riscos e uso consciente. 
+Sua relação com o aplicativo tende a ser **frequente ou diária**, pois ele já possui uma rotina de suplementação. Dessa forma, o aplicativo pode ser incorporado ao seu hábito diário para registrar doses e acompanhar informações relacionadas ao consumo.
 
-Funcionalidade: funcionamento offline 
-Necessidade atendida: permite registrar informações mesmo sem conexão com a internet, como em academias e vestiários. 
+### Necessidades
 
-Funcionalidade: Sincronização dos dados com a nuvem 
-Necessidade atendida: permite enviar os registros armazenados no dispositivo para a nuvem quando houver conexão Wi-Fi.
+**Rastreamento da suplementação diária:**
+Permite registrar as doses consumidas e reduzir a possibilidade de esquecimentos ou duplicação de doses.
 
-7. Restrições e condições
-8. 
- R: 
-  Quantidade de telas: o protótipo deve possuir no máximo 4 telas principais.
+**Informações sobre riscos e efeitos colaterais:**
+Ajuda o usuário a compreender possíveis riscos relacionados ao consumo inadequado ou excessivo de determinadas substâncias.
 
-  Número de interações: as funções principais devem ser realizadas em até 3 interações. 
-  
-  Dispositivos: deve funcionar em smartphones básicos. 
-  
-  Sistema operacional: Android 8.0 ou superior. 
-  
-  Tamanho: o APK não pode ultrapassar 20 MB. 
-  
-  Privacidade: o aplicativo deve permitir o uso anônimo e proteger os dados do usuário com criptografia quando enviados para a nuvem. 
-  
-  Conectividade: deve funcionar offline e sincronizar os dados posteriormente, preferencialmente apenas por Wi-Fi. 
-  
-  Acessibilidade: deve utilizar fontes grandes e alto contraste para facilitar a leitura durante o treino. 
+**Estimativa de consumo baseada em dados pessoais:**
+Permite utilizar informações como peso e altura para realizar cálculos e apresentar estimativas relacionadas ao consumo de água e à rotina de suplementação.
 
-8 Pontos de atenção
-O sucesso do app depende de confiança nas informações, simplicidade no uso e acompanhamento personalizado.
+### Situação de uso
+
+Um atleta amador que utiliza creatina e whey diariamente registra sua dose logo após o treino, ainda no vestiário. Dessa forma, consegue acompanhar seu consumo e evitar o registro ou consumo acidental de uma segunda dose.
+
+---
+
+## 2.2 Curiosos ou Iniciantes
+
+### Quem é?
+
+É o usuário que ainda não possui uma rotina estabelecida de suplementação, mas está considerando começar a utilizar algum produto, como whey, creatina ou termogênicos.
+
+Esse interesse pode surgir por influência de colegas de academia, redes sociais ou conteúdos relacionados ao mundo fitness. Diferentemente do atleta amador, esse usuário ainda possui pouco conhecimento sobre dosagens, benefícios e riscos.
+
+### Relação com o aplicativo
+
+Sua utilização tende a ser **pontual**, ocorrendo principalmente em momentos de dúvida ou antes de tomar uma decisão de consumo.
+
+Por exemplo, o usuário pode acessar o aplicativo antes de comprar um suplemento ou após receber uma recomendação de outra pessoa.
+
+### Necessidades
+
+**Informações confiáveis:**
+Permite que o usuário consulte informações antes de consumir uma substância, reduzindo a dependência de recomendações informais.
+
+**Compreensão de riscos e efeitos colaterais:**
+Ajuda o usuário a identificar possíveis riscos antes de iniciar o consumo.
+
+**Fontes confiáveis:**
+A utilização de informações provenientes de fontes reconhecidas, como órgãos e instituições de saúde, aumenta a credibilidade do aplicativo.
+
+### Situação de uso
+
+Um usuário recebe de um colega de academia a recomendação de utilizar creatina. Como nunca utilizou suplementos, ele acessa o Dosis para entender melhor a substância, seus possíveis riscos e as informações relacionadas ao seu consumo antes de decidir utilizá-la.
+
+---
+
+# 3. Influência do Contexto no Desenvolvimento
+
+O Dosis poderá ser utilizado principalmente em **academias e vestiários**, durante ou após os treinos.
+
+Nesse contexto, o usuário pode estar cansado, suado e com pouca atenção disponível. Por isso, a interface deve priorizar:
+
+* Botões grandes;
+* Textos curtos e objetivos;
+* Fontes legíveis;
+* Alto contraste;
+* Navegação simples;
+* Poucas etapas para realizar ações importantes.
+
+Além disso, o aplicativo deve ser capaz de funcionar em **smartphones básicos** e oferecer funcionamento **offline**, permitindo que registros sejam realizados mesmo sem conexão com a internet.
+
+Quando uma conexão estiver disponível, os dados poderão ser sincronizados posteriormente com a nuvem.
+
+Em situações que envolvam possíveis riscos, os alertas devem ser **claros, rápidos e objetivos**, evitando informações excessivamente alarmistas.
+
+Esses fatores influenciam diretamente o desenvolvimento da interface, acessibilidade, desempenho, funcionamento offline e segurança dos dados.
+
+---
+
+# 4. Objetivo e Proposta de Valor
+
+O Dosis tem como objetivo auxiliar o usuário no **acompanhamento e compreensão do consumo de suplementos e anabolizantes**.
+
+O aplicativo permitirá:
+
+* Cadastrar suplementos e/ou anabolizantes;
+* Registrar stacks e dosagens;
+* Acompanhar os produtos utilizados;
+* Receber alertas sobre possíveis riscos e interações;
+* Consultar conteúdos educativos;
+* Registrar sintomas e possíveis efeitos colaterais;
+* Acompanhar sintomas ao longo do tempo;
+* Utilizar uma calculadora de ingestão de água baseada em dados do usuário e em sua rotina de consumo.
+
+A proposta de valor do Dosis está em **centralizar informações e registros relacionados ao consumo dessas substâncias em uma interface simples, acessível e orientada à redução de riscos**.
+
+---
+
+# 5. Personalidade, Identidade e Experiência
+
+A personalidade e a identidade do Dosis devem transmitir **confiança, segurança, clareza e responsabilidade**.
+
+Essas características devem estar presentes principalmente:
+
+* Na linguagem utilizada pelo aplicativo;
+* Na apresentação das informações;
+* Na forma como os alertas são exibidos;
+* Na organização das telas;
+* Na facilidade de utilização.
+
+A comunicação deve ser objetiva e educativa, evitando tanto uma abordagem excessivamente técnica quanto mensagens que possam causar alarmismo desnecessário.
+
+---
+
+# 6. Funcionalidades e Necessidades Atendidas
+
+| Funcionalidade                                 | Necessidade atendida                                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Cadastro de suplementos e/ou anabolizantes** | Permite que o usuário registre e gerencie as substâncias que utiliza.                            |
+| **Lista de suplementos ativos**                | Permite visualizar rapidamente os produtos que estão sendo utilizados.                           |
+| **Registro de stacks e dosagens diárias**      | Permite organizar e acompanhar as substâncias e respectivas doses utilizadas.                    |
+| **Calculadora de ingestão de água**            | Auxilia o usuário a estimar sua ingestão de água com base em seus dados e rotina de consumo.     |
+| **Alertas de riscos e possíveis interações**   | Informa sobre possíveis riscos relacionados ao consumo excessivo ou à combinação de substâncias. |
+| **Notificações educativas**                    | Auxilia na compreensão dos riscos e incentiva um uso mais consciente.                            |
+| **Registro de sintomas e efeitos colaterais**  | Permite registrar e acompanhar alterações percebidas pelo usuário.                               |
+| **Linha do tempo de sintomas**                 | Facilita a visualização da evolução dos sintomas ao longo do tempo.                              |
+| **Artigos educativos**                         | Oferece informações sobre suplementos, anabolizantes, riscos e redução de danos.                 |
+| **Funcionamento offline**                      | Permite registrar informações mesmo sem conexão com a internet.                                  |
+| **Sincronização com a nuvem**                  | Permite enviar posteriormente os registros armazenados no dispositivo quando houver conexão.     |
+
+---
+
+# 7. Restrições e Condições
+
+O desenvolvimento do aplicativo deverá respeitar as seguintes restrições:
+
+### 7.1 Quantidade de telas
+
+O protótipo deverá possuir **no máximo 4 telas principais**.
+
+### 7.2 Número de interações
+
+As principais funções do aplicativo deverão ser realizadas em **até 3 interações**, sempre que possível.
+
+### 7.3 Dispositivos
+
+O aplicativo deverá funcionar em **smartphones básicos**, priorizando baixo consumo de recursos.
+
+### 7.4 Sistema operacional
+
+O aplicativo deverá ser compatível com **Android 8.0 ou superior**.
+
+### 7.5 Tamanho do aplicativo
+
+O APK deverá possuir **no máximo 20 MB**.
+
+### 7.6 Privacidade e segurança
+
+O aplicativo deverá permitir o uso de forma anônima e proteger os dados do usuário, especialmente durante o envio e armazenamento na nuvem.
+
+### 7.7 Conectividade
+
+O aplicativo deverá funcionar offline, permitindo o registro de informações sem conexão. Os dados deverão ser sincronizados posteriormente quando uma conexão estiver disponível, preferencialmente utilizando Wi-Fi.
+
+### 7.8 Acessibilidade
+
+A interface deverá utilizar fontes legíveis, bom contraste e elementos suficientemente grandes para facilitar a utilização durante ou após os treinos.
+
+---
+
+# 8. Pontos de Atenção
+
+O sucesso do Dosis depende principalmente de três fatores:
+
+### Confiança
+
+As informações apresentadas precisam ser baseadas em **fontes confiáveis**, deixando claro para o usuário a origem dos dados quando necessário.
+
+### Simplicidade
+
+O aplicativo deve permitir que as principais ações sejam realizadas rapidamente, considerando que parte dos usuários poderá utilizá-lo durante ou imediatamente após os treinos.
+
+### Acompanhamento personalizado
+
+As informações e registros devem considerar os dados fornecidos pelo usuário, permitindo um acompanhamento mais adequado de sua rotina de consumo.
+
+### Segurança das informações
+
+Como o aplicativo poderá armazenar registros relacionados ao consumo de substâncias e sintomas, a privacidade e proteção dos dados devem ser consideradas desde o desenvolvimento inicial.
+
+---
+
+## 9. Resumo
+
+O Dosis é uma proposta de aplicativo voltada ao **uso mais consciente de suplementos e anabolizantes**, oferecendo recursos de registro, acompanhamento, educação e alertas de risco.
+
+A solução busca atender principalmente dois perfis: **atletas amadores**, que necessitam acompanhar sua rotina de consumo, e **curiosos ou iniciantes**, que procuram informações confiáveis antes de começar a utilizar determinadas substâncias.
+
+O projeto prioriza **simplicidade, acessibilidade, funcionamento offline, confiança nas informações e segurança dos dados**, respeitando as restrições estabelecidas para o desenvolvimento.
