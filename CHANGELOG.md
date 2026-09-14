@@ -32,8 +32,8 @@
 
 ## [0.2] — 14/09/2026
 
-### Adicionado
-
+### Pasta **requisitos.md** adicionado
+Em **requisitos.md** foi adicionado:
 * Definição do **Objetivo** do aplicativo Dosis.
 * Definição das **Funcionalidades**.
 * Definição dos **Requisitos Funcionais**.
