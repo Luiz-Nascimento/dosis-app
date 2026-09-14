@@ -26,3 +26,16 @@
 * As informações de risco devem ser apresentadas de forma clara, sem alarmismo.
 * O aplicativo deve priorizar informações confiáveis e baseadas em fontes científicas e órgãos oficiais.
 * O fluxo principal foi definido como: **Registrar → Entender → Acompanhar → Receber alertas**.
+
+
+
+
+## [0.2] — 14/09/2026
+
+### Adicionado
+
+* Definição do **Objetivo (1)** do aplicativo Dosis.
+* Definição das **Funcionalidades (2.1)**.
+* Definição dos **Requisitos Funcionais (2.2)**.
+* Definição dos **Requisitos Não Funcionais (2.3)**.
+* Organização da documentação com base nas necessidades identificadas no estudo de caso e nas personas do projeto.
