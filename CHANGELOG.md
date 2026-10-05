@@ -39,3 +39,7 @@ Em **requisitos.md** foi adicionado:
 * Definição dos **Requisitos Funcionais**.
 * Definição dos **Requisitos Não Funcionais**.
 * Organização da documentação com base nas necessidades identificadas no estudo de caso e nas personas do projeto.
+
+## [0.3] — 04/10/2026
+### Pasta **justificativa.md** adicionado
+* Justificativa das principais decisões de interface e arquitetura
