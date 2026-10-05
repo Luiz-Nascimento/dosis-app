@@ -63,19 +63,16 @@ As quatro funções principais ficam na barra inferior, sempre à mão: Início,
 Todas as telas seguem a mesma estrutura: cabeçalho, título, blocos com títulos de seção e a ação principal no fim, onde o polegar alcança.
 A informação aparece por etapas: o formulário de dose só abre depois de escolher o suplemento, e o cadastro pede uma informação por tela. Isso reduz a carga de quem está cansado ou com pressa.
 
-## Navegação
+##Navegação
+Barra inferior fixa com 4 ícones (Início, cadastro de suplementos e anabolizantes, calculadora de água e resumo de registros), com o item ativo em amarelo.
+Perfil no canto superior direito e seta de voltar em cada tela secundária.
+O registro de dose, função principal do app, leva 3 interações:
+Tocar em Registrar dose.
+Escolher o suplemento (dose e horário já vêm preenchidos).
+Confirmar.
+Fluxo de entrada: introdução, cadastro ou login, confirmação de e-mail e Home.
 
-- **Barra inferior fixa** com 4 ícones (Início, Rotina, Hidratação e Registros), com o item ativo em amarelo.
-- **Perfil** no canto superior direito e **seta de voltar** em cada tela secundária.
-- O **registro de dose**, função principal do app, leva **3 interações**:
-  1. Tocar em **Registrar dose**.
-  2. Escolher o suplemento (dose e horário já vêm preenchidos).
-  3. Confirmar.
-- **Fluxo de entrada:** introdução, cadastro ou login, confirmação de e-mail e Home.
-
-> A barra usa só ícones, conforme o wireframe, o que reduz a descoberta para novos usuários. A posição constante e a cor do item ativo compensam isso.
-
----
+A barra usa só ícones, conforme o wireframe, o que reduz a descoberta para novos usuários. A posição constante e a cor do item ativo compensam isso.
 
 ## Componentes
 
