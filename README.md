@@ -21,3 +21,9 @@ Dosis é um aplicativo educacional e de rastreamento para uso consciente de supl
 
 # Justificativa do protótipo
 -Carlos Audre Santos
+
+# Protótipo de baixa fidelidade
+-Carlos Audre Santos
+
+# Protótipo de alta fidelidade
+-Carlos Audre Santos
