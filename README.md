@@ -18,3 +18,6 @@ Dosis é um aplicativo educacional e de rastreamento para uso consciente de supl
 # Atividade 3 
 - Carlos Audre Santos - Definiu o objetivo, funcionalidades, requisitos funcionais e requisitos não funcionais
 - Jimy Kaua - Realizou a pesquisa e fez o slide - (topico 5)
+
+# Justificativa do protótipo
+-Carlos Audre Santos
