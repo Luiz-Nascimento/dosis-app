@@ -41,5 +41,7 @@ Em **requisitos.md** foi adicionado:
 * Organização da documentação com base nas necessidades identificadas no estudo de caso e nas personas do projeto.
 
 ## [0.3] — 04/10/2026
-### Pasta **justificativa.md** adicionado
-* Justificativa das principais decisões de interface e arquitetura
+### Pasta **justificativa.md, prototipoBaixaFidelidade.pdf e prototipoAltaFidelidade.pdf** adicionado.
+* Em justificativa.md é apresentado as justificativas das principais decisões de interface e arquitetura.
+* Em prototipoBaixaFidelidade.pdf há um pdf com o protótipo de baixa fidelidade.
+* Em prototipoAltaFidelidade.pdf há um pdf com o protótipo de alta fidelidade.
