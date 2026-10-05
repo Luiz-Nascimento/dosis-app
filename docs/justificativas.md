@@ -58,13 +58,10 @@ A diferença entre H2 e H3 é pequena, então é reforçada por **peso e cor**.
 
 ---
 
-## Organização das informações
-
-- As **quatro funções principais** do produto ficam reunidas na Home como atalhos: suplementos ativos, calculadora de água, registro de como se sente e artigos.
-- Todas as telas seguem a **mesma estrutura**: cabeçalho, título, blocos com títulos de seção e a ação principal no fim, onde o polegar alcança.
-- A informação aparece **por etapas**: o formulário de dose só abre depois de escolher o suplemento, e o cadastro pede uma informação por tela. Isso reduz a carga de quem está cansado ou com pressa.
-
----
+Organização das informações
+As quatro funções principais ficam na barra inferior, sempre à mão: Início, cadastro de suplementos e anabolizantes (Rotina), calculadora de água (Hidratação) e resumo de registros (Registros). A Home reúne os atalhos para registrar dose, registrar como a pessoa se sente e ler artigos.
+Todas as telas seguem a mesma estrutura: cabeçalho, título, blocos com títulos de seção e a ação principal no fim, onde o polegar alcança.
+A informação aparece por etapas: o formulário de dose só abre depois de escolher o suplemento, e o cadastro pede uma informação por tela. Isso reduz a carga de quem está cansado ou com pressa.
 
 ## Navegação
 
