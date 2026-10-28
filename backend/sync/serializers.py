@@ -121,3 +121,51 @@ class SyncPolicySerializer(serializers.Serializer):
     entities = serializers.ListField(
         child=serializers.CharField(), help_text="Na ordem em que o app deve enviar os registros."
     )
+    encryption_required = serializers.BooleanField(help_text="Se true, lotes em texto puro são recusados.")
+    encryption = serializers.CharField(help_text="Algoritmo do envelope (A256GCM).")
+    key_agreement = serializers.CharField(help_text="Como a chave é combinada (X25519-HKDF-SHA256).")
+    compression = serializers.CharField()
+    max_payload_bytes = serializers.IntegerField(help_text="Tamanho máximo do lote descompactado.")
+    consent_version = serializers.CharField(help_text="Versão do aviso que precisa estar aceita.")
+
+
+class SyncEnvelopeSerializer(serializers.Serializer):
+    key_id = serializers.RegexField(rf"^{ID_PATTERN}$", help_text="Id da chave criada em /sync/keys.")
+    algorithm = serializers.ChoiceField([("A256GCM", "AES-256-GCM")])
+    compression = serializers.ChoiceField([("gzip", "gzip"), ("none", "sem compressão")], default="gzip")
+    nonce = serializers.CharField(max_length=32, help_text="12 bytes aleatórios, base64url. Nunca reutilize.")
+    payload = serializers.CharField(
+        help_text="base64url(AES-256-GCM(gzip(JSON do lote))), com AAD = \"dosis-sync-v1:{uid}:{key_id}\"."
+    )
+
+
+class SyncKeyRequestSerializer(serializers.Serializer):
+    device_id = serializers.CharField(max_length=64)
+    client_public_key = serializers.CharField(
+        max_length=64, help_text="Chave pública X25519 do aparelho (32 bytes, base64url)."
+    )
+
+
+class SyncKeySerializer(serializers.Serializer):
+    key_id = serializers.CharField()
+    server_public_key = serializers.CharField(help_text="Chave pública X25519 do servidor (base64url).")
+    algorithm = serializers.CharField()
+    key_agreement = serializers.CharField()
+    hkdf_info = serializers.CharField(help_text="Use com salt = key_id em UTF-8 e SHA-256, 32 bytes.")
+
+
+class SyncNoticeSerializer(serializers.Serializer):
+    version = serializers.CharField()
+    title = serializers.CharField()
+    text = serializers.CharField(help_text="Exiba este texto antes de ativar a sincronização.")
+
+
+class SyncConsentSerializer(serializers.Serializer):
+    notice = SyncNoticeSerializer()
+    accepted = serializers.BooleanField(help_text="true se a versão atual do aviso foi aceita.")
+    accepted_version = serializers.CharField(allow_null=True)
+    accepted_at = serializers.DateTimeField(allow_null=True)
+
+
+class SyncConsentRequestSerializer(serializers.Serializer):
+    notice_version = serializers.CharField(help_text="Versão do aviso que o usuário viu e aceitou.")

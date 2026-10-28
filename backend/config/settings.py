@@ -172,6 +172,9 @@ MOCK_REFRESH_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 30
 # Sincronização (fila offline do app)
 SYNC_WIFI_ONLY = env.bool('SYNC_WIFI_ONLY', default=True)
 SYNC_MAX_BATCH_SIZE = env.int('SYNC_MAX_BATCH_SIZE', default=50)
+# Lote em texto puro só é aceito com False (útil para testar no Swagger).
+SYNC_REQUIRE_ENCRYPTION = env.bool('SYNC_REQUIRE_ENCRYPTION', default=True)
+SYNC_MAX_PAYLOAD_BYTES = env.int('SYNC_MAX_PAYLOAD_BYTES', default=2 * 1024 * 1024)
 
 
 LOGGING = {

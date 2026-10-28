@@ -100,6 +100,36 @@ pendentes em lotes:
      sobrescrito. Marque como **enviado** e recarregue o registro.
    * `rejected`: dados inválidos (veja `error.details`). Não reenvie sem corrigir.
 
+### Aviso explícito e criptografia do lote
+
+Antes da primeira sincronização:
+
+1. `GET /api/v1/sync/consent`: traz o aviso (`notice.title`, `notice.text`,
+   `notice.version`). Mostre o texto ao usuário.
+2. Se ele aceitar: `POST /api/v1/sync/consent` com `{"notice_version": "..."}`.
+   Sem aceite, o envio é recusado com `428 sync_consent_required`. Se o texto do
+   aviso mudar (nova versão), é preciso aceitar de novo. `DELETE` desativa o
+   sync.
+3. Combine a chave: gere um par **X25519** no aparelho e chame
+   `POST /api/v1/sync/keys` com `device_id` e `client_public_key` (base64url).
+   A resposta traz `key_id` e `server_public_key`. Calcule o segredo
+   compartilhado e derive a chave com **HKDF-SHA256** (32 bytes, `salt` =
+   `key_id` em UTF-8, `info` = `dosis-sync-v1`). Guarde a chave no Keystore
+   (flutter_secure_storage). Ela nunca trafega pela rede.
+
+Para cada lote: `JSON → gzip → AES-256-GCM` (nonce aleatório de 12 bytes, AAD
+= `dosis-sync-v1:{uid}:{key_id}`) e envie o envelope:
+
+```json
+{"key_id": "...", "algorithm": "A256GCM", "compression": "gzip",
+ "nonce": "<base64url>", "payload": "<base64url(ciphertext + tag)>"}
+```
+
+No Flutter, o pacote `cryptography` tem `X25519`, `Hkdf` e `AesGcm.with256bits`,
+e `dart:io` tem o `gzip`. Lote em texto puro só é aceito com
+`SYNC_REQUIRE_ENCRYPTION=False` (para testar no Swagger). O lote descompactado
+tem limite de `SYNC_MAX_PAYLOAD_BYTES` (proteção contra zip bomb).
+
 ### Queda no meio do lote
 
 Cada registro é gravado numa transação do Firestore junto com o recibo do seu
@@ -130,6 +160,7 @@ users/{uid}                      perfil e dados da conta
   dose_logs/{id}                 doses registradas
   symptom_logs/{id}              "Como você se sentiu"
   hydration_logs/{id}            água ingerida
+  sync_keys/{key_id}             chave AES do aparelho (cifrada com a chave do servidor)
   sync_batches/{batch_id}        situação de cada lote de sincronização
   sync_mutations/{mutation_id}   recibo de cada mudança aplicada (idempotência)
   sync_tombstones/{entidade__id} lápides de exclusões feitas offline

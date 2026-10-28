@@ -1,4 +1,8 @@
-from .sync_helpers import batch, rec, rid
+import pytest
+
+from .sync_helpers import batch, rec, rid, make_client, plaintext_sync  # noqa: F401
+
+pytestmark = pytest.mark.usefixtures("plaintext_sync")
 
 
 def test_policy(client):

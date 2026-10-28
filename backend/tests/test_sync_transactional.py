@@ -5,7 +5,9 @@ import pytest
 
 from core.store import StoreError
 
-from .sync_helpers import batch, rec, rid
+from .sync_helpers import batch, rec, rid, make_client, plaintext_sync  # noqa: F401
+
+pytestmark = pytest.mark.usefixtures("plaintext_sync")
 
 T0 = dt.datetime(2026, 9, 20, 8, 0, tzinfo=dt.timezone.utc)
 
