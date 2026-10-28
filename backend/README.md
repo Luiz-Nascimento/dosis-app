@@ -1,0 +1,314 @@
+# Dosis — Backend (Django + Firebase)
+
+API REST que o app Flutter consome. A disciplina exige Firebase para
+**Autenticação** e **Banco de Dados**, então:
+
+| Parte | Tecnologia |
+| --- | --- |
+| Contas e login | Firebase Auth (encapsulado pelos endpoints `/api/v1/auth/*`) |
+| Dados | Cloud Firestore (todos os dados, inclusive auditoria e backups) |
+| Regras de negócio, validação e documentação | Django + DRF + Swagger (drf-spectacular) |
+
+O Django não tem banco relacional: tudo passa por `core.store`, que conversa
+com o Firestore real ou com um Firestore simulado em memória (modo mock).
+
+## Rodando localmente
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate            # Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+copy .env.example .env            # Linux/macOS: cp .env.example .env
+python manage.py runserver 0.0.0.0:8000
+```
+
+* Swagger: http://localhost:8000/api/docs/ (ReDoc em `/api/redoc/`, OpenAPI em `/api/schema/`)
+* No emulador Android, o backend fica em `http://10.0.2.2:8000`.
+
+### Testando no Swagger
+
+1. `POST /api/v1/auth/anonymous/` (ou `/register/` / `/login/`).
+2. Copie o `id_token` da resposta, clique em **Authorize** e cole.
+3. Chame qualquer endpoint autenticado.
+
+Todo erro tem o formato `{"error": {"code", "message", "details"}}`. O app deve
+decidir pelo `code` e pode exibir a `message` direto ao usuário.
+
+## Endpoints
+
+Cada app tem a sua rota em `config/urls.py` e lista os próprios endpoints em
+`apps/<app>/urls.py`. Todas as rotas ficam em `/api/v1/` e terminam em `/`.
+
+| App | Rota | Endpoints | Telas do Figma |
+| --- | --- | --- | --- |
+| `core` | `/api/v1/system/` | `health/`, `diagnostics/firestore/` | — |
+| `accounts` | `/api/v1/auth/` | `anonymous/`, `register/`, `login/`, `refresh/`, `link/`, `me/` (GET e DELETE), `verify-email/`, `verify-email/confirm/`, `password-reset/`, `password-reset/confirm/` | Introdução, Login, Cadastro, Recuperar senha |
+| `profiles` | `/api/v1/profile/` | GET e PATCH | Perfil, Meus dados, Meu objetivo, Notificações |
+| `catalog` | `/api/v1/catalog/` | `products/`, `products/{id}/`, `articles/`, `articles/{id}/` | Adicionar à rotina, Conteúdos educativos |
+| `tracking` | `/api/v1/tracking/` | CRUD de `routine-items/`, `doses/`, `symptoms/` e `hydration/` | Seus itens, Stack de hoje, Registrar dose, Registros, Como se sente hoje?, Hidratação |
+| `sync` | `/api/v1/sync/` | `policy/`, `consent/`, `keys/`, `batches/`, `batches/{id}/`, `events/`, `admin/events/`, `admin/summary/` | Fila offline |
+| `backups` | `/api/v1/backups/` | listar e criar, `{id}/`, `{id}/download/`, `{id}/restore/`, `restore/` | Perfil |
+
+Exceto as rotas públicas de autenticação e o `/api/v1/system/health/`, todas
+exigem `Authorization: Bearer <id_token>`.
+
+* **Ids gerados pelo app:** em todo `POST` de CRUD o `id` é opcional. O app pode
+  mandar o UUID criado offline, e reenviar o mesmo id retorna `409`, sem
+  duplicar.
+* **Registrar dose em 3 toques:** `POST /api/v1/tracking/doses/` só com `routine_item_id`. Nome,
+  dose, unidade e protocolo vêm do item da rotina.
+* **Calendário:** as listas de doses, sintomas e água aceitam `date_from` e
+  `date_to` (AAAA-MM-DD, fuso de Brasília) e devolvem `local_date` em cada
+  registro.
+* **Faixas de dose:** cada produto traz `dose_ranges` por protocolo, com as
+  fontes. O app usa isso para o alerta "acima da faixa normalmente utilizada".
+
+## Sincronização (fila offline)
+
+O app grava tudo localmente primeiro. Cada criação, edição ou exclusão vira
+um registro **pendente** na fila do aparelho. Com Wi-Fi, o app manda os
+pendentes em lotes:
+
+1. `GET /api/v1/sync/policy/`: rede permitida, `max_batch_size` e a ordem das
+   entidades (`profile`, `routine_items`, `dose_logs`, `symptom_logs`,
+   `hydration_logs`). Envie itens da rotina antes das doses que apontam para eles.
+2. `POST /api/v1/sync/batches/`:
+
+   ```json
+   {
+     "batch_id": "uuid-do-lote",
+     "device_id": "id-do-aparelho",
+     "network": "wifi",
+     "records": [
+       {"mutation_id": "uuid", "id": "uuid", "entity": "routine_items", "op": "upsert",
+        "client_updated_at": "2026-09-20T08:00:00-03:00", "data": {"product_id": "creatina"}},
+       {"mutation_id": "uuid", "id": "uuid", "entity": "dose_logs", "op": "upsert",
+        "client_updated_at": "2026-09-20T08:01:00-03:00", "data": {"routine_item_id": "uuid"}},
+       {"mutation_id": "uuid", "id": "uuid", "entity": "hydration_logs", "op": "delete",
+        "client_updated_at": "2026-09-20T09:00:00-03:00"}
+     ]
+   }
+   ```
+
+   * `mutation_id`: UUID único **de cada mudança** na fila (não do registro).
+   * `id`: id do registro (no perfil, o `uid`).
+   * `client_updated_at`: quando a mudança foi feita no aparelho.
+
+3. Para cada registro, a resposta traz `status`:
+   * `applied`: gravado agora. Marque como **enviado**.
+   * `duplicate`: já tinha sido gravado antes. Marque como **enviado**.
+   * `stale`: o servidor tem uma versão mais nova desse registro, e nada foi
+     sobrescrito. Marque como **enviado** e recarregue o registro.
+   * `rejected`: dados inválidos (veja `error.details`). Não reenvie sem corrigir.
+
+### Aviso explícito e criptografia do lote
+
+Antes da primeira sincronização:
+
+1. `GET /api/v1/sync/consent/`: traz o aviso (`notice.title`, `notice.text`,
+   `notice.version`). Mostre o texto ao usuário.
+2. Se ele aceitar: `POST /api/v1/sync/consent/` com `{"notice_version": "..."}`.
+   Sem aceite, o envio é recusado com `428 sync_consent_required`. Se o texto do
+   aviso mudar (nova versão), é preciso aceitar de novo. `DELETE` desativa o
+   sync.
+3. Combine a chave: gere um par **X25519** no aparelho e chame
+   `POST /api/v1/sync/keys/` com `device_id` e `client_public_key` (base64url).
+   A resposta traz `key_id` e `server_public_key`. Calcule o segredo
+   compartilhado e derive a chave com **HKDF-SHA256** (32 bytes, `salt` =
+   `key_id` em UTF-8, `info` = `dosis-sync-v1`). Guarde a chave no Keystore
+   (flutter_secure_storage). Ela nunca trafega pela rede.
+
+Para cada lote: `JSON → gzip → AES-256-GCM` (nonce aleatório de 12 bytes, AAD
+= `dosis-sync-v1:{uid}:{key_id}`) e envie o envelope:
+
+```json
+{"key_id": "...", "algorithm": "A256GCM", "compression": "gzip",
+ "nonce": "<base64url>", "payload": "<base64url(ciphertext + tag)>"}
+```
+
+No Flutter, o pacote `cryptography` tem `X25519`, `Hkdf` e `AesGcm.with256bits`,
+e `dart:io` tem o `gzip`. Lote em texto puro só é aceito com
+`SYNC_REQUIRE_ENCRYPTION=False` (para testar no Swagger). O lote descompactado
+tem limite de `SYNC_MAX_PAYLOAD_BYTES` (proteção contra zip bomb).
+
+### Queda no meio do lote
+
+Cada registro é gravado numa transação do Firestore junto com o recibo do seu
+`mutation_id` (`users/{uid}/sync_mutations`). Se a conexão cair no meio:
+
+* o que entrou tem recibo; o resto não foi gravado (nada fica pela metade);
+* `GET /api/v1/sync/batches/{batch_id}/` lista as mutações gravadas. As que
+  não aparecem lá continuam **pendentes**;
+* o caminho mais simples é reenviar o lote inteiro com o mesmo `batch_id`:
+  o que já entrou volta como `duplicate` e nada é gravado duas vezes.
+
+Mudanças fora de ordem: vale a de `client_updated_at` mais recente. Uma
+exclusão deixa uma lápide (`sync_tombstones`) para uma mudança antiga não
+recriar o registro. Um relógio do aparelho adiantado é limitado à hora do
+servidor. Recibos e lápides têm `expires_at` (30 dias): configure uma política
+de TTL do Firestore nesse campo para limpá-los.
+
+Lotes com `network` diferente de `wifi`/`ethernet` são recusados com
+`412 wifi_required` (desligue com `SYNC_WIFI_ONLY=False`). O `data` de cada
+registro passa pelas mesmas validações e pela mesma criptografia dos CRUDs.
+
+### Auditoria
+
+Cada etapa gera um evento: `sync.started`, `sync.resumed` (mesmo `batch_id`
+reenviado), `sync.completed` (com contagens e duração), `sync.failed` (queda
+no meio, com quantos registros entraram), `sync.refused` (com o motivo:
+`wifi_required`, `sync_consent_required`, `encryption_required`...), além de
+`consent.accepted`, `consent.revoked` e `key.created`.
+
+* Os eventos vão para o log estruturado `dosis.audit` (JSON, sempre) e para a
+  coleção `sync_audit` do Firestore (melhor esforço: se o Firestore cair, o
+  evento continua no log). Nunca guardam o conteúdo dos registros.
+* `GET /api/v1/sync/events/`: eventos do próprio usuário (filtros `event`,
+  `batch_id`, `limit`).
+* Monitoramento (exige a custom claim `admin`):
+  `GET /api/v1/sync/admin/events/` e `GET /api/v1/sync/admin/summary/?hours=24`
+  (eventos por tipo, falhas por código, registros aplicados, duração dos
+  lotes). Para dar acesso: `python manage.py set_admin <uid>` e depois
+  `/api/v1/auth/refresh/` no app.
+* Retenção: `expires_at` em `SYNC_AUDIT_RETENTION_DAYS` (180 dias), para a
+  política de TTL do Firestore.
+
+## Backup criptografado
+
+* `POST /api/v1/backups/`: junta perfil, rotina, doses, sintomas e água num
+  arquivo `JSON → gzip → AES-256-GCM`.
+  * **Sem senha:** a chave é derivada da chave do servidor (HKDF, com salt por
+    backup e o `uid`). Só restaura na mesma conta.
+  * **Com `passphrase`** (8+ caracteres): a chave vem da senha (scrypt). Nem o
+    servidor abre sem ela, e o arquivo pode ser restaurado em outra conta. Se a
+    senha for esquecida, o backup não tem recuperação.
+* `GET /api/v1/backups/` e `GET /api/v1/backups/{id}/`: metadados (contagens,
+  tamanho, `sha256`). `DELETE` apaga.
+* `GET /api/v1/backups/{id}/download/`: o arquivo, ainda cifrado, para o
+  usuário guardar ou levar.
+* `POST /api/v1/backups/{id}/restore/` ou `POST /api/v1/backups/restore/` (com o
+  arquivo baixado em `file`). Modos:
+  * `merge` (padrão): atualiza os registros do backup e mantém os demais;
+  * `replace`: deixa só os registros do backup.
+
+  Antes de restaurar, o servidor cria um backup automático do estado atual e
+  devolve o `safety_backup_id`, para dar para desfazer.
+* Ficam guardados os `BACKUP_MAX_PER_USER` (10) mais recentes. Criar e
+  restaurar têm limite de `BACKUP_THROTTLE_RATE` (20/hora).
+* No Firestore: `users/{uid}/backups/{id}` (metadados) +
+  `.../chunks/{n}` (conteúdo cifrado em pedaços de 500 KB, por causa do limite
+  de 1 MiB por documento). `DELETE /auth/me` apaga os backups junto.
+
+## Modelagem do Firestore
+
+```
+users/{uid}                      perfil e dados da conta
+  diagnostics/{id}               documento de teste da configuração
+  routine_items/{id}             itens do stack
+  dose_logs/{id}                 doses registradas
+  symptom_logs/{id}              "Como você se sentiu"
+  hydration_logs/{id}            água ingerida
+  sync_keys/{key_id}             chave AES do aparelho (cifrada com a chave do servidor)
+  sync_batches/{batch_id}        situação de cada lote de sincronização
+  sync_mutations/{mutation_id}   recibo de cada mudança aplicada (idempotência)
+  sync_tombstones/{entidade__id} lápides de exclusões feitas offline
+  backups/{id}                   metadados do backup
+    chunks/{n}                   conteúdo cifrado do backup, em pedaços
+sync_audit/{id}                  eventos de auditoria do sync (uid, evento, contagens)
+products/{id}                    catálogo (suplementos e anabolizantes)
+articles/{id}                    artigos educativos
+```
+
+| Coleção | Campos | Cifrados (AES-256-GCM) |
+| --- | --- | --- |
+| `users/{uid}` | email, is_anonymous, name, age, weight_kg, height_cm, biological_sex, goal, notifications{dose_reminders, symptom_reminder}, terms_accepted_at, created_at, updated_at | age, weight_kg, height_cm, biological_sex |
+| `routine_items` | product_id, name, brand, kind, protocol, dose_amount, dose_unit, schedule_times[], start_date, end_date, active, notes, created_at, updated_at | notes |
+| `dose_logs` | routine_item_id, product_id, name, kind, protocol, amount, unit, taken_at, local_date, notes, created_at, updated_at | amount, notes |
+| `symptom_logs` | status, symptoms[], other_description, notes, logged_at, local_date, created_at, updated_at | symptoms, other_description, notes |
+| `hydration_logs` | amount_ml, logged_at, local_date, created_at, updated_at | (nenhum) |
+| `products` | name, kind, default_unit, default_dose, dose_ranges[{protocol, per, min, max, unit, note, sources[]}], caution, requires_medical_supervision, sources[] | (público) |
+| `articles` | title, summary, body (Markdown), tags[], reading_minutes, published_at, sources[] | (público) |
+
+Os campos cifrados guardam `enc:v1:<base64>`. A chave vem de
+`FIELD_ENCRYPTION_KEY`, e o caminho do documento + o nome do campo entram como
+dado associado, então um valor cifrado copiado para outro lugar não decifra.
+Datas puras ficam como texto `AAAA-MM-DD` e horários como `HH:MM`.
+
+O catálogo e os artigos vêm de `catalog/content.py`. No modo mock eles são
+carregados sozinhos; no Firestore real, rode `python manage.py seed_content`
+(use `--overwrite` para atualizar o que já existe).
+
+## Modos do Firebase (`FIREBASE_MODE`)
+
+**`mock` (padrão):** não precisa de credenciais. Contas e documentos ficam em
+memória (ou em `MOCK_STORE_PATH`, para sobreviver a reinícios). Os "e-mails"
+de confirmação e de recuperação de senha não são enviados: o `oob_code` aparece
+no console do `runserver`, e você o usa em `/api/v1/auth/verify-email/confirm/` ou em
+`/api/v1/auth/password-reset/confirm/`.
+
+**`firebase`:** usa o projeto real. Passo a passo para ativar:
+
+1. Crie o projeto no [console do Firebase](https://console.firebase.google.com/).
+2. Em **Authentication > Método de login**, ative **Anônimo** e **E-mail/senha**.
+3. Crie o **Cloud Firestore** (modo produção, região `southamerica-east1`).
+4. Em **Configurações do projeto > Contas de serviço**, gere uma chave privada
+   (JSON) e salve em `backend/secrets/` (pasta ignorada pelo git).
+5. No `.env`: `FIREBASE_MODE=firebase`, `FIREBASE_PROJECT_ID`,
+   `FIREBASE_WEB_API_KEY` (Configurações > Geral), `FIREBASE_CREDENTIALS`
+   (caminho do JSON) e uma `FIELD_ENCRYPTION_KEY` nova (guarde-a bem: sem ela
+   os dados cifrados não abrem).
+6. Publique as regras e os índices: na pasta `backend/firebase/`, troque o projeto em
+   `.firebaserc` e rode `firebase deploy --only firestore`.
+7. Carregue o catálogo e os artigos: `python manage.py seed_content`.
+
+Para usar os **emuladores** do Firebase em vez do projeto real, rode
+`firebase emulators:start` na pasta `backend/firebase/` e defina
+`FIRESTORE_EMULATOR_HOST=localhost:8080` e
+`FIREBASE_AUTH_EMULATOR_HOST=localhost:9099` no `.env`.
+
+## Regras de segurança (`backend/firebase/firestore.rules`)
+
+O backend usa o Admin SDK, que ignora as regras. Elas protegem contra acesso
+direto ao Firestore: cada usuário só lê a própria árvore `users/{uid}`, nenhum
+cliente escreve direto e qualquer caminho não listado é negado.
+
+## Testes
+
+```bash
+cd backend
+pytest                       # tudo
+pytest tests/unit            # só os unitários
+pytest tests/unit/apps/sync  # só um app
+pytest tests/integration     # só os de integração
+```
+
+* `tests/unit/apps/<app>/`: testes de cada app isolado (mesma divisão de `apps/`).
+* `tests/integration/`: fluxos que atravessam vários apps (jornada da persona
+  pelas telas do Figma, vínculo e exclusão de conta, aparelho offline
+  sincronizando com queda no meio).
+* `tests/conftest.py`: fixtures comuns (modo mock zerado a cada teste,
+  clientes autenticados).
+
+Os testes rodam sempre no modo mock, sem rede.
+
+## Estrutura
+
+```
+backend/
+  config/              settings e urls.py da raiz (uma rota por app)
+  apps/
+    core/              infraestrutura: store (Firestore/mock), auth (Firebase/mock),
+                       criptografia de campos, base dos CRUDs, formato de erro, health
+    accounts/          autenticação e exclusão de conta
+    profiles/          perfil do usuário
+    catalog/           catálogo de produtos e artigos (conteúdo em content.py)
+    tracking/          rotina, doses, sintomas e hidratação
+    sync/              fila de sincronização, criptografia do lote e auditoria
+    backups/           backup criptografado e restauração
+  firebase/            firebase.json, .firebaserc, firestore.rules, índices
+  tests/
+    unit/apps/<app>/   testes de cada app
+    integration/       testes entre apps
+  requirements.txt
+```
