@@ -8,14 +8,13 @@ sobreviver a reinícios do servidor de desenvolvimento.
 """
 from __future__ import annotations
 
-import base64
 import copy
-import json
 import os
 import threading
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Iterable
+
+from core import jsoncodec
 
 from .base import (
     Doc,
@@ -81,30 +80,6 @@ def _deep_merge(base: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any
     return merged
 
 
-def _encode(value: Any) -> Any:
-    if isinstance(value, datetime):
-        return {"$dt": value.isoformat()}
-    if isinstance(value, bytes):
-        return {"$b64": base64.b64encode(value).decode("ascii")}
-    if isinstance(value, dict):
-        return {k: _encode(v) for k, v in value.items()}
-    if isinstance(value, list):
-        return [_encode(v) for v in value]
-    return value
-
-
-def _decode(value: Any) -> Any:
-    if isinstance(value, dict):
-        if set(value) == {"$dt"}:
-            return datetime.fromisoformat(value["$dt"])
-        if set(value) == {"$b64"}:
-            return base64.b64decode(value["$b64"])
-        return {k: _decode(v) for k, v in value.items()}
-    if isinstance(value, list):
-        return [_decode(v) for v in value]
-    return value
-
-
 class _MemoryTransaction(Transaction):
     def __init__(self, store: MemoryStore):
         self._store = store
@@ -134,8 +109,7 @@ class MemoryStore(DocumentStore):
         self._lock = threading.RLock()
         self._persist_path = Path(persist_path) if persist_path else None
         if self._persist_path and self._persist_path.exists():
-            raw = json.loads(self._persist_path.read_text(encoding="utf-8"))
-            self._docs = _decode(raw)
+            self._docs = jsoncodec.loads(self._persist_path.read_text(encoding="utf-8"))
 
     # -- leitura -----------------------------------------------------------
 
@@ -237,5 +211,5 @@ class MemoryStore(DocumentStore):
         if not self._persist_path:
             return
         tmp = self._persist_path.with_suffix(self._persist_path.suffix + ".tmp")
-        tmp.write_text(json.dumps(_encode(self._docs), ensure_ascii=False), encoding="utf-8")
+        tmp.write_text(jsoncodec.dumps(self._docs), encoding="utf-8")
         os.replace(tmp, self._persist_path)

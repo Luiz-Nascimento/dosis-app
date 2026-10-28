@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'catalog',
     'tracking',
     'sync',
+    'backups',
 ]
 
 MIDDLEWARE = [
@@ -114,6 +115,7 @@ REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
     'DEFAULT_THROTTLE_RATES': {
         'auth': env('AUTH_THROTTLE_RATE', default='30/min'),
+        'backup': env('BACKUP_THROTTLE_RATE', default='20/hour'),
     },
 }
 
@@ -177,6 +179,10 @@ SYNC_REQUIRE_ENCRYPTION = env.bool('SYNC_REQUIRE_ENCRYPTION', default=True)
 SYNC_MAX_PAYLOAD_BYTES = env.int('SYNC_MAX_PAYLOAD_BYTES', default=2 * 1024 * 1024)
 # Eventos de auditoria têm expires_at para a política de TTL do Firestore.
 SYNC_AUDIT_RETENTION_DAYS = env.int('SYNC_AUDIT_RETENTION_DAYS', default=180)
+
+
+# Backups: quantos ficam guardados por usuário (os mais antigos são apagados).
+BACKUP_MAX_PER_USER = env.int('BACKUP_MAX_PER_USER', default=10)
 
 
 LOGGING = {

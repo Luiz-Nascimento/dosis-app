@@ -172,6 +172,32 @@ no meio, com quantos registros entraram), `sync.refused` (com o motivo:
 * Retenção: `expires_at` em `SYNC_AUDIT_RETENTION_DAYS` (180 dias), para a
   política de TTL do Firestore.
 
+## Backup criptografado
+
+* `POST /api/v1/backups`: junta perfil, rotina, doses, sintomas e água num
+  arquivo `JSON → gzip → AES-256-GCM`.
+  * **Sem senha:** a chave é derivada da chave do servidor (HKDF, com salt por
+    backup e o `uid`). Só restaura na mesma conta.
+  * **Com `passphrase`** (8+ caracteres): a chave vem da senha (scrypt). Nem o
+    servidor abre sem ela, e o arquivo pode ser restaurado em outra conta. Se a
+    senha for esquecida, o backup não tem recuperação.
+* `GET /api/v1/backups` e `GET /api/v1/backups/{id}`: metadados (contagens,
+  tamanho, `sha256`). `DELETE` apaga.
+* `GET /api/v1/backups/{id}/download`: o arquivo, ainda cifrado, para o
+  usuário guardar ou levar.
+* `POST /api/v1/backups/{id}/restore` ou `POST /api/v1/backups/restore` (com o
+  arquivo baixado em `file`). Modos:
+  * `merge` (padrão): atualiza os registros do backup e mantém os demais;
+  * `replace`: deixa só os registros do backup.
+
+  Antes de restaurar, o servidor cria um backup automático do estado atual e
+  devolve o `safety_backup_id`, para dar para desfazer.
+* Ficam guardados os `BACKUP_MAX_PER_USER` (10) mais recentes. Criar e
+  restaurar têm limite de `BACKUP_THROTTLE_RATE` (20/hora).
+* No Firestore: `users/{uid}/backups/{id}` (metadados) +
+  `.../chunks/{n}` (conteúdo cifrado em pedaços de 500 KB, por causa do limite
+  de 1 MiB por documento). `DELETE /auth/me` apaga os backups junto.
+
 ## Modelagem do Firestore
 
 ```
@@ -185,6 +211,8 @@ users/{uid}                      perfil e dados da conta
   sync_batches/{batch_id}        situação de cada lote de sincronização
   sync_mutations/{mutation_id}   recibo de cada mudança aplicada (idempotência)
   sync_tombstones/{entidade__id} lápides de exclusões feitas offline
+  backups/{id}                   metadados do backup
+    chunks/{n}                   conteúdo cifrado do backup, em pedaços
 sync_audit/{id}                  eventos de auditoria do sync (uid, evento, contagens)
 products/{id}                    catálogo (suplementos e anabolizantes)
 articles/{id}                    artigos educativos
@@ -263,6 +291,8 @@ backend/
   profiles/    perfil do usuário
   catalog/     catálogo de produtos e artigos (conteúdo em content.py)
   tracking/    rotina, doses, sintomas e hidratação
+  sync/        fila de sincronização, criptografia do lote e auditoria
+  backups/     backup criptografado e restauração
   tests/
 firebase/      firebase.json, .firebaserc, firestore.rules, índices
 ```
