@@ -155,6 +155,10 @@ class MockAuthProvider(AuthProvider):
     def delete_user(self, uid: str) -> None:
         self._store.delete(f"{USERS}/{uid}")
 
+    def set_custom_claims(self, uid: str, claims: dict[str, Any]) -> None:
+        self._user(uid)
+        self._store.update(f"{USERS}/{uid}", {"custom_claims": claims})
+
     # -- interno -------------------------------------------------------------
 
     def _user(self, uid: str) -> dict[str, Any]:
@@ -176,6 +180,7 @@ class MockAuthProvider(AuthProvider):
         user = self._user(uid)
         provider = "anonymous" if user.get("is_anonymous") else "password"
         claims = {
+            **user.get("custom_claims", {}),
             "uid": uid,
             "user_id": uid,
             "email": user.get("email"),

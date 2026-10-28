@@ -175,6 +175,8 @@ SYNC_MAX_BATCH_SIZE = env.int('SYNC_MAX_BATCH_SIZE', default=50)
 # Lote em texto puro só é aceito com False (útil para testar no Swagger).
 SYNC_REQUIRE_ENCRYPTION = env.bool('SYNC_REQUIRE_ENCRYPTION', default=True)
 SYNC_MAX_PAYLOAD_BYTES = env.int('SYNC_MAX_PAYLOAD_BYTES', default=2 * 1024 * 1024)
+# Eventos de auditoria têm expires_at para a política de TTL do Firestore.
+SYNC_AUDIT_RETENTION_DAYS = env.int('SYNC_AUDIT_RETENTION_DAYS', default=180)
 
 
 LOGGING = {

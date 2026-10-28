@@ -1,14 +1,15 @@
 from django.conf import settings
-from drf_spectacular.utils import OpenApiParameter, PolymorphicProxySerializer, extend_schema
+from drf_spectacular.utils import OpenApiParameter, PolymorphicProxySerializer, extend_schema, inline_serializer
 from rest_framework import status
 from rest_framework.exceptions import APIException, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.resources import RecordNotFound
+from core.permissions import IsAdmin
+from core.resources import RecordNotFound, parse_query
 from core.schema import ErrorSerializer
 
-from . import security
+from . import audit, security
 from . import serializers as s
 from .handlers import HANDLERS
 from .service import get_batch, process_batch
@@ -72,7 +73,9 @@ class SyncConsentView(APIView):
         payload.is_valid(raise_exception=True)
         if payload.validated_data["notice_version"] != security.NOTICE["version"]:
             raise ValidationError({"notice_version": "O aviso mudou. Mostre a versão atual e peça o aceite de novo."})
-        return Response(s.SyncConsentSerializer(security.accept_consent(request.user.uid)).data)
+        consent = security.accept_consent(request.user.uid)
+        audit.record(request.user.uid, audit.CONSENT_ACCEPTED, notice_version=consent["accepted_version"])
+        return Response(s.SyncConsentSerializer(consent).data)
 
     @extend_schema(
         tags=[TAG],
@@ -81,6 +84,7 @@ class SyncConsentView(APIView):
     )
     def delete(self, request):
         security.revoke_consent(request.user.uid)
+        audit.record(request.user.uid, audit.CONSENT_REVOKED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -101,6 +105,9 @@ class SyncKeyView(APIView):
         payload.is_valid(raise_exception=True)
         key = security.create_sync_key(
             request.user.uid, payload.validated_data["device_id"], payload.validated_data["client_public_key"]
+        )
+        audit.record(
+            request.user.uid, audit.KEY_CREATED, device_id=payload.validated_data["device_id"], key_id=key["key_id"],
         )
         return Response(s.SyncKeySerializer(key).data, status=status.HTTP_201_CREATED)
 
@@ -134,12 +141,22 @@ class SyncBatchView(APIView):
     )
     def post(self, request):
         uid = request.user.uid
-        security.require_consent(uid)
-        serializer = s.SyncBatchSerializer(data=self._read_batch(uid, request.data))
-        serializer.is_valid(raise_exception=True)
-        batch = serializer.validated_data
-        if batch["network"] not in allowed_networks():
-            raise WifiRequired()
+        data = None
+        try:
+            security.require_consent(uid)
+            data = self._read_batch(uid, request.data)
+            serializer = s.SyncBatchSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            batch = serializer.validated_data
+            if batch["network"] not in allowed_networks():
+                raise WifiRequired()
+        except APIException as exc:
+            meta = data if isinstance(data, dict) else {}
+            audit.record(
+                uid, audit.REFUSED, error_code=_error_code(exc),
+                **{k: _short(meta.get(k)) for k in ("batch_id", "device_id", "network")},
+            )
+            raise
         return Response(s.SyncBatchResultSerializer(process_batch(uid, batch)).data)
 
     @staticmethod
@@ -169,3 +186,71 @@ class SyncBatchStatusView(APIView):
         if batch is None:
             raise RecordNotFound("Lote não encontrado.")
         return Response(s.SyncBatchStatusSerializer(batch).data)
+
+
+EVENT_PARAMETERS = [
+    OpenApiParameter("event", str, enum=[e for e, _ in audit.EVENT_CHOICES]),
+    OpenApiParameter("batch_id", str),
+    OpenApiParameter("limit", int, description="Padrão 100, máximo 500."),
+]
+
+
+class SyncEventsView(APIView):
+    @extend_schema(
+        tags=[TAG],
+        summary="Eventos de sincronização do usuário",
+        description="Auditoria: início, retomada, conclusão, falha e recusa de lotes, aceite do aviso e chaves.",
+        parameters=EVENT_PARAMETERS,
+        responses={
+            200: inline_serializer("SyncEventList", {"results": s.SyncEventSerializer(many=True)}),
+            401: ErrorSerializer,
+        },
+    )
+    def get(self, request):
+        query = parse_query(s.SyncEventQuerySerializer, request)
+        events = audit.list_events(uid=request.user.uid, **query)
+        return Response({"results": s.SyncEventSerializer(events, many=True).data})
+
+
+class AdminSyncEventsView(APIView):
+    permission_classes = [IsAdmin]
+
+    @extend_schema(
+        tags=["Monitoramento"],
+        summary="Eventos de sincronização de todos os usuários",
+        description="Exige a custom claim `admin` no token (manage.py set_admin).",
+        parameters=[OpenApiParameter("uid", str), *EVENT_PARAMETERS],
+        responses={
+            200: inline_serializer("AdminSyncEventList", {"results": s.SyncEventSerializer(many=True)}),
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+        },
+    )
+    def get(self, request):
+        events = audit.list_events(**parse_query(s.AdminSyncEventQuerySerializer, request))
+        return Response({"results": s.SyncEventSerializer(events, many=True).data})
+
+
+class AdminSyncSummaryView(APIView):
+    permission_classes = [IsAdmin]
+
+    @extend_schema(
+        tags=["Monitoramento"],
+        summary="Panorama da sincronização no período",
+        description="Contagem por tipo de evento, falhas por código, registros aplicados e duração dos lotes.",
+        parameters=[OpenApiParameter("hours", int, description="Janela em horas (padrão 24, máximo 720).")],
+        responses={200: s.SyncSummarySerializer, 401: ErrorSerializer, 403: ErrorSerializer},
+    )
+    def get(self, request):
+        hours = parse_query(s.SyncSummaryQuerySerializer, request)["hours"]
+        return Response(s.SyncSummarySerializer(audit.summary(hours)).data)
+
+
+def _error_code(exc: APIException) -> str:
+    if isinstance(exc, ValidationError):
+        return "validation_error"
+    return getattr(exc.detail, "code", None) or exc.default_code
+
+
+def _short(value):
+    return value[:64] if isinstance(value, str) else None

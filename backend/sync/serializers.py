@@ -4,6 +4,7 @@ from rest_framework import serializers
 from core.resources import ID_PATTERN
 from core.schema import ErrorBodySerializer
 
+from .audit import EVENT_CHOICES
 from .handlers import HANDLERS
 
 NETWORK_CHOICES = [
@@ -169,3 +170,51 @@ class SyncConsentSerializer(serializers.Serializer):
 
 class SyncConsentRequestSerializer(serializers.Serializer):
     notice_version = serializers.CharField(help_text="Versão do aviso que o usuário viu e aceitou.")
+
+
+class SyncEventSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    uid = serializers.CharField()
+    event = serializers.CharField(help_text="sync.started, sync.resumed, sync.completed, sync.failed, sync.refused...")
+    batch_id = serializers.CharField(allow_null=True)
+    device_id = serializers.CharField(allow_null=True)
+    network = serializers.CharField(allow_null=True)
+    attempt = serializers.IntegerField(allow_null=True)
+    received = serializers.IntegerField(allow_null=True)
+    processed = serializers.IntegerField(allow_null=True)
+    applied = serializers.IntegerField(allow_null=True)
+    duplicate = serializers.IntegerField(allow_null=True)
+    stale = serializers.IntegerField(allow_null=True)
+    rejected = serializers.IntegerField(allow_null=True)
+    error_code = serializers.CharField(allow_null=True)
+    duration_ms = serializers.IntegerField(allow_null=True)
+    created_at = serializers.DateTimeField()
+
+    def to_representation(self, instance):
+        return super().to_representation({**dict.fromkeys(self.fields), **instance})
+
+
+class SyncEventQuerySerializer(serializers.Serializer):
+    event = serializers.ChoiceField(EVENT_CHOICES, required=False)
+    batch_id = serializers.RegexField(rf"^{ID_PATTERN}$", required=False)
+    limit = serializers.IntegerField(required=False, min_value=1, max_value=500, default=100)
+
+
+class AdminSyncEventQuerySerializer(SyncEventQuerySerializer):
+    uid = serializers.CharField(required=False, max_length=128)
+
+
+class SyncSummaryQuerySerializer(serializers.Serializer):
+    hours = serializers.IntegerField(required=False, min_value=1, max_value=24 * 30, default=24)
+
+
+class SyncSummarySerializer(serializers.Serializer):
+    since = serializers.DateTimeField()
+    events = serializers.IntegerField()
+    truncated = serializers.BooleanField(help_text="true se havia mais eventos do que o limite da consulta.")
+    users = serializers.IntegerField(help_text="Usuários distintos com eventos no período.")
+    by_event = serializers.DictField(child=serializers.IntegerField())
+    failures_by_code = serializers.DictField(child=serializers.IntegerField())
+    records = serializers.DictField(child=serializers.IntegerField(), help_text="applied, duplicate, stale, rejected.")
+    batch_duration_ms_p50 = serializers.IntegerField(allow_null=True)
+    batch_duration_ms_max = serializers.IntegerField(allow_null=True)

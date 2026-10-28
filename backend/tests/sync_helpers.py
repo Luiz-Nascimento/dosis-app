@@ -9,6 +9,7 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from core.crypto import b64decode, b64encode
+from core.store import StoreError
 from sync.security import derive_key, envelope_aad
 
 
@@ -70,6 +71,26 @@ class Device:
 
     def send(self, payload, **kwargs):
         return self.client.post("/api/v1/sync/batches", self.envelope(payload, **kwargs), format="json")
+
+
+def break_connection_on_transaction(monkeypatch, store, number):
+    """Derruba a conexão na N-ésima transação, depois de montar as escritas e antes do commit."""
+    original = store.run_transaction
+    calls = {"n": 0}
+
+    def flaky(fn):
+        calls["n"] += 1
+        if calls["n"] != number:
+            return original(fn)
+
+        def fail_before_commit(tx):
+            fn(tx)
+            raise StoreError("conexão perdida")
+
+        return original(fail_before_commit)
+
+    monkeypatch.setattr(store, "run_transaction", flaky)
+    return lambda: monkeypatch.setattr(store, "run_transaction", original)
 
 
 # Fixtures para os testes da fila e da transação: lote em texto puro (o

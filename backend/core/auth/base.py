@@ -120,3 +120,7 @@ class AuthProvider(ABC):
     @abstractmethod
     def delete_user(self, uid: str) -> None:
         """Apaga a conta no Firebase Auth."""
+
+    @abstractmethod
+    def set_custom_claims(self, uid: str, claims: dict[str, Any]) -> None:
+        """Define custom claims (ex.: ``admin``). Valem a partir do próximo token (refresh)."""

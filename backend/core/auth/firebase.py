@@ -134,6 +134,9 @@ class FirebaseAuthProvider(AuthProvider):
         except admin_auth.UserNotFoundError:
             pass
 
+    def set_custom_claims(self, uid: str, claims: dict[str, Any]) -> None:
+        admin_auth.set_custom_user_claims(uid, claims or None, app=get_app())
+
     # -- interno -------------------------------------------------------------
 
     @staticmethod

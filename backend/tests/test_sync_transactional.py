@@ -3,9 +3,7 @@ import datetime as dt
 
 import pytest
 
-from core.store import StoreError
-
-from .sync_helpers import batch, rec, rid, make_client, plaintext_sync  # noqa: F401
+from .sync_helpers import batch, break_connection_on_transaction, rec, rid, make_client, plaintext_sync  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("plaintext_sync")
 
@@ -24,26 +22,6 @@ def count(store, uid, collection):
 def creatina(client):
     response = client.post("/api/v1/routine-items", {"product_id": "creatina"}, format="json")
     return response.data["id"]
-
-
-def break_connection_on_transaction(monkeypatch, store, number):
-    """Derruba a conexão na N-ésima transação, depois de montar as escritas e antes do commit."""
-    original = store.run_transaction
-    calls = {"n": 0}
-
-    def flaky(fn):
-        calls["n"] += 1
-        if calls["n"] != number:
-            return original(fn)
-
-        def fail_before_commit(tx):
-            fn(tx)
-            raise StoreError("conexão perdida")
-
-        return original(fail_before_commit)
-
-    monkeypatch.setattr(store, "run_transaction", flaky)
-    return lambda: monkeypatch.setattr(store, "run_transaction", original)
 
 
 def test_connection_drop_in_the_middle_of_20_records(client, store, creatina, monkeypatch):

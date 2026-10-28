@@ -17,12 +17,14 @@ Garantias:
 from __future__ import annotations
 
 import datetime as dt
+import time
 from collections import Counter
 from typing import Any
 
 from core.fields import utcnow
 from core.store import DocumentStore, StoreError, get_store, user_collection, user_doc
 
+from . import audit
 from .handlers import HANDLERS, PreparedWrite, SyncRejected
 
 APPLIED, DUPLICATE, STALE, REJECTED = "applied", "duplicate", "stale", "rejected"
@@ -33,19 +35,28 @@ RETENTION = dt.timedelta(days=30)
 
 def process_batch(uid: str, batch: dict[str, Any]) -> dict[str, Any]:
     store = get_store()
+    clock = time.monotonic()
     batch_path = user_doc(uid, "sync_batches", batch["batch_id"])
-    previous = store.get(batch_path)
-    attempt = (previous or {}).get("attempts", 0) + 1
-    store.set(batch_path, {
-        "device_id": batch["device_id"],
-        "network": batch["network"],
-        "status": "processing",
-        "attempts": attempt,
-        "received": len(batch["records"]),
-        "started_at": utcnow(),
-        "finished_at": None,
-        "error": None,
-    }, merge=True)
+    meta = {"batch_id": batch["batch_id"], "device_id": batch["device_id"], "network": batch["network"]}
+    received = len(batch["records"])
+    try:
+        previous = store.get(batch_path)
+        attempt = (previous or {}).get("attempts", 0) + 1
+        audit.record(uid, audit.RESUMED if previous else audit.STARTED, **meta, attempt=attempt, received=received)
+        store.set(batch_path, {
+            "device_id": batch["device_id"],
+            "network": batch["network"],
+            "status": "processing",
+            "attempts": attempt,
+            "received": received,
+            "started_at": utcnow(),
+            "finished_at": None,
+            "error": None,
+        }, merge=True)
+    except StoreError as exc:
+        audit.record(uid, audit.FAILED, **meta, received=received, processed=0,
+                     error_code="storage_unavailable", error_message=str(exc), duration_ms=_elapsed(clock))
+        raise
 
     results: list[dict[str, Any]] = []
     try:
@@ -53,12 +64,20 @@ def process_batch(uid: str, batch: dict[str, Any]) -> dict[str, Any]:
             results.append(apply_record(store, uid, batch["batch_id"], record))
     except StoreError as exc:
         _try_set(store, batch_path, {"status": "interrupted", "processed": len(results), "error": str(exc)})
+        audit.record(uid, audit.FAILED, **meta, attempt=attempt, received=received, processed=len(results),
+                     error_code="storage_unavailable", error_message=str(exc), duration_ms=_elapsed(clock))
         raise
 
     counts = Counter(r["status"] for r in results)
     summary = {status: counts.get(status, 0) for status in STATUSES}
     store.set(batch_path, {"status": "completed", "processed": len(results), "finished_at": utcnow(), **summary}, merge=True)
+    audit.record(uid, audit.COMPLETED, **meta, attempt=attempt, received=received, processed=len(results),
+                 duration_ms=_elapsed(clock), **summary)
     return {"batch_id": batch["batch_id"], "attempt": attempt, "received": len(results), **summary, "results": results}
+
+
+def _elapsed(clock: float) -> int:
+    return int((time.monotonic() - clock) * 1000)
 
 
 def apply_record(store: DocumentStore, uid: str, batch_id: str, record: dict[str, Any]) -> dict[str, Any]:

@@ -151,6 +151,27 @@ Lotes com `network` diferente de `wifi`/`ethernet` são recusados com
 `412 wifi_required` (desligue com `SYNC_WIFI_ONLY=False`). O `data` de cada
 registro passa pelas mesmas validações e pela mesma criptografia dos CRUDs.
 
+### Auditoria
+
+Cada etapa gera um evento: `sync.started`, `sync.resumed` (mesmo `batch_id`
+reenviado), `sync.completed` (com contagens e duração), `sync.failed` (queda
+no meio, com quantos registros entraram), `sync.refused` (com o motivo:
+`wifi_required`, `sync_consent_required`, `encryption_required`...), além de
+`consent.accepted`, `consent.revoked` e `key.created`.
+
+* Os eventos vão para o log estruturado `dosis.audit` (JSON, sempre) e para a
+  coleção `sync_audit` do Firestore (melhor esforço: se o Firestore cair, o
+  evento continua no log). Nunca guardam o conteúdo dos registros.
+* `GET /api/v1/sync/events`: eventos do próprio usuário (filtros `event`,
+  `batch_id`, `limit`).
+* Monitoramento (exige a custom claim `admin`):
+  `GET /api/v1/admin/sync/events` e `GET /api/v1/admin/sync/summary?hours=24`
+  (eventos por tipo, falhas por código, registros aplicados, duração dos
+  lotes). Para dar acesso: `python manage.py set_admin <uid>` e depois
+  `/auth/refresh` no app.
+* Retenção: `expires_at` em `SYNC_AUDIT_RETENTION_DAYS` (180 dias), para a
+  política de TTL do Firestore.
+
 ## Modelagem do Firestore
 
 ```
@@ -164,6 +185,7 @@ users/{uid}                      perfil e dados da conta
   sync_batches/{batch_id}        situação de cada lote de sincronização
   sync_mutations/{mutation_id}   recibo de cada mudança aplicada (idempotência)
   sync_tombstones/{entidade__id} lápides de exclusões feitas offline
+sync_audit/{id}                  eventos de auditoria do sync (uid, evento, contagens)
 products/{id}                    catálogo (suplementos e anabolizantes)
 articles/{id}                    artigos educativos
 ```
