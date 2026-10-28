@@ -29,6 +29,9 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'core',
     'accounts',
+    'profiles',
+    'catalog',
+    'tracking',
 ]
 
 MIDDLEWARE = [
@@ -125,6 +128,12 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
     'SCHEMA_PATH_PREFIX': r'/api/v1',
+    'ENUM_NAME_OVERRIDES': {
+        'UnitEnum': 'core.choices.UNIT_CHOICES',
+        'KindEnum': 'core.choices.KIND_CHOICES',
+        'ProtocolEnum': 'core.choices.PROTOCOL_CHOICES',
+        'SymptomEnum': 'core.choices.SYMPTOM_CHOICES',
+    },
     'SWAGGER_UI_SETTINGS': {
         'persistAuthorization': True,
         'displayRequestDuration': True,
@@ -143,6 +152,10 @@ FIREBASE_WEB_API_KEY = env('FIREBASE_WEB_API_KEY', default='')
 FIREBASE_CREDENTIALS = env('FIREBASE_CREDENTIALS', default='')
 FIREBASE_AUTH_EMULATOR_HOST = env('FIREBASE_AUTH_EMULATOR_HOST', default='')
 FIRESTORE_EMULATOR_HOST = env('FIRESTORE_EMULATOR_HOST', default='')
+
+# Chave AES-256 (32 bytes em base64) dos campos sensíveis gravados no Firestore.
+# Sem ela, uma chave é derivada da SECRET_KEY (aceitável só em desenvolvimento).
+FIELD_ENCRYPTION_KEY = env('FIELD_ENCRYPTION_KEY', default='')
 
 # Arquivo opcional para o mock sobreviver a reinícios do runserver.
 MOCK_STORE_PATH = env('MOCK_STORE_PATH', default='')

@@ -128,6 +128,12 @@ class FirebaseAuthProvider(AuthProvider):
         except (ValueError, admin_auth.InvalidIdTokenError, admin_auth.UserDisabledError) as exc:
             raise InvalidToken() from exc
 
+    def delete_user(self, uid: str) -> None:
+        try:
+            admin_auth.delete_user(uid, app=get_app())
+        except admin_auth.UserNotFoundError:
+            pass
+
     # -- interno -------------------------------------------------------------
 
     @staticmethod

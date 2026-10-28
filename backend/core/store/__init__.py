@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import threading
+from typing import Callable
 
 from django.conf import settings
 
@@ -27,6 +28,7 @@ __all__ = [
     "doc_path",
     "get_store",
     "new_id",
+    "register_mock_seeder",
     "reset_store",
     "user_doc",
     "user_collection",
@@ -34,6 +36,14 @@ __all__ = [
 
 _store: DocumentStore | None = None
 _lock = threading.Lock()
+_mock_seeders: list[Callable[[DocumentStore], object]] = []
+
+
+def register_mock_seeder(seeder: Callable[[DocumentStore], object]) -> None:
+    """Registra uma função que popula o store mock assim que ele é criado
+    (ex.: catálogo e artigos). No Firestore real use o comando seed_content."""
+    if seeder not in _mock_seeders:
+        _mock_seeders.append(seeder)
 
 
 def get_store() -> DocumentStore:
@@ -59,7 +69,10 @@ def _build_store() -> DocumentStore:
     if firebase_mode() == MODE_MOCK:
         from .memory import MemoryStore
 
-        return MemoryStore(settings.MOCK_STORE_PATH or None)
+        store = MemoryStore(settings.MOCK_STORE_PATH or None)
+        for seeder in _mock_seeders:
+            seeder(store)
+        return store
 
     from .firestore import FirestoreStore
 

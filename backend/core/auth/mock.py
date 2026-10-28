@@ -152,6 +152,9 @@ class MockAuthProvider(AuthProvider):
             raise InvalidToken()
         return claims
 
+    def delete_user(self, uid: str) -> None:
+        self._store.delete(f"{USERS}/{uid}")
+
     # -- interno -------------------------------------------------------------
 
     def _user(self, uid: str) -> dict[str, Any]:

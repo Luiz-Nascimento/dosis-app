@@ -116,3 +116,7 @@ class AuthProvider(ABC):
     @abstractmethod
     def verify_id_token(self, id_token: str) -> dict[str, Any]:
         """Valida o ID token e retorna as claims (``uid``, ``email``, ``firebase``...)."""
+
+    @abstractmethod
+    def delete_user(self, uid: str) -> None:
+        """Apaga a conta no Firebase Auth."""

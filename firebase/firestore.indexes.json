@@ -1,4 +1,13 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "dose_logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "routine_item_id", "order": "ASCENDING" },
+        { "fieldPath": "taken_at", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

@@ -14,7 +14,7 @@ from core.auth import get_auth_provider
 from core.schema import ErrorSerializer
 
 from . import serializers as s
-from .services import sync_user_document
+from .services import delete_account, sync_user_document
 
 TAG = "Autenticação"
 
@@ -181,3 +181,13 @@ class MeView(APIView):
             "is_anonymous": user.is_anonymous,
             "email_verified": user.email_verified,
         }).data)
+
+    @extend_schema(
+        tags=[TAG],
+        summary="Excluir conta e todos os dados",
+        description="Exclusão definitiva (LGPD): apaga a árvore users/{uid} no Firestore e a conta no Firebase Auth.",
+        responses={204: None, 401: ErrorSerializer},
+    )
+    def delete(self, request):
+        delete_account(request.user.uid)
+        return Response(status=status.HTTP_204_NO_CONTENT)
