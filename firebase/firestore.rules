@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Regras de segurança do Firestore do Dosis.
+//
+// O backend Django acessa o Firestore pelo Admin SDK, que não passa por estas
+// regras. Elas existem como defesa em profundidade contra acesso direto de
+// clientes (ex.: alguém usando o SDK do Firebase com o próprio token):
+//   * cada usuário só lê a própria árvore users/{uid};
+//   * nenhum cliente escreve direto: toda escrita passa pela API, que valida
+//     os dados e criptografa os campos sensíveis;
+//   * qualquer caminho não listado aqui é negado.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+
+      match /diagnostics/{docId} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
