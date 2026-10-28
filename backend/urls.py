@@ -1,4 +1,4 @@
-"""Rotas da API. Cada app recebe sua rota aqui e lista os próprios endpoints em ``apps/<app>/urls.py``."""
+"""Rotas da raiz: dá a rota de cada app e inclui o ``urls.py`` dele (``apps/<app>/urls.py``), que lista os endpoints do app."""
 from django.urls import include, path
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView

@@ -37,8 +37,9 @@ decidir pelo `code` e pode exibir a `message` direto ao usuário.
 
 ## Endpoints
 
-Cada app tem a sua rota em `config/urls.py` e lista os próprios endpoints em
-`apps/<app>/urls.py`. Todas as rotas ficam em `/api/v1/` e terminam em `/`.
+O `urls.py` da raiz (`backend/urls.py`) dá a rota de cada app e inclui o `urls.py` dele,
+`apps/<app>/urls.py`, que lista os endpoints do app. Todas as rotas ficam em
+`/api/v1/` e terminam em `/`.
 
 | App | Rota | Endpoints | Telas do Figma |
 | --- | --- | --- | --- |
@@ -296,7 +297,8 @@ Os testes rodam sempre no modo mock, sem rede.
 
 ```
 backend/
-  config/              settings e urls.py da raiz (uma rota por app)
+  urls.py              rotas da raiz: uma rota por app, incluindo apps/<app>/urls.py
+  config/              settings, wsgi e asgi
   apps/
     core/              infraestrutura: store (Firestore/mock), auth (Firebase/mock),
                        criptografia de campos, base dos CRUDs, formato de erro, health
