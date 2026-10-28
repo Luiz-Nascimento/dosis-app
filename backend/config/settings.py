@@ -27,13 +27,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_spectacular',
-    'core',
-    'accounts',
-    'profiles',
-    'catalog',
-    'tracking',
-    'sync',
-    'backups',
+    'apps.core',
+    'apps.accounts',
+    'apps.profiles',
+    'apps.catalog',
+    'apps.tracking',
+    'apps.sync',
+    'apps.backups',
 ]
 
 MIDDLEWARE = [
@@ -99,7 +99,7 @@ MAILERS = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'core.authentication.FirebaseAuthentication',
+        'apps.core.authentication.FirebaseAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -111,7 +111,7 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'EXCEPTION_HANDLER': 'core.exceptions.exception_handler',
+    'EXCEPTION_HANDLER': 'apps.core.exceptions.exception_handler',
     'UNAUTHENTICATED_USER': None,
     'DEFAULT_THROTTLE_RATES': {
         'auth': env('AUTH_THROTTLE_RATE', default='30/min'),
@@ -123,7 +123,7 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Dosis API',
     'DESCRIPTION': (
         'API do Dosis para o app Flutter. Autenticação via Firebase Auth '
-        '(use POST /api/v1/auth/anonymous ou /api/v1/auth/login, copie o '
+        '(use POST /api/v1/auth/anonymous/ ou /api/v1/auth/login/, copie o '
         '`id_token` e clique em **Authorize**). Os dados ficam no Firestore.\n\n'
         'Erros seguem sempre o formato `{"error": {"code", "message", "details"}}`.'
     ),
@@ -132,13 +132,13 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
     'SCHEMA_PATH_PREFIX': r'/api/v1',
     'ENUM_NAME_OVERRIDES': {
-        'UnitEnum': 'core.choices.UNIT_CHOICES',
-        'KindEnum': 'core.choices.KIND_CHOICES',
-        'ProtocolEnum': 'core.choices.PROTOCOL_CHOICES',
-        'SymptomEnum': 'core.choices.SYMPTOM_CHOICES',
-        'SymptomStatusEnum': 'core.choices.SYMPTOM_STATUS_CHOICES',
-        'SyncResultStatusEnum': 'sync.serializers.RESULT_CHOICES',
-        'SyncBatchStatusEnum': 'sync.serializers.BATCH_STATUS_CHOICES',
+        'UnitEnum': 'apps.core.choices.UNIT_CHOICES',
+        'KindEnum': 'apps.core.choices.KIND_CHOICES',
+        'ProtocolEnum': 'apps.core.choices.PROTOCOL_CHOICES',
+        'SymptomEnum': 'apps.core.choices.SYMPTOM_CHOICES',
+        'SymptomStatusEnum': 'apps.core.choices.SYMPTOM_STATUS_CHOICES',
+        'SyncResultStatusEnum': 'apps.sync.serializers.RESULT_CHOICES',
+        'SyncBatchStatusEnum': 'apps.sync.serializers.BATCH_STATUS_CHOICES',
     },
     'SWAGGER_UI_SETTINGS': {
         'persistAuthorization': True,

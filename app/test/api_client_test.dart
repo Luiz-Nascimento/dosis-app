@@ -58,7 +58,7 @@ void main() {
     final calls = <String>[];
     final api = fakeClient((request) async {
       calls.add('${request.url.path} ${request.headers['Authorization'] ?? '-'}');
-      if (request.url.path.endsWith('/auth/refresh')) {
+      if (request.url.path.endsWith('/auth/refresh/')) {
         expect(body(request), {'refresh_token': 'refresh-1'});
         return jsonResponse(sessionJson(idToken: 'novo', refresh: 'refresh-2'));
       }
@@ -69,7 +69,7 @@ void main() {
     }, session: session);
 
     expect(await api.get('/auth/me'), {'uid': 'u1'});
-    expect(calls, ['/api/v1/auth/me Bearer velho', '/api/v1/auth/refresh -', '/api/v1/auth/me Bearer novo']);
+    expect(calls, ['/api/v1/auth/me Bearer velho', '/api/v1/auth/refresh/ -', '/api/v1/auth/me Bearer novo']);
     expect((await api.tokens.read())!.refreshToken, 'refresh-2');
   });
 

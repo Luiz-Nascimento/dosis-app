@@ -5,3 +5,7 @@ django-environ==0.14.0
 firebase-admin==7.7.0
 cryptography==50.0.2
 requests==2.34.2
+
+# Testes
+pytest==9.2.0
+pytest-django==4.14.0

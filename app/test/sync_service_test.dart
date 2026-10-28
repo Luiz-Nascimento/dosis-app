@@ -57,7 +57,7 @@ void main() {
   test('combina a chave e cifra o lote no formato do backend', () async {
     final server = FakeServer();
     final api = fakeClient((request) async {
-      if (request.url.path.endsWith('/sync/keys')) return jsonResponse(await server.pair(body(request)), 201);
+      if (request.url.path.endsWith('/sync/keys/')) return jsonResponse(await server.pair(body(request)), 201);
       final envelope = body(request);
       expect(envelope.keys, containsAll(['key_id', 'algorithm', 'compression', 'nonce', 'payload']));
       expect(envelope['algorithm'], 'A256GCM');

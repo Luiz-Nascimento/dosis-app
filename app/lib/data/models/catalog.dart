@@ -56,7 +56,7 @@ class DoseRange {
   bool isAbove(double amount) => amount > max;
 }
 
-/// Suplemento ou anabolizante do catálogo (`/products`).
+/// Suplemento ou anabolizante do catálogo (`/catalog/products/`).
 class Product {
   const Product({
     required this.id,

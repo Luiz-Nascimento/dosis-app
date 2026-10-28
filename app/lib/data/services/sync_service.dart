@@ -54,24 +54,24 @@ class SyncService {
   final _x25519 = X25519();
   final _aes = AesGcm.with256bits();
 
-  Future<SyncPolicy> policy() async => SyncPolicy.fromJson(await api.get('/sync/policy') as Json);
+  Future<SyncPolicy> policy() async => SyncPolicy.fromJson(await api.get('/sync/policy/') as Json);
 
   /// Situação do aceite e o texto do aviso explícito.
-  Future<SyncConsent> consent() async => SyncConsent.fromJson(await api.get('/sync/consent') as Json);
+  Future<SyncConsent> consent() async => SyncConsent.fromJson(await api.get('/sync/consent/') as Json);
 
   /// Registra que o usuário viu e aceitou a versão [noticeVersion] do aviso.
   Future<SyncConsent> acceptConsent(String noticeVersion) async =>
-      SyncConsent.fromJson(await api.post('/sync/consent', body: {'notice_version': noticeVersion}) as Json);
+      SyncConsent.fromJson(await api.post('/sync/consent/', body: {'notice_version': noticeVersion}) as Json);
 
   /// Desativa a sincronização.
-  Future<void> revokeConsent() => api.delete('/sync/consent');
+  Future<void> revokeConsent() => api.delete('/sync/consent/');
 
   /// Combina a chave com o servidor (X25519 + HKDF-SHA256). Só a chave pública
   /// trafega; a chave AES fica em [keys].
   Future<SyncKey> pairDevice(String deviceId) async {
     final keyPair = await _x25519.newKeyPair();
     final publicKey = await keyPair.extractPublicKey();
-    final json = await api.post('/sync/keys', body: {
+    final json = await api.post('/sync/keys/', body: {
       'device_id': deviceId,
       'client_public_key': encodeBase64Url(publicKey.bytes),
     }) as Json;
@@ -107,7 +107,7 @@ class SyncService {
       'records': records.map((r) => r.toJson()).toList(),
     };
     final body = encrypt ? await sealBatch(batch) : batch;
-    return SyncBatchResult.fromJson(await api.post('/sync/batches', body: body) as Json);
+    return SyncBatchResult.fromJson(await api.post('/sync/batches/', body: body) as Json);
   }
 
   /// `JSON → gzip → AES-256-GCM` no envelope esperado pelo backend.
@@ -135,23 +135,23 @@ class SyncService {
 
   /// O que um lote gravou (use quando a resposta do envio não chegou).
   Future<SyncBatchStatus> batchStatus(String batchId) async =>
-      SyncBatchStatus.fromJson(await api.get('/sync/batches/$batchId') as Json);
+      SyncBatchStatus.fromJson(await api.get('/sync/batches/$batchId/') as Json);
 
   /// Auditoria dos eventos de sincronização do usuário.
   Future<List<SyncEvent>> events({String? event, String? batchId, int? limit}) async {
-    final json = await api.get('/sync/events', query: {'event': event, 'batch_id': batchId, 'limit': limit}) as Json;
+    final json = await api.get('/sync/events/', query: {'event': event, 'batch_id': batchId, 'limit': limit}) as Json;
     return (json['results'] as List).map((e) => SyncEvent.fromJson(e as Json)).toList();
   }
 }
 
-/// Monitoramento do sync (exige a custom claim `admin`): `/admin/sync/*`.
+/// Monitoramento do sync (exige a custom claim `admin`): `/sync/admin/*`.
 class MonitoringService {
   MonitoringService(this.api);
 
   final ApiClient api;
 
   Future<List<SyncEvent>> events({String? uid, String? event, String? batchId, int? limit}) async {
-    final json = await api.get('/admin/sync/events', query: {
+    final json = await api.get('/sync/admin/events/', query: {
       'uid': uid,
       'event': event,
       'batch_id': batchId,
@@ -161,7 +161,7 @@ class MonitoringService {
   }
 
   Future<SyncSummary> summary({int hours = 24}) async =>
-      SyncSummary.fromJson(await api.get('/admin/sync/summary', query: {'hours': hours}) as Json);
+      SyncSummary.fromJson(await api.get('/sync/admin/summary/', query: {'hours': hours}) as Json);
 }
 
 String encodeBase64Url(List<int> bytes) => base64Url.encode(bytes).replaceAll('=', '');

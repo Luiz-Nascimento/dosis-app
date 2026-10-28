@@ -2,8 +2,8 @@ import pytest
 from django.core.cache import cache
 from rest_framework.test import APIClient
 
-from core.auth import get_auth_provider, reset_auth_provider
-from core.store import get_store, reset_store
+from apps.core.auth import get_auth_provider, reset_auth_provider
+from apps.core.store import get_store, reset_store
 
 
 @pytest.fixture(autouse=True)
@@ -40,7 +40,7 @@ def make_client():
 
     def _make():
         client = APIClient()
-        response = client.post("/api/v1/auth/anonymous")
+        response = client.post("/api/v1/auth/anonymous/")
         assert response.status_code == 201, response.data
         client.credentials(HTTP_AUTHORIZATION=f"Bearer {response.data['id_token']}")
         client.session_data = response.data

@@ -110,7 +110,7 @@ class ApiClient {
     final completer = _refreshing = Completer<void>();
     completer.future.ignore(); // quem chamou recebe o erro pelo rethrow abaixo
     try {
-      final response = await _send('POST', '/auth/refresh', body: {'refresh_token': session.refreshToken});
+      final response = await _send('POST', '/auth/refresh/', body: {'refresh_token': session.refreshToken});
       if (response.statusCode >= 400) {
         await tokens.clear();
         throw _toException(response);

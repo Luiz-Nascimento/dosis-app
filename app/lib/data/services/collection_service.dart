@@ -15,17 +15,17 @@ abstract class CollectionService<T> {
   T fromJson(Json json);
 
   Future<List<T>> listWhere(Map<String, Object?> query) async {
-    final json = await api.get(path, query: query) as Json;
+    final json = await api.get('$path/', query: query) as Json;
     return (json['results'] as List).map((e) => fromJson(e as Json)).toList();
   }
 
-  Future<T> get(String id) async => fromJson(await api.get('$path/$id') as Json);
+  Future<T> get(String id) async => fromJson(await api.get('$path/$id/') as Json);
 
-  Future<T> createFrom(Map<String, Object?> data) async => fromJson(await api.post(path, body: data) as Json);
+  Future<T> createFrom(Map<String, Object?> data) async => fromJson(await api.post('$path/', body: data) as Json);
 
   /// Edição parcial: envie só o que mudou. Use `null` para apagar um campo opcional.
   Future<T> update(String id, Map<String, Object?> changes) async =>
-      fromJson(await api.patch('$path/$id', body: changes) as Json);
+      fromJson(await api.patch('$path/$id/', body: changes) as Json);
 
-  Future<void> delete(String id) => api.delete('$path/$id');
+  Future<void> delete(String id) => api.delete('$path/$id/');
 }

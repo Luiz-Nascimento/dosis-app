@@ -18,7 +18,7 @@ com o Firestore real ou com um Firestore simulado em memória (modo mock).
 cd backend
 python -m venv .venv
 .venv\Scripts\activate            # Linux/macOS: source .venv/bin/activate
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 copy .env.example .env            # Linux/macOS: cp .env.example .env
 python manage.py runserver 0.0.0.0:8000
 ```
@@ -28,7 +28,7 @@ python manage.py runserver 0.0.0.0:8000
 
 ### Testando no Swagger
 
-1. `POST /api/v1/auth/anonymous` (ou `/register` / `/login`).
+1. `POST /api/v1/auth/anonymous/` (ou `/register/` / `/login/`).
 2. Copie o `id_token` da resposta, clique em **Authorize** e cole.
 3. Chame qualquer endpoint autenticado.
 
@@ -37,24 +37,26 @@ decidir pelo `code` e pode exibir a `message` direto ao usuário.
 
 ## Endpoints
 
-| Recurso | Rotas | Tela do Figma |
-| --- | --- | --- |
-| Autenticação | `/auth/anonymous`, `/register`, `/login`, `/refresh`, `/link`, `/me` (GET e DELETE), `/verify-email`, `/password-reset` | Introdução, Login, Cadastro, Recuperar senha |
-| Perfil | `GET/PATCH /profile` | Perfil, Meus dados, Meu objetivo, Notificações |
-| Catálogo | `GET /products`, `GET /products/{id}` | Adicionar à rotina |
-| Rotina (stack) | CRUD `/routine-items` | Seus itens, Stack de hoje, Protocolo |
-| Doses | CRUD `/doses` | Registrar dose, Registros, Editar stack do dia |
-| Sintomas | CRUD `/symptoms` | Como se sente hoje?, Registros |
-| Hidratação | CRUD `/hydration` | Hidratação |
-| Artigos | `GET /articles`, `GET /articles/{id}` | Conteúdos educativos |
+Cada app tem a sua rota em `config/urls.py` e lista os próprios endpoints em
+`apps/<app>/urls.py`. Todas as rotas ficam em `/api/v1/` e terminam em `/`.
 
-Todas as rotas ficam em `/api/v1/` e, exceto as públicas de autenticação e o
-`/health`, exigem `Authorization: Bearer <id_token>`.
+| App | Rota | Endpoints | Telas do Figma |
+| --- | --- | --- | --- |
+| `core` | `/api/v1/system/` | `health/`, `diagnostics/firestore/` | — |
+| `accounts` | `/api/v1/auth/` | `anonymous/`, `register/`, `login/`, `refresh/`, `link/`, `me/` (GET e DELETE), `verify-email/`, `verify-email/confirm/`, `password-reset/`, `password-reset/confirm/` | Introdução, Login, Cadastro, Recuperar senha |
+| `profiles` | `/api/v1/profile/` | GET e PATCH | Perfil, Meus dados, Meu objetivo, Notificações |
+| `catalog` | `/api/v1/catalog/` | `products/`, `products/{id}/`, `articles/`, `articles/{id}/` | Adicionar à rotina, Conteúdos educativos |
+| `tracking` | `/api/v1/tracking/` | CRUD de `routine-items/`, `doses/`, `symptoms/` e `hydration/` | Seus itens, Stack de hoje, Registrar dose, Registros, Como se sente hoje?, Hidratação |
+| `sync` | `/api/v1/sync/` | `policy/`, `consent/`, `keys/`, `batches/`, `batches/{id}/`, `events/`, `admin/events/`, `admin/summary/` | Fila offline |
+| `backups` | `/api/v1/backups/` | listar e criar, `{id}/`, `{id}/download/`, `{id}/restore/`, `restore/` | Perfil |
+
+Exceto as rotas públicas de autenticação e o `/api/v1/system/health/`, todas
+exigem `Authorization: Bearer <id_token>`.
 
 * **Ids gerados pelo app:** em todo `POST` de CRUD o `id` é opcional. O app pode
   mandar o UUID criado offline, e reenviar o mesmo id retorna `409`, sem
   duplicar.
-* **Registrar dose em 3 toques:** `POST /doses` só com `routine_item_id`. Nome,
+* **Registrar dose em 3 toques:** `POST /api/v1/tracking/doses/` só com `routine_item_id`. Nome,
   dose, unidade e protocolo vêm do item da rotina.
 * **Calendário:** as listas de doses, sintomas e água aceitam `date_from` e
   `date_to` (AAAA-MM-DD, fuso de Brasília) e devolvem `local_date` em cada
@@ -68,10 +70,10 @@ O app grava tudo localmente primeiro. Cada criação, edição ou exclusão vira
 um registro **pendente** na fila do aparelho. Com Wi-Fi, o app manda os
 pendentes em lotes:
 
-1. `GET /api/v1/sync/policy`: rede permitida, `max_batch_size` e a ordem das
+1. `GET /api/v1/sync/policy/`: rede permitida, `max_batch_size` e a ordem das
    entidades (`profile`, `routine_items`, `dose_logs`, `symptom_logs`,
    `hydration_logs`). Envie itens da rotina antes das doses que apontam para eles.
-2. `POST /api/v1/sync/batches`:
+2. `POST /api/v1/sync/batches/`:
 
    ```json
    {
@@ -104,14 +106,14 @@ pendentes em lotes:
 
 Antes da primeira sincronização:
 
-1. `GET /api/v1/sync/consent`: traz o aviso (`notice.title`, `notice.text`,
+1. `GET /api/v1/sync/consent/`: traz o aviso (`notice.title`, `notice.text`,
    `notice.version`). Mostre o texto ao usuário.
-2. Se ele aceitar: `POST /api/v1/sync/consent` com `{"notice_version": "..."}`.
+2. Se ele aceitar: `POST /api/v1/sync/consent/` com `{"notice_version": "..."}`.
    Sem aceite, o envio é recusado com `428 sync_consent_required`. Se o texto do
    aviso mudar (nova versão), é preciso aceitar de novo. `DELETE` desativa o
    sync.
 3. Combine a chave: gere um par **X25519** no aparelho e chame
-   `POST /api/v1/sync/keys` com `device_id` e `client_public_key` (base64url).
+   `POST /api/v1/sync/keys/` com `device_id` e `client_public_key` (base64url).
    A resposta traz `key_id` e `server_public_key`. Calcule o segredo
    compartilhado e derive a chave com **HKDF-SHA256** (32 bytes, `salt` =
    `key_id` em UTF-8, `info` = `dosis-sync-v1`). Guarde a chave no Keystore
@@ -136,7 +138,7 @@ Cada registro é gravado numa transação do Firestore junto com o recibo do seu
 `mutation_id` (`users/{uid}/sync_mutations`). Se a conexão cair no meio:
 
 * o que entrou tem recibo; o resto não foi gravado (nada fica pela metade);
-* `GET /api/v1/sync/batches/{batch_id}` lista as mutações gravadas. As que
+* `GET /api/v1/sync/batches/{batch_id}/` lista as mutações gravadas. As que
   não aparecem lá continuam **pendentes**;
 * o caminho mais simples é reenviar o lote inteiro com o mesmo `batch_id`:
   o que já entrou volta como `duplicate` e nada é gravado duas vezes.
@@ -162,30 +164,30 @@ no meio, com quantos registros entraram), `sync.refused` (com o motivo:
 * Os eventos vão para o log estruturado `dosis.audit` (JSON, sempre) e para a
   coleção `sync_audit` do Firestore (melhor esforço: se o Firestore cair, o
   evento continua no log). Nunca guardam o conteúdo dos registros.
-* `GET /api/v1/sync/events`: eventos do próprio usuário (filtros `event`,
+* `GET /api/v1/sync/events/`: eventos do próprio usuário (filtros `event`,
   `batch_id`, `limit`).
 * Monitoramento (exige a custom claim `admin`):
-  `GET /api/v1/admin/sync/events` e `GET /api/v1/admin/sync/summary?hours=24`
+  `GET /api/v1/sync/admin/events/` e `GET /api/v1/sync/admin/summary/?hours=24`
   (eventos por tipo, falhas por código, registros aplicados, duração dos
   lotes). Para dar acesso: `python manage.py set_admin <uid>` e depois
-  `/auth/refresh` no app.
+  `/api/v1/auth/refresh/` no app.
 * Retenção: `expires_at` em `SYNC_AUDIT_RETENTION_DAYS` (180 dias), para a
   política de TTL do Firestore.
 
 ## Backup criptografado
 
-* `POST /api/v1/backups`: junta perfil, rotina, doses, sintomas e água num
+* `POST /api/v1/backups/`: junta perfil, rotina, doses, sintomas e água num
   arquivo `JSON → gzip → AES-256-GCM`.
   * **Sem senha:** a chave é derivada da chave do servidor (HKDF, com salt por
     backup e o `uid`). Só restaura na mesma conta.
   * **Com `passphrase`** (8+ caracteres): a chave vem da senha (scrypt). Nem o
     servidor abre sem ela, e o arquivo pode ser restaurado em outra conta. Se a
     senha for esquecida, o backup não tem recuperação.
-* `GET /api/v1/backups` e `GET /api/v1/backups/{id}`: metadados (contagens,
+* `GET /api/v1/backups/` e `GET /api/v1/backups/{id}/`: metadados (contagens,
   tamanho, `sha256`). `DELETE` apaga.
-* `GET /api/v1/backups/{id}/download`: o arquivo, ainda cifrado, para o
+* `GET /api/v1/backups/{id}/download/`: o arquivo, ainda cifrado, para o
   usuário guardar ou levar.
-* `POST /api/v1/backups/{id}/restore` ou `POST /api/v1/backups/restore` (com o
+* `POST /api/v1/backups/{id}/restore/` ou `POST /api/v1/backups/restore/` (com o
   arquivo baixado em `file`). Modos:
   * `merge` (padrão): atualiza os registros do backup e mantém os demais;
   * `replace`: deixa só os registros do backup.
@@ -242,8 +244,8 @@ carregados sozinhos; no Firestore real, rode `python manage.py seed_content`
 **`mock` (padrão):** não precisa de credenciais. Contas e documentos ficam em
 memória (ou em `MOCK_STORE_PATH`, para sobreviver a reinícios). Os "e-mails"
 de confirmação e de recuperação de senha não são enviados: o `oob_code` aparece
-no console do `runserver`, e você o usa em `/auth/verify-email/confirm` ou em
-`/auth/password-reset/confirm`.
+no console do `runserver`, e você o usa em `/api/v1/auth/verify-email/confirm/` ou em
+`/api/v1/auth/password-reset/confirm/`.
 
 **`firebase`:** usa o projeto real. Passo a passo para ativar:
 
@@ -256,16 +258,16 @@ no console do `runserver`, e você o usa em `/auth/verify-email/confirm` ou em
    `FIREBASE_WEB_API_KEY` (Configurações > Geral), `FIREBASE_CREDENTIALS`
    (caminho do JSON) e uma `FIELD_ENCRYPTION_KEY` nova (guarde-a bem: sem ela
    os dados cifrados não abrem).
-6. Publique as regras e os índices: na pasta `firebase/`, troque o projeto em
+6. Publique as regras e os índices: na pasta `backend/firebase/`, troque o projeto em
    `.firebaserc` e rode `firebase deploy --only firestore`.
 7. Carregue o catálogo e os artigos: `python manage.py seed_content`.
 
 Para usar os **emuladores** do Firebase em vez do projeto real, rode
-`firebase emulators:start` na pasta `firebase/` e defina
+`firebase emulators:start` na pasta `backend/firebase/` e defina
 `FIRESTORE_EMULATOR_HOST=localhost:8080` e
 `FIREBASE_AUTH_EMULATOR_HOST=localhost:9099` no `.env`.
 
-## Regras de segurança (`firebase/firestore.rules`)
+## Regras de segurança (`backend/firebase/firestore.rules`)
 
 O backend usa o Admin SDK, que ignora as regras. Elas protegem contra acesso
 direto ao Firestore: cada usuário só lê a própria árvore `users/{uid}`, nenhum
@@ -275,8 +277,18 @@ cliente escreve direto e qualquer caminho não listado é negado.
 
 ```bash
 cd backend
-pytest
+pytest                       # tudo
+pytest tests/unit            # só os unitários
+pytest tests/unit/apps/sync  # só um app
+pytest tests/integration     # só os de integração
 ```
+
+* `tests/unit/apps/<app>/`: testes de cada app isolado (mesma divisão de `apps/`).
+* `tests/integration/`: fluxos que atravessam vários apps (jornada da persona
+  pelas telas do Figma, vínculo e exclusão de conta, aparelho offline
+  sincronizando com queda no meio).
+* `tests/conftest.py`: fixtures comuns (modo mock zerado a cada teste,
+  clientes autenticados).
 
 Os testes rodam sempre no modo mock, sem rede.
 
@@ -284,15 +296,19 @@ Os testes rodam sempre no modo mock, sem rede.
 
 ```
 backend/
-  config/      settings e rotas
-  core/        infraestrutura: store (Firestore/mock), auth (Firebase/mock),
-               criptografia de campos, base dos CRUDs, formato de erro, health
-  accounts/    endpoints de autenticação e exclusão de conta
-  profiles/    perfil do usuário
-  catalog/     catálogo de produtos e artigos (conteúdo em content.py)
-  tracking/    rotina, doses, sintomas e hidratação
-  sync/        fila de sincronização, criptografia do lote e auditoria
-  backups/     backup criptografado e restauração
+  config/              settings e urls.py da raiz (uma rota por app)
+  apps/
+    core/              infraestrutura: store (Firestore/mock), auth (Firebase/mock),
+                       criptografia de campos, base dos CRUDs, formato de erro, health
+    accounts/          autenticação e exclusão de conta
+    profiles/          perfil do usuário
+    catalog/           catálogo de produtos e artigos (conteúdo em content.py)
+    tracking/          rotina, doses, sintomas e hidratação
+    sync/              fila de sincronização, criptografia do lote e auditoria
+    backups/           backup criptografado e restauração
+  firebase/            firebase.json, .firebaserc, firestore.rules, índices
   tests/
-firebase/      firebase.json, .firebaserc, firestore.rules, índices
+    unit/apps/<app>/   testes de cada app
+    integration/       testes entre apps
+  requirements.txt
 ```

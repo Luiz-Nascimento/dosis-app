@@ -32,20 +32,20 @@ Erros chegam como `ApiException`: decida pelo `code` (ex.: `wifi_required`,
 português. `fieldErrors` traz os erros por campo dos formulários. Sem internet,
 o `code` é `network_error`. O token expirado é renovado sozinho.
 
-| Service | Endpoints | Telas |
+| Service | Endpoints (em `/api/v1/`) | Telas |
 | --- | --- | --- |
-| `api.system` | `/health`, `/diagnostics/firestore` | — |
-| `api.auth` | `/auth/*` (anônimo, cadastro, login, vincular, confirmar e-mail, recuperar senha, excluir conta) | Introdução, Login, Cadastro |
-| `api.profile` | `/profile` | Perfil, Meus dados, Objetivo, Notificações |
-| `api.catalog` | `/products` | Adicionar à rotina |
-| `api.articles` | `/articles` | Conteúdos educativos |
-| `api.routine` | `/routine-items` | Seus itens, Stack de hoje |
-| `api.doses` | `/doses` | Registrar dose, Registros, Editar stack do dia |
-| `api.symptoms` | `/symptoms` | Como se sente hoje? |
-| `api.hydration` | `/hydration` | Hidratação |
-| `api.sync` | `/sync/*` (política, aviso, chave, lotes, status, eventos) | Fila offline |
-| `api.backups` | `/backups` (criar, baixar, restaurar) | Perfil |
-| `api.monitoring` | `/admin/sync/*` | Equipe (admin) |
+| `api.system` | `system/health/`, `system/diagnostics/firestore/` | — |
+| `api.auth` | `auth/*` (anônimo, cadastro, login, vincular, confirmar e-mail, recuperar senha, excluir conta) | Introdução, Login, Cadastro |
+| `api.profile` | `profile/` | Perfil, Meus dados, Objetivo, Notificações |
+| `api.catalog` | `catalog/products/` | Adicionar à rotina |
+| `api.articles` | `catalog/articles/` | Conteúdos educativos |
+| `api.routine` | `tracking/routine-items/` | Seus itens, Stack de hoje |
+| `api.doses` | `tracking/doses/` | Registrar dose, Registros, Editar stack do dia |
+| `api.symptoms` | `tracking/symptoms/` | Como se sente hoje? |
+| `api.hydration` | `tracking/hydration/` | Hidratação |
+| `api.sync` | `sync/*` (política, aviso, chave, lotes, status, eventos) | Fila offline |
+| `api.backups` | `backups/*` (criar, baixar, restaurar) | Perfil |
+| `api.monitoring` | `sync/admin/*` | Equipe (admin) |
 
 * **Ids gerados no app:** `newId()` (`lib/core/ids.dart`). Registro criado offline
   mantém o mesmo id ao chegar ao servidor.

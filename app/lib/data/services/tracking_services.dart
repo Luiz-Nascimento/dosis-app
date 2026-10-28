@@ -10,9 +10,9 @@ Map<String, Object?> _range(DateTime? from, DateTime? to, int? limit) => {
       'limit': limit,
     };
 
-/// Itens do stack (`/routine-items`).
+/// Itens do stack (`/tracking/routine-items/`).
 class RoutineService extends CollectionService<RoutineItem> {
-  RoutineService(ApiClient api) : super(api, '/routine-items');
+  RoutineService(ApiClient api) : super(api, '/tracking/routine-items');
 
   @override
   RoutineItem fromJson(Json json) => RoutineItem.fromJson(json);
@@ -55,9 +55,9 @@ class RoutineService extends CollectionService<RoutineItem> {
       }));
 }
 
-/// Doses registradas (`/doses`).
+/// Doses registradas (`/tracking/doses/`).
 class DoseService extends CollectionService<DoseLog> {
-  DoseService(ApiClient api) : super(api, '/doses');
+  DoseService(ApiClient api) : super(api, '/tracking/doses');
 
   @override
   DoseLog fromJson(Json json) => DoseLog.fromJson(json);
@@ -93,9 +93,9 @@ class DoseService extends CollectionService<DoseLog> {
       }));
 }
 
-/// "Como você se sentiu?" (`/symptoms`).
+/// "Como você se sentiu?" (`/tracking/symptoms/`).
 class SymptomService extends CollectionService<SymptomLog> {
-  SymptomService(ApiClient api) : super(api, '/symptoms');
+  SymptomService(ApiClient api) : super(api, '/tracking/symptoms');
 
   @override
   SymptomLog fromJson(Json json) => SymptomLog.fromJson(json);
@@ -123,9 +123,9 @@ class SymptomService extends CollectionService<SymptomLog> {
       }));
 }
 
-/// Água ingerida (`/hydration`).
+/// Água ingerida (`/tracking/hydration/`).
 class HydrationService extends CollectionService<HydrationLog> {
-  HydrationService(ApiClient api) : super(api, '/hydration');
+  HydrationService(ApiClient api) : super(api, '/tracking/hydration');
 
   @override
   HydrationLog fromJson(Json json) => HydrationLog.fromJson(json);

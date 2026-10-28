@@ -1,7 +1,7 @@
 import 'enums.dart';
 import 'json.dart';
 
-/// Item do stack (`/routine-items`): "Seus itens" e "Stack de hoje".
+/// Item do stack (`/tracking/routine-items/`): "Seus itens" e "Stack de hoje".
 class RoutineItem {
   const RoutineItem({
     required this.id,
@@ -60,7 +60,7 @@ class RoutineItem {
   final DateTime? updatedAt;
 }
 
-/// Dose registrada (`/doses`).
+/// Dose registrada (`/tracking/doses/`).
 class DoseLog {
   const DoseLog({
     required this.id,
@@ -111,7 +111,7 @@ class DoseLog {
   final DateTime? updatedAt;
 }
 
-/// "Como você se sentiu?" (`/symptoms`).
+/// "Como você se sentiu?" (`/tracking/symptoms/`).
 class SymptomLog {
   const SymptomLog({
     required this.id,
@@ -148,7 +148,7 @@ class SymptomLog {
   final DateTime? updatedAt;
 }
 
-/// Água ingerida (`/hydration`).
+/// Água ingerida (`/tracking/hydration/`).
 class HydrationLog {
   const HydrationLog({
     required this.id,

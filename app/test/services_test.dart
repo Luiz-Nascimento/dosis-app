@@ -41,7 +41,7 @@ void main() {
   test('registrar dose só com o item da rotina (3 toques)', () async {
     final api = fakeClient((request) async {
       expect(request.method, 'POST');
-      expect(request.url.path, '/api/v1/doses');
+      expect(request.url.path, '/api/v1/tracking/doses/');
       expect(body(request), {'routine_item_id': 'item1234'});
       return jsonResponse(doseJson({}), 201);
     }, session: session);
