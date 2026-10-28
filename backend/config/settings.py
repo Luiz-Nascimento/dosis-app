@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'profiles',
     'catalog',
     'tracking',
+    'sync',
 ]
 
 MIDDLEWARE = [
@@ -163,6 +164,11 @@ MOCK_STORE_PATH = env('MOCK_STORE_PATH', default='')
 # Validade dos tokens emitidos pelo modo mock (no Firebase real é 1 hora).
 MOCK_ID_TOKEN_TTL_SECONDS = 3600
 MOCK_REFRESH_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 30
+
+
+# Sincronização (fila offline do app)
+SYNC_WIFI_ONLY = env.bool('SYNC_WIFI_ONLY', default=True)
+SYNC_MAX_BATCH_SIZE = env.int('SYNC_MAX_BATCH_SIZE', default=50)
 
 
 LOGGING = {

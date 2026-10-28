@@ -62,6 +62,39 @@ Todas as rotas ficam em `/api/v1/` e, exceto as públicas de autenticação e o
 * **Faixas de dose:** cada produto traz `dose_ranges` por protocolo, com as
   fontes. O app usa isso para o alerta "acima da faixa normalmente utilizada".
 
+## Sincronização (fila offline)
+
+O app grava tudo localmente primeiro. Cada criação, edição ou exclusão vira
+um registro **pendente** na fila do aparelho. Com Wi-Fi, o app manda os
+pendentes em lotes:
+
+1. `GET /api/v1/sync/policy`: rede permitida, `max_batch_size` e a ordem das
+   entidades (`profile`, `routine_items`, `dose_logs`, `symptom_logs`,
+   `hydration_logs`). Envie itens da rotina antes das doses que apontam para eles.
+2. `POST /api/v1/sync/batches`:
+
+   ```json
+   {
+     "batch_id": "uuid-do-lote",
+     "device_id": "id-do-aparelho",
+     "network": "wifi",
+     "records": [
+       {"id": "uuid", "entity": "routine_items", "op": "upsert", "data": {"product_id": "creatina"}},
+       {"id": "uuid", "entity": "dose_logs", "op": "upsert", "data": {"routine_item_id": "uuid"}},
+       {"id": "uuid", "entity": "hydration_logs", "op": "delete"}
+     ]
+   }
+   ```
+
+3. Para cada registro, a resposta traz `status`:
+   * `applied`: marque como **enviado**;
+   * `rejected`: dados inválidos (veja `error.details`). Não reenvie sem corrigir.
+
+Lotes com `network` diferente de `wifi`/`ethernet` são recusados com
+`412 wifi_required` (desligue com `SYNC_WIFI_ONLY=False`). O `data` de cada
+registro passa pelas mesmas validações e pela mesma criptografia dos CRUDs.
+Upsert cria ou atualiza, e apagar algo que já não existe conta como sucesso.
+
 ## Modelagem do Firestore
 
 ```
