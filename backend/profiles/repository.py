@@ -38,7 +38,11 @@ class ProfileRepository:
             "updated_at": data.get("updated_at"),
         }
 
+    def storage_for_update(self, changes: dict[str, Any], modified_at=None) -> dict[str, Any]:
+        now = utcnow()
+        record = {**changes, "updated_at": now, "modified_at": modified_at or now}
+        return encrypt_fields(self.path, record, self.encrypted_fields)
+
     def update(self, changes: dict[str, Any]) -> dict[str, Any]:
-        record = encrypt_fields(self.path, {**changes, "updated_at": utcnow()}, self.encrypted_fields)
-        self.store.set(self.path, record, merge=True)
+        self.store.set(self.path, self.storage_for_update(changes), merge=True)
         return self.get()

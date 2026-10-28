@@ -75,19 +75,35 @@ class UserCollectionRepository:
         docs = self.store.list(self.collection_path(), where=where, order_by=order, limit=limit)
         return [self.from_storage(d.id, d.data) for d in docs]
 
+    # ``modified_at`` registra quando a mudança aconteceu de fato (no aparelho,
+    # para registros sincronizados offline). O sync usa esse campo para decidir
+    # qual versão vale quando mudanças chegam fora de ordem.
+
+    def storage_for_create(
+        self, item_id: str, data: dict[str, Any], modified_at: dt.datetime | None = None
+    ) -> dict[str, Any]:
+        now = utcnow()
+        record = {**data, "created_at": now, "updated_at": now, "modified_at": modified_at or now}
+        return self.to_storage(item_id, record)
+
+    def storage_for_update(
+        self, item_id: str, data: dict[str, Any], modified_at: dt.datetime | None = None
+    ) -> dict[str, Any]:
+        now = utcnow()
+        return self.to_storage(item_id, {**data, "updated_at": now, "modified_at": modified_at or now})
+
     def create(self, data: dict[str, Any], item_id: str | None = None) -> dict[str, Any]:
         item_id = item_id or new_id()
-        now = utcnow()
-        record = {**data, "created_at": now, "updated_at": now}
+        record = self.storage_for_create(item_id, data)
         try:
-            self.store.create(self.path(item_id), self.to_storage(item_id, record))
+            self.store.create(self.path(item_id), record)
         except DocumentAlreadyExists as exc:
             raise Conflict() from exc
         return self.from_storage(item_id, record)
 
     def update(self, item_id: str, data: dict[str, Any]) -> dict[str, Any]:
         path = self.path(item_id)
-        changes = self.to_storage(item_id, {**data, "updated_at": utcnow()})
+        changes = self.storage_for_update(item_id, data)
 
         def work(tx):
             if tx.get(path) is None:

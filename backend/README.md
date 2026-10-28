@@ -79,21 +79,47 @@ pendentes em lotes:
      "device_id": "id-do-aparelho",
      "network": "wifi",
      "records": [
-       {"id": "uuid", "entity": "routine_items", "op": "upsert", "data": {"product_id": "creatina"}},
-       {"id": "uuid", "entity": "dose_logs", "op": "upsert", "data": {"routine_item_id": "uuid"}},
-       {"id": "uuid", "entity": "hydration_logs", "op": "delete"}
+       {"mutation_id": "uuid", "id": "uuid", "entity": "routine_items", "op": "upsert",
+        "client_updated_at": "2026-09-20T08:00:00-03:00", "data": {"product_id": "creatina"}},
+       {"mutation_id": "uuid", "id": "uuid", "entity": "dose_logs", "op": "upsert",
+        "client_updated_at": "2026-09-20T08:01:00-03:00", "data": {"routine_item_id": "uuid"}},
+       {"mutation_id": "uuid", "id": "uuid", "entity": "hydration_logs", "op": "delete",
+        "client_updated_at": "2026-09-20T09:00:00-03:00"}
      ]
    }
    ```
 
+   * `mutation_id`: UUID único **de cada mudança** na fila (não do registro).
+   * `id`: id do registro (no perfil, o `uid`).
+   * `client_updated_at`: quando a mudança foi feita no aparelho.
+
 3. Para cada registro, a resposta traz `status`:
-   * `applied`: marque como **enviado**;
+   * `applied`: gravado agora. Marque como **enviado**.
+   * `duplicate`: já tinha sido gravado antes. Marque como **enviado**.
+   * `stale`: o servidor tem uma versão mais nova desse registro, e nada foi
+     sobrescrito. Marque como **enviado** e recarregue o registro.
    * `rejected`: dados inválidos (veja `error.details`). Não reenvie sem corrigir.
+
+### Queda no meio do lote
+
+Cada registro é gravado numa transação do Firestore junto com o recibo do seu
+`mutation_id` (`users/{uid}/sync_mutations`). Se a conexão cair no meio:
+
+* o que entrou tem recibo; o resto não foi gravado (nada fica pela metade);
+* `GET /api/v1/sync/batches/{batch_id}` lista as mutações gravadas. As que
+  não aparecem lá continuam **pendentes**;
+* o caminho mais simples é reenviar o lote inteiro com o mesmo `batch_id`:
+  o que já entrou volta como `duplicate` e nada é gravado duas vezes.
+
+Mudanças fora de ordem: vale a de `client_updated_at` mais recente. Uma
+exclusão deixa uma lápide (`sync_tombstones`) para uma mudança antiga não
+recriar o registro. Um relógio do aparelho adiantado é limitado à hora do
+servidor. Recibos e lápides têm `expires_at` (30 dias): configure uma política
+de TTL do Firestore nesse campo para limpá-los.
 
 Lotes com `network` diferente de `wifi`/`ethernet` são recusados com
 `412 wifi_required` (desligue com `SYNC_WIFI_ONLY=False`). O `data` de cada
 registro passa pelas mesmas validações e pela mesma criptografia dos CRUDs.
-Upsert cria ou atualiza, e apagar algo que já não existe conta como sucesso.
 
 ## Modelagem do Firestore
 
@@ -104,6 +130,9 @@ users/{uid}                      perfil e dados da conta
   dose_logs/{id}                 doses registradas
   symptom_logs/{id}              "Como você se sentiu"
   hydration_logs/{id}            água ingerida
+  sync_batches/{batch_id}        situação de cada lote de sincronização
+  sync_mutations/{mutation_id}   recibo de cada mudança aplicada (idempotência)
+  sync_tombstones/{entidade__id} lápides de exclusões feitas offline
 products/{id}                    catálogo (suplementos e anabolizantes)
 articles/{id}                    artigos educativos
 ```

@@ -1,23 +1,32 @@
-"""Como cada tipo de registro que chega pelo sync é aplicado no Firestore.
+"""Como cada tipo de registro que chega pelo sync vira uma escrita no Firestore.
 
 Os handlers reaproveitam os mesmos serializers e repositórios dos CRUDs:
 um registro sincronizado passa pelas mesmas validações e pela mesma
 criptografia de um registro criado pela API.
+
+A validação acontece antes da transação (``prepare``). A transação em si
+(em ``service.py``) só decide se a escrita vale e grava documento + recibo
+juntos.
 """
 from __future__ import annotations
 
+import datetime as dt
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any
 
-from core.resources import Conflict, RecordNotFound, UserCollectionRepository
+from core.resources import UserCollectionRepository
+from core.store import user_doc
 from profiles.repository import ProfileRepository
 from profiles.serializers import ProfileSerializer
 from tracking import repositories as r
 from tracking import serializers as s
 
+_SERVER_FIELDS = ("id", "created_at", "updated_at", "modified_at")
+
 
 class SyncRejected(Exception):
-    """Registro recusado de forma definitiva: o app não deve reenviar sem corrigir."""
+    """Registro recusado: o app deve corrigir antes de reenviar."""
 
     def __init__(self, code: str, message: str, details: Any = None):
         super().__init__(message)
@@ -29,14 +38,25 @@ class SyncRejected(Exception):
         return {"code": self.code, "message": self.message, "details": self.details}
 
 
+@dataclass(frozen=True)
+class PreparedWrite:
+    """Escrita já validada e cifrada, pronta para entrar na transação."""
+
+    path: str
+    op: str
+    # Documento completo, se ele não existir na hora da transação.
+    create_payload: dict[str, Any] | None = None
+    # Campos a mesclar, se ele já existir.
+    update_payload: dict[str, Any] | None = None
+    # Lápide de exclusão: impede que uma mudança antiga recrie o registro.
+    tombstone_path: str | None = None
+
+
 class EntityHandler(ABC):
     name: str
 
     @abstractmethod
-    def upsert(self, uid: str, record_id: str, data: dict[str, Any]) -> None: ...
-
-    @abstractmethod
-    def delete(self, uid: str, record_id: str) -> None: ...
+    def prepare(self, uid: str, record: dict[str, Any], modified_at: dt.datetime) -> PreparedWrite: ...
 
 
 class CollectionHandler(EntityHandler):
@@ -45,29 +65,28 @@ class CollectionHandler(EntityHandler):
         self.serializer_class = serializer_class
         self.repository_class = repository_class
 
-    def upsert(self, uid: str, record_id: str, data: dict[str, Any]) -> None:
+    def prepare(self, uid: str, record: dict[str, Any], modified_at: dt.datetime) -> PreparedWrite:
         repo = self.repository_class(uid)
+        record_id = record["id"]
+        tombstone = user_doc(uid, "sync_tombstones", f"{self.name}__{record_id}")
+        if record["op"] == "delete":
+            return PreparedWrite(path=repo.path(record_id), op="delete", tombstone_path=tombstone)
+
         existing = repo.get(record_id)
         serializer = self.serializer_class(
-            instance=existing, data=data, partial=existing is not None, context={"uid": uid}
+            instance=existing, data=record["data"], partial=existing is not None, context={"uid": uid}
         )
         if not serializer.is_valid():
             raise SyncRejected("validation_error", "Dados inválidos.", serializer.errors)
-        validated = dict(serializer.validated_data)
-        validated.pop("id", None)
-        if existing is None:
-            try:
-                repo.create(validated, record_id)
-                return
-            except Conflict:
-                pass  # Criado em paralelo: segue como atualização.
-        repo.update(record_id, validated)
-
-    def delete(self, uid: str, record_id: str) -> None:
-        try:
-            self.repository_class(uid).delete(record_id)
-        except RecordNotFound:
-            pass  # Já apagado: apagar de novo não é erro.
+        changes = {k: v for k, v in serializer.validated_data.items() if k not in _SERVER_FIELDS}
+        full = {**{k: v for k, v in (existing or {}).items() if k not in _SERVER_FIELDS}, **changes}
+        return PreparedWrite(
+            path=repo.path(record_id),
+            op="upsert",
+            create_payload=repo.storage_for_create(record_id, full, modified_at),
+            update_payload=repo.storage_for_update(record_id, changes, modified_at),
+            tombstone_path=tombstone,
+        )
 
 
 class ProfileHandler(EntityHandler):
@@ -75,16 +94,20 @@ class ProfileHandler(EntityHandler):
 
     name = "profile"
 
-    def upsert(self, uid: str, record_id: str, data: dict[str, Any]) -> None:
-        if record_id != uid:
+    def prepare(self, uid: str, record: dict[str, Any], modified_at: dt.datetime) -> PreparedWrite:
+        if record["id"] != uid:
             raise SyncRejected("invalid_record", "No perfil, o id do registro deve ser o uid do usuário.")
-        serializer = ProfileSerializer(data=data, partial=True)
+        if record["op"] == "delete":
+            raise SyncRejected("invalid_operation", "O perfil não é apagado pelo sync. Use DELETE /auth/me.")
+        serializer = ProfileSerializer(data=record["data"], partial=True)
         if not serializer.is_valid():
             raise SyncRejected("validation_error", "Dados inválidos.", serializer.errors)
-        ProfileRepository(uid).update(dict(serializer.validated_data))
-
-    def delete(self, uid: str, record_id: str) -> None:
-        raise SyncRejected("invalid_operation", "O perfil não é apagado pelo sync. Use DELETE /auth/me.")
+        payload = ProfileRepository(uid).storage_for_update(dict(serializer.validated_data), modified_at)
+        return PreparedWrite(
+            path=user_doc(uid), op="upsert",
+            create_payload={**payload, "created_at": payload["updated_at"]},
+            update_payload=payload,
+        )
 
 
 # A ordem importa: aplique itens da rotina antes das doses que apontam para eles.

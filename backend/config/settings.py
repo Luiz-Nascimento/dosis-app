@@ -134,6 +134,9 @@ SPECTACULAR_SETTINGS = {
         'KindEnum': 'core.choices.KIND_CHOICES',
         'ProtocolEnum': 'core.choices.PROTOCOL_CHOICES',
         'SymptomEnum': 'core.choices.SYMPTOM_CHOICES',
+        'SymptomStatusEnum': 'core.choices.SYMPTOM_STATUS_CHOICES',
+        'SyncResultStatusEnum': 'sync.serializers.RESULT_CHOICES',
+        'SyncBatchStatusEnum': 'sync.serializers.BATCH_STATUS_CHOICES',
     },
     'SWAGGER_UI_SETTINGS': {
         'persistAuthorization': True,
