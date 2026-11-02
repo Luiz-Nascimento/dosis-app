@@ -30,3 +30,8 @@ Dosis é um aplicativo educacional e de rastreamento para uso consciente de supl
 -Carlos Audre Santos
 # Slide de Apresentação final
 - Luiz Augusto Nascimento Ferreira
+
+
+# Aplicativo (Unidade II)
+- Carlos Audre Santos - Arquitetura em camadas (KAN-4), gerenciamento de estado com Riverpod (KAN-8), tema e navegação (KAN-5) e documentação do uso de IA
+
