@@ -1,7 +1,6 @@
 # Uso de IA no projeto
 Este documento registra como ferramentas de IA foram usadas no Dosis, conforme exigido pela disciplina
-de Programação para Dispositivos Móveis (UNIT). Ele cobre o trabalho do aluno **Carlos Audre Santos**
-na Unidade II (aplicativo). Cada integrante deve registrar o próprio uso.
+de Programação para Dispositivos Móveis (UNIT).
 
 ## Ferramenta
 
