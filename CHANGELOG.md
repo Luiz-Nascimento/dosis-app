@@ -46,5 +46,20 @@ Em **requisitos.md** foi adicionado:
 * Em prototipoBaixaFidelidade.pdf há um pdf com o protótipo de baixa fidelidade.
 * Em prototipoAltaFidelidade.pdf há um pdf com o protótipo de alta fidelidade.
 
+
 ## [0.4] — 02/11/2026
 ### Base do aplicativo Flutter (Unidade II)
+
+* Arquitetura em camadas **Presentation / Domain / Data** (KAN-4), documentada em `docs/arquitetura.md`:
+  interfaces de repositório, casos de uso (`RegisterDose`, `GetTodayStack`, `GetDoseHistory`) e raiz de composição (`AppDependencies`).
+* Gerenciamento de estado com **Riverpod** (KAN-8): `ProviderScope`, providers dos casos de uso e da aba selecionada.
+* Repositórios falsos em memória: o app roda sem backend por padrão. Com `--dart-define=USE_API=true` usa a API Django.
+* Tema escuro de alto contraste, barra do topo e menu de baixo com 4 abas, seguindo o protótipo de alta fidelidade (KAN-5).
+* Telas navegáveis: Início, Registrar dose, Rotina, Hidratação, Registros, Como se sente hoje? e Conteúdos educativos.
+* Teste unitário dos casos de uso (`app/test/domain/usecases_test.dart`).
+* Adicionado `docs/uso-de-ia.md` com o registro do uso de IA.
+
+### Limitações conhecidas
+* Sem login: a API real ainda não pode ser usada pelo app.
+* Sintomas, catálogo e remoção de item da rotina ainda não gravam dados.
+* Aviso de dose alta e estimativa de hidratação usam regras provisórias.
