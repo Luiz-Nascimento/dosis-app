@@ -13,8 +13,8 @@ de Programação para Dispositivos Móveis (UNIT).
 ### Arquitetura em Camadas
 * **Design e Estrutura:** Propôs e desenhou a arquitetura dividida em *Presentation*, *Domain* e *Data*.
 * **Componentes Core:** Implementou as interfaces de repositório, os casos de uso principais (`RegisterDose`, `GetTodayStack`) e estabeleceu a raiz de composição (`AppDependencies`).
-* **Documentação:** Escreveu o código estrutural e gerou o arquivo explicativo em `docs/arquitetura.md`.
-* **Validação:** Criou os arquivos nos diretórios corretos, corrigiu erros de importação (especificamente no `DoseRepository`), executou o aplicativo e validou a integridade da arquitetura.
+* **Documentação:** Ajudou com o código estrutural e gerou o arquivo explicativo em `docs/arquitetura.md`.
+* **Validação:** Corrigiu erros de importação (especificamente no `DoseRepository`), executou o aplicativo e validou a integridade da arquitetura.
 
 ### Gerenciamento de Estado
 * **Integração com Riverpod:** Sugeriu e escreveu a estrutura de estados utilizando a biblioteca **Riverpod** (configuração do `ProviderScope`, centralização no `providers.dart` e adaptação de telas com `ConsumerWidget`).
