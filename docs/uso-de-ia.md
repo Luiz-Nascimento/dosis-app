@@ -2,8 +2,8 @@
 Este documento registra como ferramentas de IA foram usadas no Dosis, conforme exigido pela disciplina
 de Programação para Dispositivos Móveis (UNIT).
 
-"Esta documentação detalha a contribuição da IA no projeto. Ela foi responsável por estruturar a base do sistema em Flutter
-e participou ativamente do desenvolvimento de todo o código, embora não tenha realizado commits ou pushes diretamente no repositório."
+Esta documentação detalha a contribuição da IA no projeto. Ela foi responsável por estruturar a base do sistema em Flutter
+e participou ativamente do desenvolvimento de todo o código, embora não tenha realizado commits ou pushes diretamente no repositório.
 
 ## 📅 Histórico de Contribuições (01/11 e 02/11)
 ### Arquitetura em Camadas
