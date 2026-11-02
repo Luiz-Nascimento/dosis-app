@@ -45,3 +45,6 @@ Em **requisitos.md** foi adicionado:
 * Em justificativa.md é apresentado as justificativas das principais decisões de interface e arquitetura.
 * Em prototipoBaixaFidelidade.pdf há um pdf com o protótipo de baixa fidelidade.
 * Em prototipoAltaFidelidade.pdf há um pdf com o protótipo de alta fidelidade.
+
+## [0.4] — 02/11/2026
+### Base do aplicativo Flutter (Unidade II)
