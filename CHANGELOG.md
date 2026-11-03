@@ -62,4 +62,17 @@ Em **requisitos.md** foi adicionado:
 ### Limitações conhecidas
 * Sem login: a API real ainda não pode ser usada pelo app.
 * Sintomas, catálogo e remoção de item da rotina ainda não gravam dados.
-* Aviso de dose alta e estimativa de hidratação usam regras provisórias.
+* Aviso de dose alta ainda usa regra provisória (KAN-11 pendente).
+
+## [0.5] — 03/11/2026
+### Calculadora de Hidratação com Suporte a Creatina (KAN-10)
+
+* Implementado o caso de uso `CalculateHydration` na camada **Domain** (`app/lib/domain/usecases/calculate_hydration.dart`), substituindo a regra provisória anterior:
+  * Meta hídrica basal de **35 ml/kg** para praticantes de atividade física.
+  * Ajuste de hidratação preventivo com base científica (ACSM/SBEM) proporcional ao consumo de creatina ativa no stack (**100 ml por grama**, mínimo de **500 ml** adicionais) para suporte à retenção intracelular e segurança renal.
+* Refatoração da tela de Hidratação (`app/lib/presentation/pages/hydration_page.dart`):
+  * Integração com Riverpod via `calculateHydrationProvider`.
+  * Exibição estruturada com meta em destaque (litros e ml/dia), detalhes da recomendação e aviso preventivo visual.
+  * Validação de entrada de peso com mensagem informativa em card de alerta.
+* Testes unitários do caso de uso em `app/test/domain/calculate_hydration_test.dart` cobrindo cenários com e sem creatina, protocolos de saturação e validação de peso.
+
