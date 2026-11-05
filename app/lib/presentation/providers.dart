@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app_dependencies.dart';
 import '../data/models/tracking.dart';
 import '../domain/usecases/calculate_hydration.dart';
+import '../domain/usecases/check_dose_safety.dart';
 import '../domain/usecases/get_dose_history.dart';
 import '../domain/usecases/get_today_stack.dart';
 import '../domain/usecases/register_dose.dart';
@@ -20,6 +21,8 @@ final getDoseHistoryProvider =
     Provider<GetDoseHistory>((ref) => GetDoseHistory(ref.watch(dependenciesProvider).doses));
 final calculateHydrationProvider =
     Provider<CalculateHydration>((ref) => const CalculateHydration());
+final checkDoseSafetyProvider =
+    Provider<CheckDoseSafety>((ref) => const CheckDoseSafety());
 
 final todayStackProvider = FutureProvider<List<RoutineItem>>((ref) => ref.watch(getTodayStackProvider)());
 final doseHistoryProvider = FutureProvider<List<DoseLog>>((ref) => ref.watch(getDoseHistoryProvider)());

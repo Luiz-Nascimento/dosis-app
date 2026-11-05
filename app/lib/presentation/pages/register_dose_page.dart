@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/enums.dart';
 import '../../data/models/tracking.dart';
+import '../../domain/usecases/check_dose_safety.dart';
 import '../format.dart';
 import '../providers.dart';
 import '../theme/app_theme.dart';
@@ -46,40 +47,82 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(message)));
 
-  /// Aviso laranja do protótipo. A regra (mais que o dobro da dose padrão) é provisória:
-  /// a faixa de referência de cada protocolo vem da calculadora de risco.
-  Future<bool> _confirmHighDose() async {
+  /// Alerta laranja do protótipo com fontes e respaldo científico (KAN-11).
+  Future<bool> _confirmHighDose(DoseSafetyCheck check) async {
     final keep = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
         backgroundColor: AppColors.orange,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Atenção', style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.w800)),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.black, size: 28),
+                  SizedBox(width: 8),
+                  Text('Atenção', style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.w800)),
+                ],
+              ),
               const SizedBox(height: 12),
-              const Text(
-                'A dose informada está acima da faixa normalmente utilizada em protocolos de uso contínuo.',
+              Text(
+                check.message ??
+                    'A dose informada está acima da faixa normalmente recomendada.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w700),
+                style: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w700),
               ),
-              const SizedBox(height: 16),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white),
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Revisar Protocolo'),
-              ),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  side: const BorderSide(color: Colors.black, width: 2),
+              if (check.caution != null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  check.caution!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Color(0xFF202020), fontSize: 12, height: 1.35),
                 ),
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Manter Configuração'),
+              ],
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Fonte: ${check.sourcesFormatted}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Revisar Protocolo', style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    side: const BorderSide(color: Colors.black, width: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Manter Configuração', style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
               ),
             ],
           ),
@@ -96,10 +139,19 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
       _toast('Informe uma dose maior que zero.');
       return;
     }
-    final reference = item.doseAmount;
-    if (reference != null && amount > reference * 2) {
-      if (!await _confirmHighDose()) return;
+
+    // Avaliação de segurança com CheckDoseSafety (KAN-11)
+    final safetyCheck = ref.read(checkDoseSafetyProvider)(
+      productName: item.name,
+      amount: amount,
+      unit: item.doseUnit,
+      protocol: _protocol,
+    );
+
+    if (safetyCheck.isAboveRange) {
+      if (!await _confirmHighDose(safetyCheck)) return;
     }
+
     final now = DateTime.now();
     final takenAt = DateTime(now.year, now.month, now.day, _time.hour, _time.minute);
     try {
