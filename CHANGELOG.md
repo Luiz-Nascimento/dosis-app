@@ -62,7 +62,6 @@ Em **requisitos.md** foi adicionado:
 ### Limitações conhecidas
 * Sem login: a API real ainda não pode ser usada pelo app.
 * Sintomas, catálogo e remoção de item da rotina ainda não gravam dados.
-* Aviso de dose alta ainda usa regra provisória (KAN-11 pendente).
 
 ## [0.5] — 03/11/2026
 ### Calculadora de Hidratação com Suporte a Creatina (KAN-10)
@@ -75,4 +74,19 @@ Em **requisitos.md** foi adicionado:
   * Exibição estruturada com meta em destaque (litros e ml/dia), detalhes da recomendação e aviso preventivo visual.
   * Validação de entrada de peso com mensagem informativa em card de alerta.
 * Testes unitários do caso de uso em `app/test/domain/calculate_hydration_test.dart` cobrindo cenários com e sem creatina, protocolos de saturação e validação de peso.
+
+## [0.6] — 05/11/2026
+### Alerta Preventivo de Dose de Creatina e Rins (KAN-11)
+
+* Implementado o caso de uso `CheckDoseSafety` na camada **Domain** (`app/lib/domain/usecases/check_dose_safety.dart`):
+  * Avaliação por protocolo com base em evidências científicas oficiais (**ISSN 2017 / ANVISA**):
+    * **Uso contínuo:** Faixa usual de 3 a 5 g/dia. Doses superiores ativam o alerta de atenção.
+    * **Protocolo de saturação:** Faixa usual de 15 a 25 g/dia por período delimitado (5 a 7 dias). Doses superiores a 25g/dia ativam o alerta.
+  * Informações de cuidado fisiológico explicando que doses excessivas geram sobrecarga sem ganho de eficácia e alertando sobre a elevação esperada da creatinina sérica em exames laboratoriais.
+* Refatoração do fluxo de registro de dose (`app/lib/presentation/pages/register_dose_page.dart`):
+  * Integração com Riverpod via `checkDoseSafetyProvider`.
+  * Card de diálogo laranja estilizado de alta fidelidade com citação explícita das fontes oficiais (`Fonte: ISSN / ANVISA`).
+  * Autonomia do usuário preservada através dos botões **"Revisar Protocolo"** e **"Manter Configuração"**.
+* Testes unitários em `app/test/domain/check_dose_safety_test.dart` cobrindo cenários de dose normal, dose excessiva contínua, saturação e conversão de unidades (mg para g).
+
 
