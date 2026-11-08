@@ -5,6 +5,8 @@ import '../data/models/tracking.dart';
 import '../domain/usecases/get_dose_history.dart';
 import '../domain/usecases/get_today_stack.dart';
 import '../domain/usecases/register_dose.dart';
+import '../data/models/auth.dart';
+import '../domain/repositories/auth_repository.dart';
 
 /// Preenchido no `main` com a implementação escolhida (fake ou API).
 final dependenciesProvider = Provider<AppDependencies>(
@@ -30,3 +32,28 @@ class TabIndex extends Notifier<int> {
 }
 
 final tabIndexProvider = NotifierProvider<TabIndex, int>(TabIndex.new);
+
+
+final authRepositoryProvider =
+    Provider<AuthRepository>((ref) => ref.watch(dependenciesProvider).auth);
+
+/// `true` quando há sessão aberta. Decide entre a tela de boas-vindas e o app.
+class Session extends AsyncNotifier<bool> {
+  @override
+  Future<bool> build() => ref.read(authRepositoryProvider).isSignedIn();
+
+  void signedIn() => state = const AsyncData(true);
+
+  Future<void> signOut() async {
+    await ref.read(authRepositoryProvider).signOut();
+    ref.read(tabIndexProvider.notifier).select(0);
+    state = const AsyncData(false);
+  }
+}
+
+final sessionProvider = AsyncNotifierProvider<Session, bool>(Session.new);
+
+final accountProvider = FutureProvider<Account>((ref) {
+  ref.watch(sessionProvider);
+  return ref.watch(authRepositoryProvider).account();
+});

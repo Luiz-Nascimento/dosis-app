@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
 import '../theme/app_theme.dart';
+import '../pages/profile_page.dart';
 
 /// Barra do topo: logo "Dosis" amarelo + ícone de perfil.
 class DosisTopBar extends StatelessWidget implements PreferredSizeWidget {
@@ -22,15 +23,20 @@ class DosisTopBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 18),
-          child: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.card,
-              border: Border.all(color: AppColors.border),
+          child: InkResponse(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ProfilePage()),
             ),
-            child: const Icon(Icons.person_outline, size: 20),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.card,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: const Icon(Icons.person_outline, size: 20),
+            ),
           ),
         ),
       ],
@@ -70,11 +76,11 @@ class DosisBottomNav extends ConsumerWidget {
   static const _labels = ['Início', 'Rotina', 'Hidratação', 'Registros'];
 
   Widget _icon(int index, Color color) => switch (index) {
-        0 => Icon(Icons.home_outlined, size: 32, color: color),
-        1 => _PillIcon(color),
-        2 => Icon(Icons.water_drop_outlined, size: 30, color: color),
-        _ => Icon(Icons.assignment_outlined, size: 30, color: color),
-      };
+    0 => Icon(Icons.home_outlined, size: 32, color: color),
+    1 => _PillIcon(color),
+    2 => Icon(Icons.water_drop_outlined, size: 30, color: color),
+    _ => Icon(Icons.assignment_outlined, size: 30, color: color),
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -95,9 +101,16 @@ class DosisBottomNav extends ConsumerWidget {
                     child: InkResponse(
                       onTap: () {
                         ref.read(tabIndexProvider.notifier).select(i);
-                        if (popToRoot) Navigator.of(context).popUntil((route) => route.isFirst);
+                        if (popToRoot)
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
                       },
-                      child: Center(child: _icon(i, i == current ? AppColors.yellow : Colors.white)),
+                      child: Center(
+                        child: _icon(
+                          i,
+                          i == current ? AppColors.yellow : Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
