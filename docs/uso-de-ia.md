@@ -22,4 +22,14 @@ e participou ativamente do desenvolvimento de todo o código, embora não tenha 
 A inteligência artificial foi utilizada ativamente como uma ferramenta de **Pair Programming** e aceleração de desenvolvimento. O processo envolveu a tomada de decisão humana na governança do projeto,
 validação de regras de negócio e testes em runtime, enquanto a IA otimizou o tempo de escrita de código estrutural (*boilerplate*), sugeriu correções rápidas de compilação e auxiliou na formatação da documentação técnica.
 
+## 📅 Histórico de Contribuições (08/11)
+### Login, Cadastro e Recuperação de Senha
+
+* **Análise do backend e do protótipo:** Leitura do `AuthService`, dos endpoints `/auth/*` e das regras de senha do backend, e dos frames de login, cadastro, confirmação de e-mail e recuperação de senha do protótipo de alta fidelidade.
+* **Arquitetura:** Sugestão da interface `AuthRepository`, das implementações `ApiAuthRepository` e `FakeAuthRepository` e da integração com o `AppDependencies`, mantendo a regra de dependência entre as camadas.
+* **Interface e estado:** Escrita assistida das telas (Boas-vindas, Entrar, Criar conta em 3 passos, Confirme seu e-mail, Recuperar senha e Perfil), dos widgets compartilhados e do `AuthGate` com Riverpod.
+* **Regras e testes:** Escrita das regras de senha e e-mail e do teste unitário correspondente.
+* **Orientação sobre o backend:** Explicação dos modos `mock` e `firebase`, do passo a passo para ativar o Firebase real e de como confirmar o e-mail manualmente no modo `mock`.
+* **Limitações da IA:** O código gerado foi validado pelo aluno (compilação e execução). A IA não rodou o backend em modo `firebase`, e a tela "Nova senha" (deep link) ficou fora do escopo.
+
 
