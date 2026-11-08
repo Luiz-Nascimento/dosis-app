@@ -89,4 +89,20 @@ Em **requisitos.md** foi adicionado:
   * Autonomia do usuário preservada através dos botões **"Revisar Protocolo"** e **"Manter Configuração"**.
 * Testes unitários em `app/test/domain/check_dose_safety_test.dart` cobrindo cenários de dose normal, dose excessiva contínua, saturação e conversão de unidades (mg para g).
 
+* 
+## [0.7] — 08/11/2026
+### Login, cadastro e recuperação de senha
+
+* Telas de autenticação seguindo o protótipo de alta fidelidade: boas-vindas, **Entrar**, **Criar conta** (3 passos: nome, e-mail e senha com aceite dos termos), **Confirme seu e-mail** e **Recuperar senha** (com a tela "Verifique seu e-mail").
+* Interface `AuthRepository` na camada **Domain** e implementações `ApiAuthRepository` (usa os endpoints `/auth/*` do backend Django, com Firebase Auth) e `FakeAuthRepository` (dados em memória).
+* Regras de senha e de e-mail em `app/lib/domain/auth_rules.dart`, iguais às do backend (8+ caracteres, uma letra e um número).
+* Sessão gerenciada com Riverpod (`sessionProvider`) e `AuthGate`: sem sessão o app abre na introdução; com sessão, abre o app.
+* Tela de Perfil com a opção **Sair**, acessada pelo ícone do topo.
+* Teste unitário das regras em `app/test/domain/auth_rules_test.dart`.
+
+### Limitações conhecidas
+* O e-mail de confirmação só é enviado de verdade com o backend em modo `firebase`. No modo `mock` o link aparece no console do servidor.
+* A tela "Nova senha" depende de deep link e ainda não foi implementada.
+* Os itens Meus dados, Meu objetivo e Notificações do Perfil ainda não têm tela.
+
 
