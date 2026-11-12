@@ -48,7 +48,9 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
     ..showSnackBar(SnackBar(content: Text(message)));
 
   /// Alerta laranja do protótipo com fontes e respaldo científico (KAN-11).
-  Future<bool> _confirmHighDose(DoseSafetyCheck check) async {
+  /// Serve para dose acima da faixa e para anabolizantes (acompanhamento médico).
+  Future<bool> _confirmDose(DoseSafetyCheck check) async {
+    final medical = check.requiresMedicalSupervision;
     final keep = await showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
@@ -59,12 +61,22 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.black, size: 28),
-                  SizedBox(width: 8),
-                  Text('Atenção', style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.w800)),
+                  Icon(
+                    medical ? Icons.medical_services_outlined : Icons.warning_amber_rounded,
+                    color: Colors.black,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      medical ? 'Acompanhamento médico' : 'Atenção',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.w800),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -108,7 +120,7 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   onPressed: () => Navigator.of(ctx).pop(false),
-                  child: const Text('Revisar Protocolo', style: TextStyle(fontWeight: FontWeight.w700)),
+                  child: Text(medical ? 'Voltar' : 'Revisar Protocolo', style: const TextStyle(fontWeight: FontWeight.w700)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -121,7 +133,10 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   onPressed: () => Navigator.of(ctx).pop(true),
-                  child: const Text('Manter Configuração', style: TextStyle(fontWeight: FontWeight.w700)),
+                  child: Text(
+                    medical ? 'Entendi, registrar' : 'Manter Configuração',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
             ],
@@ -140,20 +155,24 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
       return;
     }
 
-    // Avaliação de segurança com CheckDoseSafety (KAN-11)
-    final safetyCheck = ref.read(checkDoseSafetyProvider)(
-      productName: item.name,
-      amount: amount,
-      unit: item.doseUnit,
-      protocol: _protocol,
-    );
-
-    if (safetyCheck.isAboveRange) {
-      if (!await _confirmHighDose(safetyCheck)) return;
-    }
-
     final now = DateTime.now();
     final takenAt = DateTime(now.year, now.month, now.day, _time.hour, _time.minute);
+
+    // Avaliação de segurança com as faixas do catálogo e as doses do dia (KAN-11).
+    // Se o catálogo não responder (ex.: sem internet), a dose é registrada sem o
+    // alerta: o aviso orienta, ele não pode impedir o registro.
+    DoseSafetyCheck? safetyCheck;
+    try {
+      safetyCheck = await ref
+          .read(checkDoseSafetyProvider)(item: item, amount: amount, protocol: _protocol, takenAt: takenAt);
+    } catch (_) {
+      safetyCheck = null;
+    }
+    if (!mounted) return;
+    if (safetyCheck != null && safetyCheck.needsConfirmation) {
+      if (!await _confirmDose(safetyCheck)) return;
+    }
+
     try {
       await ref.read(registerDoseProvider)(routineItemId: item.id, amount: amount, takenAt: takenAt);
       ref.invalidate(doseHistoryProvider);

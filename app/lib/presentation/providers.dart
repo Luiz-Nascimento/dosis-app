@@ -23,8 +23,10 @@ final getDoseHistoryProvider =
     Provider<GetDoseHistory>((ref) => GetDoseHistory(ref.watch(dependenciesProvider).doses));
 final calculateHydrationProvider =
     Provider<CalculateHydration>((ref) => const CalculateHydration());
-final checkDoseSafetyProvider =
-    Provider<CheckDoseSafety>((ref) => const CheckDoseSafety());
+final checkDoseSafetyProvider = Provider<CheckDoseSafety>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return CheckDoseSafety(deps.catalog, deps.doses);
+});
 
 final todayStackProvider = FutureProvider<List<RoutineItem>>((ref) => ref.watch(getTodayStackProvider)());
 final doseHistoryProvider = FutureProvider<List<DoseLog>>((ref) => ref.watch(getDoseHistoryProvider)());

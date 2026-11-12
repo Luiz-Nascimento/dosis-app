@@ -15,6 +15,7 @@ class FakeRoutineRepository implements RoutineRepository {
   static const _items = <RoutineItem>[
     RoutineItem(
       id: 'r-creatina',
+      productId: 'creatina',
       name: 'Creatina',
       brand: 'Growth',
       kind: ProductKind.supplement,
@@ -26,6 +27,7 @@ class FakeRoutineRepository implements RoutineRepository {
     ),
     RoutineItem(
       id: 'r-whey',
+      productId: 'whey-protein',
       name: 'Whey Protein',
       brand: 'Growth',
       kind: ProductKind.supplement,
@@ -53,15 +55,17 @@ class FakeDoseRepository implements DoseRepository {
     final logs = <DoseLog>[];
     for (var back = 1; back <= 7; back++) {
       final day = DateTime(now.year, now.month, now.day).subtract(Duration(days: back));
-      logs.add(_log('Creatina', 5, DateTime(day.year, day.month, day.day, 8)));
-      logs.add(_log('Whey Protein', 60, DateTime(day.year, day.month, day.day, 12, 30)));
+      logs.add(_log('Creatina', 5, DateTime(day.year, day.month, day.day, 8), routineItemId: 'r-creatina', productId: 'creatina'));
+      logs.add(_log('Whey Protein', 60, DateTime(day.year, day.month, day.day, 12, 30),
+          routineItemId: 'r-whey', productId: 'whey-protein'));
     }
     return logs;
   }
 
-  DoseLog _log(String name, double amount, DateTime at, {String? routineItemId}) => DoseLog(
+  DoseLog _log(String name, double amount, DateTime at, {String? routineItemId, String? productId}) => DoseLog(
         id: newId(),
         routineItemId: routineItemId,
+        productId: productId,
         name: name,
         kind: ProductKind.supplement,
         protocol: Protocol.continuous,
@@ -85,6 +89,7 @@ class FakeDoseRepository implements DoseRepository {
     final log = DoseLog(
       id: newId(),
       routineItemId: item.id,
+      productId: item.productId,
       name: item.name,
       kind: item.kind,
       protocol: item.protocol,
