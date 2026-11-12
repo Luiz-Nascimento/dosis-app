@@ -3,6 +3,7 @@ import 'data/repositories/api_auth_repository.dart';
 import 'data/repositories/api_catalog_repository.dart';
 import 'data/repositories/api_dose_repository.dart';
 import 'data/repositories/api_routine_repository.dart';
+import 'data/repositories/api_symptom_repository.dart';
 import 'data/repositories/api_system_repository.dart';
 import 'data/repositories/fake_auth_repository.dart';
 import 'data/repositories/fake_catalog_repository.dart';
@@ -11,6 +12,7 @@ import 'domain/repositories/auth_repository.dart';
 import 'domain/repositories/catalog_repository.dart';
 import 'domain/repositories/dose_repository.dart';
 import 'domain/repositories/routine_repository.dart';
+import 'domain/repositories/symptom_repository.dart';
 import 'domain/repositories/system_repository.dart';
 
 /// Raiz de composição: o único lugar que sabe qual implementação de cada
@@ -22,6 +24,7 @@ class AppDependencies {
     required this.routine,
     required this.doses,
     required this.catalog,
+    required this.symptoms,
   });
 
   /// API Django (`--dart-define=USE_API=true`).
@@ -33,6 +36,7 @@ class AppDependencies {
       routine: ApiRoutineRepository(dosisApi.routine),
       doses: ApiDoseRepository(dosisApi.doses),
       catalog: ApiCatalogRepository(dosisApi.catalog),
+      symptoms: ApiSymptomRepository(dosisApi.symptoms),
     );
   }
 
@@ -45,6 +49,7 @@ class AppDependencies {
       routine: routine,
       doses: FakeDoseRepository(routine),
       catalog: FakeCatalogRepository(),
+      symptoms: FakeSymptomRepository(),
     );
   }
 
@@ -53,4 +58,5 @@ class AppDependencies {
   final RoutineRepository routine;
   final DoseRepository doses;
   final CatalogRepository catalog;
+  final SymptomRepository symptoms;
 }

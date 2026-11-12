@@ -1,6 +1,7 @@
 import '../../core/ids.dart';
 import '../../domain/repositories/dose_repository.dart';
 import '../../domain/repositories/routine_repository.dart';
+import '../../domain/repositories/symptom_repository.dart';
 import '../../domain/repositories/system_repository.dart';
 import '../models/auth.dart';
 import '../models/enums.dart';
@@ -112,6 +113,44 @@ class FakeDoseRepository implements DoseRepository {
       return true;
     }).toList()
       ..sort((a, b) => b.takenAt.compareTo(a.takenAt));
+    if (limit != null && result.length > limit) result = result.sublist(0, limit);
+    return result;
+  }
+}
+
+class FakeSymptomRepository implements SymptomRepository {
+  final List<SymptomLog> _logs = [];
+
+  @override
+  Future<SymptomLog> register({
+    required SymptomStatus status,
+    List<Symptom> symptoms = const [],
+    String? otherDescription,
+    String? notes,
+    DateTime? loggedAt,
+  }) async {
+    final at = loggedAt ?? DateTime.now();
+    final log = SymptomLog(
+      id: newId(),
+      status: status,
+      symptoms: symptoms,
+      otherDescription: otherDescription,
+      notes: notes,
+      loggedAt: at,
+      localDate: FakeDoseRepository._date(at),
+    );
+    _logs.add(log);
+    return log;
+  }
+
+  @override
+  Future<List<SymptomLog>> list({DateTime? from, DateTime? to, int? limit}) async {
+    var result = _logs.where((l) {
+      if (from != null && l.loggedAt.isBefore(from)) return false;
+      if (to != null && l.loggedAt.isAfter(to)) return false;
+      return true;
+    }).toList()
+      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
     if (limit != null && result.length > limit) result = result.sublist(0, limit);
     return result;
   }
