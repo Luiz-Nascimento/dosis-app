@@ -60,6 +60,8 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
       if (mounted) setState(() => _saving = false);
     }
     if (!mounted) return;
+    // Atualiza o painel de risco, o relatório semanal e a aba Registros.
+    ref.invalidate(symptomHistoryProvider);
 
     // Só confirma depois que o registro foi gravado de verdade.
     await showDialog<void>(

@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app_dependencies.dart';
 import '../data/models/tracking.dart';
+import '../domain/usecases/build_risk_panel.dart';
+import '../domain/usecases/build_weekly_symptom_report.dart';
 import '../domain/usecases/calculate_hydration.dart';
 import '../domain/usecases/check_dose_safety.dart';
 import '../domain/usecases/get_dose_history.dart';
@@ -117,4 +119,33 @@ final settingsProvider = AsyncNotifierProvider<Settings, UserSettings>(Settings.
 final hydrationProgressProvider = FutureProvider<HydrationProgress>((ref) {
   ref.watch(settingsProvider);
   return ref.watch(getHydrationProgressProvider)();
+});
+
+// ---- Painel de risco e relatório semanal de sintomas ----
+
+final buildRiskPanelProvider = Provider<BuildRiskPanel>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return BuildRiskPanel(deps.doses, deps.catalog, deps.symptoms);
+});
+final buildWeeklySymptomReportProvider = Provider<BuildWeeklySymptomReport>(
+  (ref) => BuildWeeklySymptomReport(ref.watch(dependenciesProvider).symptoms),
+);
+
+/// Sintomas registrados, mais recentes primeiro. Invalide depois de gravar um
+/// registro novo: o painel, o relatório e a aba Registros dependem dele.
+final symptomHistoryProvider = FutureProvider<List<SymptomLog>>(
+  (ref) => ref.watch(dependenciesProvider).symptoms.list(limit: 500),
+);
+
+/// Painel dos últimos 7 dias. Recalcula quando entra uma dose ou um sintoma novo.
+final riskPanelProvider = FutureProvider<RiskPanel>((ref) {
+  ref.watch(doseHistoryProvider);
+  ref.watch(symptomHistoryProvider);
+  return ref.watch(buildRiskPanelProvider)();
+});
+
+/// Relatório de uma semana (o parâmetro é o deslocamento: 0 = atual, -1 = anterior).
+final symptomReportProvider = FutureProvider.family<WeeklySymptomReport, int>((ref, weekOffset) {
+  ref.watch(symptomHistoryProvider);
+  return ref.watch(buildWeeklySymptomReportProvider)(weekOffset: weekOffset);
 });

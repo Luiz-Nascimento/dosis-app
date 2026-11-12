@@ -120,6 +120,33 @@ class FakeDoseRepository implements DoseRepository {
 }
 
 class FakeSymptomRepository implements SymptomRepository {
+  /// Com [seeded], começa com registros de exemplo das duas últimas semanas,
+  /// para o painel de risco e o relatório semanal terem o que mostrar.
+  FakeSymptomRepository({bool seeded = false}) {
+    if (!seeded) return;
+    final now = DateTime.now();
+    SymptomLog at(int daysAgo, int hour, List<Symptom> symptoms, {String? notes}) {
+      final when = DateTime(now.year, now.month, now.day - daysAgo, hour);
+      return SymptomLog(
+        id: newId(),
+        status: symptoms.isEmpty ? SymptomStatus.normal : SymptomStatus.different,
+        symptoms: symptoms,
+        notes: notes,
+        loggedAt: when,
+        localDate: FakeDoseRepository._date(when),
+      );
+    }
+
+    _logs.addAll([
+      at(1, 21, [Symptom.nausea], notes: 'Depois do pré-treino em jejum'),
+      at(2, 20, const []),
+      at(4, 22, [Symptom.fatigue, Symptom.dizziness]),
+      at(5, 20, const []),
+      at(8, 21, [Symptom.nausea]),
+      at(10, 20, const []),
+    ]);
+  }
+
   final List<SymptomLog> _logs = [];
 
   @override

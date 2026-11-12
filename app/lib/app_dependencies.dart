@@ -63,7 +63,7 @@ class AppDependencies {
       routine: routine,
       doses: FakeDoseRepository(routine),
       catalog: FakeCatalogRepository(),
-      symptoms: FakeSymptomRepository(),
+      symptoms: FakeSymptomRepository(seeded: true),
       hydration: FakeHydrationRepository(),
       // Preferências e lembretes são do aparelho, não do backend: valem também no modo fake.
       settings: SecureSettingsRepository(),

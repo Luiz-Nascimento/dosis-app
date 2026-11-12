@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/models/enums.dart';
 import '../../data/models/tracking.dart';
 import '../providers.dart';
 import '../theme/app_theme.dart';
@@ -8,7 +9,7 @@ import '../widgets/dosis_widgets.dart';
 import 'supplement_history_page.dart';
 
 /// "Registros": dias com doses, mais recentes primeiro, 5 por página.
-/// Os sintomas ("Nenhum sintoma") entram quando o repositório de sintomas existir.
+/// Cada dia mostra também os sintomas registrados nele.
 class RecordsPage extends ConsumerStatefulWidget {
   const RecordsPage({super.key});
 
@@ -31,9 +32,21 @@ class _RecordsPageState extends ConsumerState<RecordsPage> {
     return '${int.parse(parts[2])} de ${_abbr[int.parse(parts[1]) - 1]}';
   }
 
+  /// Resumo dos sintomas registrados no dia (`localDate` no formato AAAA-MM-DD).
+  String _symptomsOf(String localDate, List<SymptomLog> all) {
+    final ofDay = all.where((s) => s.localDate == localDate);
+    if (ofDay.isEmpty) return 'Sem registro de sintomas';
+    final labels = {
+      for (final log in ofDay)
+        if (log.status == SymptomStatus.different) ...log.symptoms.map((s) => s.label),
+    };
+    return labels.isEmpty ? 'Nenhum sintoma' : labels.join(', ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final doses = ref.watch(doseHistoryProvider).value ?? const <DoseLog>[];
+    final symptoms = ref.watch(symptomHistoryProvider).value ?? const <SymptomLog>[];
     final byDay = <String, List<DoseLog>>{};
     for (final dose in doses) {
       byDay.putIfAbsent(dose.localDate, () => []).add(dose);
@@ -109,9 +122,9 @@ class _RecordsPageState extends ConsumerState<RecordsPage> {
                               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
-                              'Nenhum sintoma',
-                              style: TextStyle(fontSize: 11, color: AppColors.muted, fontWeight: FontWeight.w600),
+                            Text(
+                              _symptomsOf(day, symptoms),
+                              style: const TextStyle(fontSize: 11, color: AppColors.muted, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
