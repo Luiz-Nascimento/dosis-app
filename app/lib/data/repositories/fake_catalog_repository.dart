@@ -153,6 +153,9 @@ class FakeCatalogRepository implements CatalogRepository {
   ];
 
   @override
+  Future<Product?> productById(String id) async => products.where((p) => p.id == id).firstOrNull;
+
+  @override
   Future<Product?> productFor(RoutineItem item) async {
     if (item.productId != null) {
       return products.where((p) => p.id == item.productId).firstOrNull;

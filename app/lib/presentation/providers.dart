@@ -5,6 +5,7 @@ import '../data/models/tracking.dart';
 import '../domain/usecases/calculate_hydration.dart';
 import '../domain/usecases/check_dose_safety.dart';
 import '../domain/usecases/get_dose_history.dart';
+import '../domain/usecases/get_supplement_history.dart';
 import '../domain/usecases/get_today_stack.dart';
 import '../domain/usecases/register_dose.dart';
 import '../domain/usecases/register_symptoms.dart';
@@ -31,8 +32,20 @@ final checkDoseSafetyProvider = Provider<CheckDoseSafety>((ref) {
   return CheckDoseSafety(deps.catalog, deps.doses);
 });
 
+final getSupplementHistoryProvider = Provider<GetSupplementHistory>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return GetSupplementHistory(deps.doses, deps.catalog);
+});
+
 final todayStackProvider = FutureProvider<List<RoutineItem>>((ref) => ref.watch(getTodayStackProvider)());
 final doseHistoryProvider = FutureProvider<List<DoseLog>>((ref) => ref.watch(getDoseHistoryProvider)());
+
+/// Histórico por suplemento dos últimos N dias (o parâmetro é o número de dias).
+final supplementHistoryProvider = FutureProvider.family<List<SupplementHistory>, int>((ref, days) {
+  // Depende do histórico geral: registrar uma dose nova recalcula os gráficos.
+  ref.watch(doseHistoryProvider);
+  return ref.watch(getSupplementHistoryProvider)(days: days);
+});
 
 /// Aba selecionada do menu de baixo (0 início, 1 rotina, 2 hidratação, 3 registros).
 class TabIndex extends Notifier<int> {

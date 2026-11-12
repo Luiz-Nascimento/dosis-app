@@ -5,6 +5,7 @@ import '../../data/models/tracking.dart';
 import '../providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/dosis_widgets.dart';
+import 'supplement_history_page.dart';
 
 /// "Registros": dias com doses, mais recentes primeiro, 5 por página.
 /// Os sintomas ("Nenhum sintoma") entram quando o repositório de sintomas existir.
@@ -72,6 +73,15 @@ class _RecordsPageState extends ConsumerState<RecordsPage> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             children: [
+              NavCard(
+                icon: Icons.bar_chart_rounded,
+                title: 'Histórico por suplemento',
+                subtitle: 'Consumo e evolução das doses',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const SupplementHistoryPage()),
+                ),
+              ),
+              const SizedBox(height: 16),
               if (days.isEmpty)
                 const Padding(
                   padding: EdgeInsets.only(top: 40),
