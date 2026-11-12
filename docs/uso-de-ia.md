@@ -42,3 +42,11 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Sintomas:** Escrita assistida do `SymptomRepository`, do caso de uso `RegisterSymptoms` e da gravação na tela "Como se sente hoje?", com testes unitários.
 * **Hidratação:** Identificação de que a regra de hidratação era atribuída à SBEM/ACSM sem que essas fontes a recomendem, e correção do texto exibido.
 * **Validação humana:** As mudanças foram revisadas e testadas no app pelo aluno antes de cada commit. Os valores do cálculo de hidratação foram mantidos como decisão da equipe.
+
+### Novas funcionalidades (12/11)
+
+* **Histórico por suplemento e gráficos:** Escrita assistida do caso de uso `GetSupplementHistory`, da tela de histórico e do componente de gráfico `DosisBarChart`, com testes unitários.
+* **Metas de hidratação e lembretes:** Escrita assistida dos casos de uso de meta e registro de água, da tela de lembretes, da integração com `flutter_local_notifications` e da configuração do Android (permissões, receivers e Gradle), com testes unitários.
+* **Painel de risco e relatório semanal de sintomas:** Escrita assistida dos casos de uso `BuildRiskPanel` e `BuildWeeklySymptomReport` e das duas telas, com testes unitários.
+* **Verificação feita pela IA:** execução dos testes e do analisador, compilação do APK de depuração e conferência visual das telas renderizadas em imagem.
+* **Limitações da IA:** a IA não executou o app em um celular. O disparo real das notificações no aparelho precisa ser validado pelo aluno.
