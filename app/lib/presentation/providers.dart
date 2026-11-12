@@ -10,6 +10,9 @@ import '../domain/usecases/get_today_stack.dart';
 import '../domain/usecases/register_dose.dart';
 import '../domain/usecases/register_symptoms.dart';
 import '../data/models/auth.dart';
+import '../data/models/settings.dart';
+import '../domain/usecases/hydration_goals.dart';
+import '../domain/usecases/update_settings.dart';
 import '../domain/repositories/auth_repository.dart';
 
 /// Preenchido no `main` com a implementação escolhida (fake ou API).
@@ -80,4 +83,38 @@ final sessionProvider = AsyncNotifierProvider<Session, bool>(Session.new);
 final accountProvider = FutureProvider<Account>((ref) {
   ref.watch(sessionProvider);
   return ref.watch(authRepositoryProvider).account();
+});
+
+// ---- Meta de hidratação e lembretes ----
+
+final getHydrationProgressProvider = Provider<GetHydrationProgress>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return GetHydrationProgress(deps.hydration, deps.settings);
+});
+final logWaterProvider = Provider<LogWater>((ref) => LogWater(ref.watch(dependenciesProvider).hydration));
+final removeWaterLogProvider =
+    Provider<RemoveWaterLog>((ref) => RemoveWaterLog(ref.watch(dependenciesProvider).hydration));
+final updateSettingsProvider = Provider<UpdateSettings>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return UpdateSettings(deps.settings, deps.routine, deps.reminders);
+});
+
+/// Preferências do aparelho. `save` valida, reagenda os lembretes e atualiza quem estiver ouvindo.
+class Settings extends AsyncNotifier<UserSettings> {
+  @override
+  Future<UserSettings> build() => ref.read(dependenciesProvider).settings.load();
+
+  Future<SettingsUpdate> save(UserSettings settings) async {
+    final update = await ref.read(updateSettingsProvider)(settings);
+    state = AsyncData(update.settings);
+    return update;
+  }
+}
+
+final settingsProvider = AsyncNotifierProvider<Settings, UserSettings>(Settings.new);
+
+/// Progresso de hoje e dos últimos 7 dias. Recalcula quando a meta muda.
+final hydrationProgressProvider = FutureProvider<HydrationProgress>((ref) {
+  ref.watch(settingsProvider);
+  return ref.watch(getHydrationProgressProvider)();
 });

@@ -1,5 +1,6 @@
 import '../../core/ids.dart';
 import '../../domain/repositories/dose_repository.dart';
+import '../../domain/repositories/hydration_repository.dart';
 import '../../domain/repositories/routine_repository.dart';
 import '../../domain/repositories/symptom_repository.dart';
 import '../../domain/repositories/system_repository.dart';
@@ -154,4 +155,31 @@ class FakeSymptomRepository implements SymptomRepository {
     if (limit != null && result.length > limit) result = result.sublist(0, limit);
     return result;
   }
+}
+
+class FakeHydrationRepository implements HydrationRepository {
+  final List<HydrationLog> _logs = [];
+
+  @override
+  Future<HydrationLog> log({required int amountMl, DateTime? loggedAt}) async {
+    final at = loggedAt ?? DateTime.now();
+    final log = HydrationLog(id: newId(), amountMl: amountMl, loggedAt: at, localDate: FakeDoseRepository._date(at));
+    _logs.add(log);
+    return log;
+  }
+
+  @override
+  Future<List<HydrationLog>> list({DateTime? from, DateTime? to, int? limit}) async {
+    var result = _logs.where((l) {
+      if (from != null && l.loggedAt.isBefore(from)) return false;
+      if (to != null && l.loggedAt.isAfter(to)) return false;
+      return true;
+    }).toList()
+      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+    if (limit != null && result.length > limit) result = result.sublist(0, limit);
+    return result;
+  }
+
+  @override
+  Future<void> remove(String id) async => _logs.removeWhere((l) => l.id == id);
 }
