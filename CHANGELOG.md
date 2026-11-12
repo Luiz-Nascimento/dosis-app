@@ -122,3 +122,38 @@ Em **requisitos.md** foi adicionado:
 * Ainda não existe a tela de linha do tempo dos sintomas (F08); os registros já ficam gravados.
 * Sem conexão com o catálogo, a dose é registrada sem o alerta.
 * O `FakeCatalogRepository` é uma cópia do `content.py`: ao mudar uma faixa no backend, atualize também o app.
+
+## [0.9] — 12/11/2026
+### Histórico por suplemento e gráficos de evolução das doses
+
+* Nova tela **Histórico** (aba Registros > "Histórico por suplemento"): escolha do suplemento e do período (7, 30 ou 90 dias), gráfico de barras com a soma de cada dia, resumo (total, média por dia de uso, dias com registro) e a lista paginada de todos os registros.
+* Caso de uso `GetSupplementHistory` na camada **Domain**: agrupa as doses por produto, soma por dia e converte g/mg/mcg para uma unidade só.
+* Para produtos com faixa diária no catálogo (ex.: creatina), o gráfico mostra a linha do limite usual e pinta de laranja os dias acima dele. Anabolizantes mostram o aviso de acompanhamento médico em vez de uma faixa.
+* Gráfico desenhado no próprio app (`DosisBarChart`, com `CustomPainter`), sem biblioteca de gráficos, para não aumentar o APK (RNF09).
+
+### Metas de hidratação diária e lembretes (água e suplementos)
+
+* Aba **Hidratação** ganhou a seção "Meta de hoje": meta diária editável, barra de progresso, botões de registro rápido (+200, +300, +500 ml e "Outro"), registros do dia (com opção de apagar) e gráfico dos últimos 7 dias com a linha da meta.
+* A estimativa da calculadora pode virar a meta com o botão "Usar X L como minha meta".
+* Nova tela **Lembretes** (pela aba Hidratação ou em Perfil > Notificações): lembretes de água a cada 1 a 4 horas entre dois horários, e lembretes de suplementos nos horários dos itens ativos da rotina. A tela mostra antes de salvar o que será agendado.
+* Notificações locais com `flutter_local_notifications` (funcionam sem internet e são recriadas quando o aparelho reinicia). O domínio só conhece a interface `ReminderScheduler`.
+* Casos de uso `GetHydrationProgress`, `LogWater`, `RemoveWaterLog` e `UpdateSettings`; interfaces `HydrationRepository` e `SettingsRepository`. A água registrada usa o endpoint `/tracking/hydration/`; a meta e os lembretes ficam guardados no aparelho.
+* Android: permissões `POST_NOTIFICATIONS` e `RECEIVE_BOOT_COMPLETED`, receivers do plugin, *desugaring* e `compileSdk = 37` (exigências do plugin).
+
+### Painel de indicadores de risco e relatório semanal de sintomas
+
+* Nova tela **Painel de risco** (Início > "Painel de risco"): analisa os últimos 7 dias e mostra um indicador por suplemento (dentro da faixa, acima da faixa em N dias, sem faixa de referência ou "requer acompanhamento médico" para anabolizantes) e um indicador dos sintomas registrados. Os alertas citam a fonte do catálogo.
+* Caso de uso `BuildRiskPanel`: faixas por dia somam as doses do dia; faixas por tomada comparam cada dose. Palpitação, ou sintomas em 3 ou mais dias da semana, pedem atenção; com anabolizante em uso, o painel orienta levar os registros ao médico.
+* Nova tela **Relatório semanal** de sintomas: os 7 dias da semana (segunda a domingo), dias com registro e com sintomas, frequência de cada sintoma comparada com a semana anterior, registros com observações e navegação entre semanas. Caso de uso `BuildWeeklySymptomReport`.
+* A aba **Registros** agora mostra os sintomas de cada dia (antes exibia sempre "Nenhum sintoma").
+* O painel informa que não é diagnóstico e não substitui a orientação de um profissional de saúde.
+
+### Testes
+* 35 testes unitários novos (histórico, meta de hidratação, lembretes, painel de risco e relatório semanal). Total: 77.
+
+### Limitações conhecidas
+* Os lembretes só são agendados no celular (Android/iOS). No computador a tela funciona, mas nada é agendado.
+* O agendamento é "inexato": o Android pode atrasar o lembrete em alguns minutos para economizar bateria.
+* Os lembretes de suplementos são montados ao salvar. Se a rotina mudar, é preciso salvar os lembretes de novo.
+* A meta e os lembretes ficam no aparelho: não acompanham a conta em outro celular.
+* O histórico e os relatórios leem até 500 registros por consulta (limite da API).

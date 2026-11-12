@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
+import 'reminders_page.dart';
 import '../theme/app_theme.dart';
 import '../widgets/dosis_chrome.dart';
 import '../widgets/dosis_widgets.dart';
@@ -39,8 +40,10 @@ class ProfilePage extends ConsumerWidget {
             _Item(
               icon: Icons.edit_outlined,
               title: 'Notificações',
-              subtitle: 'Ative ou desative notificações',
-              onTap: soon,
+              subtitle: 'Lembretes de água e de suplementos',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const RemindersPage()),
+              ),
             ),
             const SizedBox(height: 18),
             DosisCard(

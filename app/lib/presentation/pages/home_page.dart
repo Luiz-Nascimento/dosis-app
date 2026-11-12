@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import '../widgets/dosis_widgets.dart';
 import 'articles_page.dart';
 import 'register_dose_page.dart';
+import 'risk_panel_page.dart';
 import 'symptoms_page.dart';
 
 class HomePage extends ConsumerWidget {
@@ -96,6 +97,13 @@ class HomePage extends ConsumerWidget {
           title: 'Registrar como me senti',
           subtitle: 'Humor, acne, sono e mais',
           onTap: () => _push(context, const SymptomsPage()),
+        ),
+        const SizedBox(height: 12),
+        NavCard(
+          icon: Icons.shield_outlined,
+          title: 'Painel de risco',
+          subtitle: 'Indicadores da semana e relatório de sintomas',
+          onTap: () => _push(context, const RiskPanelPage()),
         ),
         const SizedBox(height: 22),
         const SectionTitle('Conteúdos educativos'),

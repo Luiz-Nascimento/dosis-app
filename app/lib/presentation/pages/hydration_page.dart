@@ -7,6 +7,7 @@ import '../format.dart';
 import '../providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/dosis_widgets.dart';
+import '../widgets/hydration_goal_section.dart';
 
 /// Tela de Estimativa de Hidratação.
 /// Utiliza o caso de uso [CalculateHydration] (camada de domínio) para estimar
@@ -50,6 +51,23 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
     });
   }
 
+  /// Leva a estimativa calculada para a meta diária.
+  Future<void> _useAsGoal(HydrationResult result) async {
+    final messenger = ScaffoldMessenger.of(context);
+    void toast(String message) => messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+    try {
+      final settings = await ref.read(settingsProvider.future);
+      await ref.read(settingsProvider.notifier).save(settings.copyWith(hydrationGoalMl: result.totalMl));
+      toast('Meta diária atualizada para ${result.totalLitersText}.');
+    } on ArgumentError catch (error) {
+      toast('${error.message}');
+    } catch (error) {
+      toast('Não foi possível salvar a meta: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = ref.watch(todayStackProvider).value ?? const <RoutineItem>[];
@@ -58,16 +76,13 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
         const Center(
-          child: Text('Estimativa de hidratação', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+          child: Text('Hidratação', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
         ),
-        const SizedBox(height: 4),
-        const Center(
-          child: Text(
-            'Quanto beber hoje, com base em você e no seu stack',
-            style: TextStyle(fontSize: 14, color: AppColors.muted),
-          ),
-        ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
+        const HydrationGoalSection(),
+        const SizedBox(height: 26),
+        const SectionTitle('Estimativa de hidratação', subtitle: 'Quanto beber, com base em você e no seu stack'),
+        const SizedBox(height: 16),
         _UnitField(title: 'Peso', controller: _weight, unit: 'kg', hint: '76'),
         const SizedBox(height: 18),
         _UnitField(title: 'Altura', controller: _height, unit: 'cm', hint: '178'),
@@ -134,6 +149,16 @@ class _HydrationPageState extends ConsumerState<HydrationPage> {
         if (_result != null) ...[
           const SizedBox(height: 20),
           _ResultCard(result: _result!),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => _useAsGoal(_result!),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.yellow,
+              side: const BorderSide(color: AppColors.yellow),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: Text('Usar ${_result!.totalLitersText} como minha meta'),
+          ),
         ],
       ],
     );

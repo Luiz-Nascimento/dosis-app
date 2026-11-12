@@ -1,3 +1,4 @@
+import '../../core/api/api_exception.dart';
 import '../../domain/repositories/catalog_repository.dart';
 import '../models/catalog.dart';
 import '../models/tracking.dart';
@@ -25,5 +26,17 @@ class ApiCatalogRepository implements CatalogRepository {
       product = page.results.firstOrNull;
     }
     return _cache[key] = product;
+  }
+
+  @override
+  Future<Product?> productById(String id) async {
+    if (_cache.containsKey(id)) return _cache[id];
+    try {
+      return _cache[id] = await _service.getProduct(id);
+    } on ApiException catch (error) {
+      // Produto removido do catálogo: segue sem a faixa de referência.
+      if (error.statusCode == 404) return _cache[id] = null;
+      rethrow;
+    }
   }
 }
