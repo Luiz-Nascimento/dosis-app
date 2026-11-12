@@ -106,3 +106,19 @@ Em **requisitos.md** foi adicionado:
 * Os itens Meus dados, Meu objetivo e Notificações do Perfil ainda não têm tela.
 
 
+## [0.8] — 12/11/2026
+### Correções nos alertas de dose, sintomas e hidratação
+
+* **Alerta de dose usa o catálogo** (`CheckDoseSafety`): as faixas deixam de ser fixas no código e passam a vir do catálogo (`backend/apps/catalog/content.py`), pela nova interface `CatalogRepository` (`ApiCatalogRepository` e `FakeCatalogRepository`).
+  * Whey Protein e Ômega 3 passam a ter alerta, não só a creatina.
+  * **Faixas por dia somam as doses do dia:** 5 g de creatina de manhã + 5 g à noite agora gera alerta (10 g, acima de 3 a 5 g/dia). Faixas por tomada (whey, 20 a 40 g) comparam só a dose informada.
+  * Conversão entre g, mg e mcg; unidades que não se convertem (ex.: cápsulas) não geram alerta.
+* **Aviso de anabolizantes:** registrar uma dose de anabolizante sempre mostra o aviso de acompanhamento médico, com as fontes CFM / ANVISA / SBEM. O aviso orienta e não bloqueia o registro.
+* **Sintomas agora são gravados** (`RegisterSymptoms`, `SymptomRepository`): antes a tela mostrava "Registro salvo com sucesso" sem salvar nada. Agora a confirmação só aparece depois da gravação, e a tela valida as mesmas regras do backend (marcar "Normal" ou ao menos um sintoma; "Outro" exige descrição).
+* **Hidratação:** o texto deixa de atribuir a regra de 35 ml/kg e o acréscimo por creatina à SBEM/ACSM, que não fazem essa recomendação. A estimativa agora é apresentada como regra prática do app, com a orientação do ACSM de repor o suor em treinos intensos ou calor.
+* Testes unitários novos para `CheckDoseSafety` e `RegisterSymptoms`, e teste da hidratação atualizado.
+
+### Limitações conhecidas
+* Ainda não existe a tela de linha do tempo dos sintomas (F08); os registros já ficam gravados.
+* Sem conexão com o catálogo, a dose é registrada sem o alerta.
+* O `FakeCatalogRepository` é uma cópia do `content.py`: ao mudar uma faixa no backend, atualize também o app.
