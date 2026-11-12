@@ -33,3 +33,12 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Limitações da IA:** O código gerado foi validado pelo aluno (compilação e execução). A IA não rodou o backend em modo `firebase`, e a tela "Nova senha" (deep link) ficou fora do escopo.
 
 
+
+## 📅 Histórico de Contribuições (12/11)
+### Revisão do código e correção de bugs
+
+* **Análise do repositório:** Leitura do app, do backend e da documentação para levantar os bugs e as funcionalidades incompletas em relação aos requisitos.
+* **Alertas de dose:** Escrita assistida da nova versão do `CheckDoseSafety` (faixas vindas do catálogo, soma das doses do dia e aviso de anabolizantes), do `CatalogRepository` e das suas implementações, com testes unitários.
+* **Sintomas:** Escrita assistida do `SymptomRepository`, do caso de uso `RegisterSymptoms` e da gravação na tela "Como se sente hoje?", com testes unitários.
+* **Hidratação:** Identificação de que a regra de hidratação era atribuída à SBEM/ACSM sem que essas fontes a recomendem, e correção do texto exibido.
+* **Validação humana:** As mudanças foram revisadas e testadas no app pelo aluno antes de cada commit. Os valores do cálculo de hidratação foram mantidos como decisão da equipe.

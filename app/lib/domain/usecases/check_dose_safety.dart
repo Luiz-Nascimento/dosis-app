@@ -1,126 +1,155 @@
 import '../../data/models/catalog.dart';
 import '../../data/models/enums.dart';
+import '../../data/models/tracking.dart';
+import '../repositories/catalog_repository.dart';
+import '../repositories/dose_repository.dart';
+
+/// Tipo de alerta que a dose gera antes de ser registrada.
+enum DoseAlert {
+  /// Dentro da faixa, ou o produto não tem faixa de referência.
+  none,
+
+  /// Acima da faixa usual do catálogo (por tomada ou somando o dia).
+  aboveRange,
+
+  /// Anabolizante: não existe dose segura sem prescrição, o aviso aparece sempre.
+  medicalSupervision,
+}
 
 /// Resultado da avaliação de segurança da dose a ser registrada.
 class DoseSafetyCheck {
   const DoseSafetyCheck({
-    required this.isAboveRange,
-    this.recommendedMin,
-    this.recommendedMax,
-    this.unit = DoseUnit.g,
-    this.protocol = Protocol.continuous,
+    this.alert = DoseAlert.none,
+    this.range,
+    this.totalToday,
     this.message,
     this.caution,
     this.sources = const [],
   });
 
-  /// Indica se a dose ultrapassa a faixa recomendada para o protocolo.
-  final bool isAboveRange;
+  final DoseAlert alert;
 
-  /// Limite inferior da faixa de dose recomendada.
-  final double? recommendedMin;
+  /// Faixa do catálogo usada na comparação, se houver.
+  final DoseRange? range;
 
-  /// Limite superior da faixa de dose recomendada.
-  final double? recommendedMax;
+  /// Soma do dia contando a dose nova, na unidade da faixa (só para faixas "por dia").
+  final double? totalToday;
 
-  /// Unidade de medida da dose (g, mg, etc.).
-  final DoseUnit unit;
-
-  /// Protocolo avaliado (ex: contínuo, saturação).
-  final Protocol protocol;
-
-  /// Mensagem amigável e não-alarmista explicando a situação.
+  /// Mensagem curta e não alarmista explicando a situação.
   final String? message;
 
-  /// Recomendações médicas/fisiológicas de atenção (ex: rins e creatinina).
+  /// Cuidados do produto, vindos do catálogo.
   final String? caution;
 
-  /// Fontes científicas oficiais que embasam a recomendação (ANVISA, ISSN, etc.).
+  /// Fontes que embasam o alerta (ISSN, ANVISA, CFM...).
   final List<Source> sources;
 
-  /// Retorna o nome formatado das fontes (ex: "ISSN / ANVISA").
+  bool get needsConfirmation => alert != DoseAlert.none;
+  bool get isAboveRange => alert == DoseAlert.aboveRange;
+  bool get requiresMedicalSupervision => alert == DoseAlert.medicalSupervision;
+
+  /// Nome das fontes sem repetição (ex.: "ISSN / ANVISA").
   String get sourcesFormatted {
     if (sources.isEmpty) return 'Fontes oficiais de saúde';
     return sources.map((s) => s.name).toSet().join(' / ');
   }
 }
 
-/// Caso de uso que avalia a segurança de uma dose com base em evidências científicas.
+/// Usado quando um anabolizante foi cadastrado à mão e não está no catálogo.
+const anabolicFallbackCaution =
+    'Uso apenas com prescrição e acompanhamento médico. O CFM veda a prescrição para fins estéticos ou '
+    'de desempenho. Pode afetar coração, fígado, fertilidade, pele e humor.';
+
+/// Avalia a dose com as faixas do catálogo (`backend/apps/catalog/content.py`).
 ///
-/// Diretrizes para Creatina (ISSN 2017 / ANVISA):
-/// - Uso contínuo (manutenção): 3 g a 5 g por dia. Doses acima de 5g acionam alerta preventivo.
-/// - Saturação: 15 g a 25 g por dia (divididas em tomadas), por 5 a 7 dias. Doses acima de 25g acionam alerta.
+/// * Faixa "por dia" (ex.: creatina 3 a 5 g/dia): soma as doses do mesmo produto
+///   já registradas no dia com a dose nova.
+/// * Faixa "por tomada" (ex.: whey 20 a 40 g): compara só a dose nova.
+/// * Anabolizantes: sempre avisa, porque não há faixa segura sem prescrição.
+///
+/// O alerta nunca bloqueia: a tela pergunta e o usuário decide.
 class CheckDoseSafety {
-  const CheckDoseSafety();
+  const CheckDoseSafety(this._catalog, this._doses);
 
-  DoseSafetyCheck call({
-    required String productName,
+  final CatalogRepository _catalog;
+  final DoseRepository _doses;
+
+  Future<DoseSafetyCheck> call({
+    required RoutineItem item,
     required double amount,
-    required DoseUnit unit,
     required Protocol protocol,
-  }) {
-    final lowerName = productName.toLowerCase();
+    required DateTime takenAt,
+  }) async {
+    final product = await _catalog.productFor(item);
 
-    // Verificação específica para creatina
-    if (lowerName.contains('creatina')) {
-      // Normaliza mg para g se necessário
-      final amountInGrams = unit == DoseUnit.mg ? amount / 1000.0 : amount;
-
-      final issnSource = const Source(
-        id: 'issn-creatina-2017',
-        name: 'ISSN',
-        citation:
-            'Kreider RB et al. International Society of Sports Nutrition position stand: safety and efficacy of creatine supplementation. 2017.',
-        url: 'https://doi.org/10.1186/s12970-017-0173-z',
+    if (item.kind == ProductKind.anabolic || (product?.requiresMedicalSupervision ?? false)) {
+      return DoseSafetyCheck(
+        alert: DoseAlert.medicalSupervision,
+        message: '${product?.name ?? item.name} não tem dose segura de uso sem prescrição médica.',
+        caution: product?.caution ?? anabolicFallbackCaution,
+        sources: product?.sources ?? const [],
       );
-      final anvisaSource = const Source(
-        id: 'anvisa-suplementos',
-        name: 'ANVISA',
-        citation: 'ANVISA. RDC nº 243/2018 e Instrução Normativa nº 28/2018: suplementos alimentares.',
-        url: 'https://www.gov.br/anvisa/pt-br/assuntos/alimentos/suplementos-alimentares',
-      );
-
-      const cautionText =
-          'Em pessoas saudáveis, doses usuais não mostraram prejuízo aos rins. A creatina pode elevar a creatinina sérica no exame de sangue: avise seu médico que faz uso. Doses excessivas não aumentam a eficácia e geram sobrecarga desnecessária.';
-
-      if (protocol == Protocol.loading) {
-        // Protocolo de saturação: 15g a 25g
-        const min = 15.0;
-        const max = 25.0;
-        if (amountInGrams > max) {
-          return DoseSafetyCheck(
-            isAboveRange: true,
-            recommendedMin: min,
-            recommendedMax: max,
-            unit: DoseUnit.g,
-            protocol: protocol,
-            message:
-                'A dose informada (${amountInGrams.toStringAsFixed(1).replaceAll('.0', '')} g) está acima da faixa usual para protocolo de saturação (15 a 25 g/dia por 5 a 7 dias).',
-            caution: cautionText,
-            sources: [issnSource, anvisaSource],
-          );
-        }
-      } else {
-        // Uso contínuo (padrão) e outros: 3g a 5g
-        const min = 3.0;
-        const max = 5.0;
-        if (amountInGrams > max) {
-          return DoseSafetyCheck(
-            isAboveRange: true,
-            recommendedMin: min,
-            recommendedMax: max,
-            unit: DoseUnit.g,
-            protocol: protocol,
-            message:
-                'A dose informada (${amountInGrams.toStringAsFixed(1).replaceAll('.0', '')} g) está acima da faixa normalmente utilizada em protocolos de uso contínuo (3 a 5 g/dia).',
-            caution: cautionText,
-            sources: [issnSource, anvisaSource],
-          );
-        }
-      }
     }
 
-    // Se estiver dentro da faixa segura ou não for produto com regra rígida
-    return const DoseSafetyCheck(isAboveRange: false);
+    final range = product?.rangeFor(protocol);
+    if (product == null || range == null) return const DoseSafetyCheck();
+
+    final dose = convertDose(amount, item.doseUnit, range.unit);
+    // Unidades que não se convertem (ex.: cápsulas x gramas): não dá para comparar.
+    if (dose == null) return const DoseSafetyCheck();
+
+    final perDay = range.per == 'day';
+    final total = perDay ? dose + await _alreadyTakenOn(takenAt, item, product, range.unit) : dose;
+
+    final unit = range.unit.label;
+    final limits = '${_fmt(range.min)} a ${_fmt(range.max)} $unit';
+    // Margem pequena para não alertar por erro de arredondamento (ex.: 0,1 + 0,2).
+    if (total <= range.max + 1e-9) {
+      return DoseSafetyCheck(range: range, totalToday: perDay ? total : null);
+    }
+
+    return DoseSafetyCheck(
+      alert: DoseAlert.aboveRange,
+      range: range,
+      totalToday: perDay ? total : null,
+      message: perDay && total > dose
+          ? 'Somando as doses de hoje, você chegaria a ${_fmt(total)} $unit de ${product.name}, '
+              'acima da faixa usual de ${protocol.label.toLowerCase()} ($limits por dia).'
+          : 'A dose informada (${_fmt(total)} $unit) está acima da faixa usual de '
+              '${protocol.label.toLowerCase()} ($limits ${perDay ? 'por dia' : 'por tomada'}).',
+      caution: product.caution,
+      sources: range.sources.isEmpty ? product.sources : range.sources,
+    );
+  }
+
+  /// Quanto do mesmo produto já foi registrado no dia de [at], na unidade [unit].
+  Future<double> _alreadyTakenOn(DateTime at, RoutineItem item, Product product, DoseUnit unit) async {
+    final start = DateTime(at.year, at.month, at.day);
+    final end = start.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
+    final logs = await _doses.list(from: start, to: end);
+
+    var total = 0.0;
+    for (final log in logs) {
+      final local = log.takenAt.toLocal();
+      final sameDay = local.year == at.year && local.month == at.month && local.day == at.day;
+      // Mesmo produto do catálogo (ex.: duas marcas de creatina) ou o mesmo item da rotina.
+      final sameProduct = log.productId != null ? log.productId == product.id : log.routineItemId == item.id;
+      if (sameDay && sameProduct) total += convertDose(log.amount, log.unit, unit) ?? 0;
+    }
+    return total;
   }
 }
+
+const _inMg = {DoseUnit.g: 1000.0, DoseUnit.mg: 1.0, DoseUnit.mcg: 0.001};
+
+/// Converte entre g, mg e mcg. Devolve `null` quando as unidades não se convertem.
+double? convertDose(double amount, DoseUnit from, DoseUnit to) {
+  if (from == to) return amount;
+  final fromMg = _inMg[from];
+  final toMg = _inMg[to];
+  if (fromMg == null || toMg == null) return null;
+  return amount * fromMg / toMg;
+}
+
+String _fmt(double v) =>
+    v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1).replaceAll('.', ',');

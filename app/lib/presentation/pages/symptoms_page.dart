@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/enums.dart';
+import '../providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/dosis_chrome.dart';
 import '../widgets/dosis_widgets.dart';
 
-/// "Como se sente hoje?". Ainda não grava: o repositório de sintomas é outra tarefa.
-class SymptomsPage extends StatefulWidget {
+/// "Como se sente hoje?" (RF10): grava pelo caso de uso [RegisterSymptoms].
+class SymptomsPage extends ConsumerStatefulWidget {
   const SymptomsPage({super.key});
 
   @override
-  State<SymptomsPage> createState() => _SymptomsPageState();
+  ConsumerState<SymptomsPage> createState() => _SymptomsPageState();
 }
 
-class _SymptomsPageState extends State<SymptomsPage> {
+class _SymptomsPageState extends ConsumerState<SymptomsPage> {
   static const _options = [
     Symptom.pain,
     Symptom.nausea,
@@ -26,6 +28,7 @@ class _SymptomsPageState extends State<SymptomsPage> {
   final _notes = TextEditingController();
   final Set<Symptom> _selected = {};
   bool _normal = false;
+  bool _saving = false;
 
   @override
   void dispose() {
@@ -38,7 +41,27 @@ class _SymptomsPageState extends State<SymptomsPage> {
         if (!_selected.remove(symptom)) _selected.add(symptom);
       });
 
+  void _toast(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+
   Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await ref.read(registerSymptomsProvider)(normal: _normal, symptoms: _selected, notes: _notes.text);
+    } on ArgumentError catch (error) {
+      // Regra de validação (ex.: nada marcado): mostra a mensagem do caso de uso.
+      if (mounted) _toast('${error.message}');
+      return;
+    } catch (error) {
+      if (mounted) _toast('Não foi possível salvar: $error');
+      return;
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+    if (!mounted) return;
+
+    // Só confirma depois que o registro foi gravado de verdade.
     await showDialog<void>(
       context: context,
       builder: (ctx) => Dialog(
@@ -126,7 +149,7 @@ class _SymptomsPageState extends State<SymptomsPage> {
             decoration: const InputDecoration(hintText: 'Como você se sentiu?'),
           ),
           const SizedBox(height: 28),
-          FilledButton(onPressed: _save, child: const Text('Salvar registro')),
+          FilledButton(onPressed: _saving ? null : _save, child: const Text('Salvar registro')),
         ],
       ),
     );

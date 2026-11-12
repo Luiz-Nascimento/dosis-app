@@ -23,7 +23,7 @@ class HydrationResult {
   /// Quantidade total de creatina identificada no stack diário (em gramas).
   final double creatineGrams;
 
-  /// Explicação textual fundamentada em evidências científicas.
+  /// Explicação do cálculo para o usuário.
   final String explanation;
 
   /// Formatação do total em litros (ex: "3,2 L").
@@ -39,15 +39,25 @@ class HydrationResult {
   }
 }
 
-/// Caso de uso: Cálculo de ingestão diária de água contextualizado com creatina.
+/// Caso de uso: estimativa de ingestão diária de água, considerando a creatina do stack.
 ///
-/// Diretrizes científicas (ACSM, SBEM, ANVISA):
-/// - Base para praticantes de atividade física: 35 ml por kg de peso corporal.
-/// - Ajuste por creatina: Creatina atrai água para o interior das células musculares
-///   (retenção hídrica intracelular). Recomenda-se acréscimo proporcional de
-///   100 ml de água por grama de creatina consumida (mínimo de 500 ml para doses usuais).
+/// Os números são uma regra prática definida pelo app, NÃO uma recomendação de
+/// órgão oficial, e o texto mostrado ao usuário diz isso:
+/// - Base: 35 ml por kg de peso corporal (regra prática comum, não vem do ACSM).
+/// - Creatina: a creatina leva água para dentro das células musculares, então o app
+///   acrescenta 100 ml por grama (mínimo de 500 ml) como margem preventiva.
+///   Nenhuma diretriz define esse acréscimo.
+/// - O que o ACSM (Sawka et al., 2007) recomenda é repor o que se perde no suor,
+///   que varia com a pessoa, o treino e o clima: por isso o aviso de beber mais
+///   em dias de treino intenso ou calor.
 class CalculateHydration {
   const CalculateHydration();
+
+  static const _disclaimer = 'É uma regra prática do app, não uma recomendação oficial. '
+      'Em dias de treino intenso ou calor, beba mais para repor o suor (ACSM).';
+
+  static String _grams(double g) =>
+      g == g.roundToDouble() ? g.toStringAsFixed(0) : g.toStringAsFixed(1).replaceAll('.', ',');
 
   HydrationResult call({
     required double weightKg,
@@ -90,12 +100,11 @@ class CalculateHydration {
           : '$creatineBonusMl ml';
 
       explanation =
-          'Sua meta diária inclui ${(baseMl / 1000).toStringAsFixed(1).replaceAll('.', ',')} L base '
-          '(35 ml/kg) mais $bonusFormatted adicionais devido ao uso de creatina (${creatineGrams.toStringAsFixed(1).replaceAll('.0', '')} g no seu stack), '
-          'essenciais para a hidratação celular e suporte renal seguro (SBEM/ACSM).';
+          'Estimativa do Dosis: ${(baseMl / 1000).toStringAsFixed(1).replaceAll('.', ',')} L como ponto de partida '
+          '(35 ml por kg) mais $bonusFormatted pelo uso de creatina (${_grams(creatineGrams)} g no seu stack). '
+          '$_disclaimer';
     } else {
-      explanation =
-          'Meta diária estimada com base em 35 ml por kg de peso corporal para manutenção do equilíbrio hídrico em praticantes de exercícios físicos.';
+      explanation = 'Estimativa do Dosis: 35 ml por kg de peso como ponto de partida. $_disclaimer';
     }
 
     final totalMl = baseMl + creatineBonusMl;

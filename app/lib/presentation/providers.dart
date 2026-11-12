@@ -7,6 +7,7 @@ import '../domain/usecases/check_dose_safety.dart';
 import '../domain/usecases/get_dose_history.dart';
 import '../domain/usecases/get_today_stack.dart';
 import '../domain/usecases/register_dose.dart';
+import '../domain/usecases/register_symptoms.dart';
 import '../data/models/auth.dart';
 import '../domain/repositories/auth_repository.dart';
 
@@ -19,12 +20,16 @@ final getTodayStackProvider =
     Provider<GetTodayStack>((ref) => GetTodayStack(ref.watch(dependenciesProvider).routine));
 final registerDoseProvider =
     Provider<RegisterDose>((ref) => RegisterDose(ref.watch(dependenciesProvider).doses));
+final registerSymptomsProvider =
+    Provider<RegisterSymptoms>((ref) => RegisterSymptoms(ref.watch(dependenciesProvider).symptoms));
 final getDoseHistoryProvider =
     Provider<GetDoseHistory>((ref) => GetDoseHistory(ref.watch(dependenciesProvider).doses));
 final calculateHydrationProvider =
     Provider<CalculateHydration>((ref) => const CalculateHydration());
-final checkDoseSafetyProvider =
-    Provider<CheckDoseSafety>((ref) => const CheckDoseSafety());
+final checkDoseSafetyProvider = Provider<CheckDoseSafety>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return CheckDoseSafety(deps.catalog, deps.doses);
+});
 
 final todayStackProvider = FutureProvider<List<RoutineItem>>((ref) => ref.watch(getTodayStackProvider)());
 final doseHistoryProvider = FutureProvider<List<DoseLog>>((ref) => ref.watch(getDoseHistoryProvider)());

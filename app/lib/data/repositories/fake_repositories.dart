@@ -1,6 +1,7 @@
 import '../../core/ids.dart';
 import '../../domain/repositories/dose_repository.dart';
 import '../../domain/repositories/routine_repository.dart';
+import '../../domain/repositories/symptom_repository.dart';
 import '../../domain/repositories/system_repository.dart';
 import '../models/auth.dart';
 import '../models/enums.dart';
@@ -15,6 +16,7 @@ class FakeRoutineRepository implements RoutineRepository {
   static const _items = <RoutineItem>[
     RoutineItem(
       id: 'r-creatina',
+      productId: 'creatina',
       name: 'Creatina',
       brand: 'Growth',
       kind: ProductKind.supplement,
@@ -26,6 +28,7 @@ class FakeRoutineRepository implements RoutineRepository {
     ),
     RoutineItem(
       id: 'r-whey',
+      productId: 'whey-protein',
       name: 'Whey Protein',
       brand: 'Growth',
       kind: ProductKind.supplement,
@@ -53,15 +56,17 @@ class FakeDoseRepository implements DoseRepository {
     final logs = <DoseLog>[];
     for (var back = 1; back <= 7; back++) {
       final day = DateTime(now.year, now.month, now.day).subtract(Duration(days: back));
-      logs.add(_log('Creatina', 5, DateTime(day.year, day.month, day.day, 8)));
-      logs.add(_log('Whey Protein', 60, DateTime(day.year, day.month, day.day, 12, 30)));
+      logs.add(_log('Creatina', 5, DateTime(day.year, day.month, day.day, 8), routineItemId: 'r-creatina', productId: 'creatina'));
+      logs.add(_log('Whey Protein', 60, DateTime(day.year, day.month, day.day, 12, 30),
+          routineItemId: 'r-whey', productId: 'whey-protein'));
     }
     return logs;
   }
 
-  DoseLog _log(String name, double amount, DateTime at, {String? routineItemId}) => DoseLog(
+  DoseLog _log(String name, double amount, DateTime at, {String? routineItemId, String? productId}) => DoseLog(
         id: newId(),
         routineItemId: routineItemId,
+        productId: productId,
         name: name,
         kind: ProductKind.supplement,
         protocol: Protocol.continuous,
@@ -85,6 +90,7 @@ class FakeDoseRepository implements DoseRepository {
     final log = DoseLog(
       id: newId(),
       routineItemId: item.id,
+      productId: item.productId,
       name: item.name,
       kind: item.kind,
       protocol: item.protocol,
@@ -107,6 +113,44 @@ class FakeDoseRepository implements DoseRepository {
       return true;
     }).toList()
       ..sort((a, b) => b.takenAt.compareTo(a.takenAt));
+    if (limit != null && result.length > limit) result = result.sublist(0, limit);
+    return result;
+  }
+}
+
+class FakeSymptomRepository implements SymptomRepository {
+  final List<SymptomLog> _logs = [];
+
+  @override
+  Future<SymptomLog> register({
+    required SymptomStatus status,
+    List<Symptom> symptoms = const [],
+    String? otherDescription,
+    String? notes,
+    DateTime? loggedAt,
+  }) async {
+    final at = loggedAt ?? DateTime.now();
+    final log = SymptomLog(
+      id: newId(),
+      status: status,
+      symptoms: symptoms,
+      otherDescription: otherDescription,
+      notes: notes,
+      loggedAt: at,
+      localDate: FakeDoseRepository._date(at),
+    );
+    _logs.add(log);
+    return log;
+  }
+
+  @override
+  Future<List<SymptomLog>> list({DateTime? from, DateTime? to, int? limit}) async {
+    var result = _logs.where((l) {
+      if (from != null && l.loggedAt.isBefore(from)) return false;
+      if (to != null && l.loggedAt.isAfter(to)) return false;
+      return true;
+    }).toList()
+      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
     if (limit != null && result.length > limit) result = result.sublist(0, limit);
     return result;
   }
