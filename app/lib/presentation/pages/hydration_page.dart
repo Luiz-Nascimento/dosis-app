@@ -217,7 +217,7 @@ class _ResultCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '+${result.creatineBonusMl} ml de hidratação preventiva para suporte da creatina',
+                    '+${result.creatineBonusMl} ml pelo uso de creatina (margem preventiva do app)',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

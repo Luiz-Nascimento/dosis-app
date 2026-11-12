@@ -47,6 +47,9 @@ void main() {
       expect(result.creatineGrams, 3.0);
       expect(result.totalLitersText, '3,3 L');
       expect(result.explanation, contains('creatina'));
+      // Não pode atribuir a regra a órgãos que não a recomendam.
+      expect(result.explanation, isNot(contains('SBEM')));
+      expect(result.explanation, contains('não uma recomendação oficial'));
     });
 
     test('calcula bônus proporcional para protocolo de saturação de creatina (20g)', () {
