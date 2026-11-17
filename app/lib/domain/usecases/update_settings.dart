@@ -1,8 +1,10 @@
+import '../../data/models/recommendation.dart';
 import '../../data/models/settings.dart';
 import '../../data/models/tracking.dart';
 import '../repositories/reminder_scheduler.dart';
 import '../repositories/routine_repository.dart';
 import '../repositories/settings_repository.dart';
+import 'build_recommendations.dart';
 
 /// Resultado de salvar as preferências.
 class SettingsUpdate {
@@ -21,7 +23,12 @@ class SettingsUpdate {
 /// * Água: um lembrete a cada [UserSettings.waterIntervalHours] horas, do
 ///   horário inicial ao final (ex.: 8h, 10h, ..., 22h).
 /// * Suplementos: um lembrete por horário da rotina, juntando os itens do mesmo horário.
-List<Reminder> planReminders(UserSettings settings, List<RoutineItem> activeItems) {
+/// * Educacional: uma dica por dia, com a recomendação mais relevante do motor.
+List<Reminder> planReminders(
+  UserSettings settings,
+  List<RoutineItem> activeItems, {
+  List<Recommendation> recommendations = const [],
+}) {
   final reminders = <Reminder>[];
 
   if (settings.waterReminders) {
@@ -62,16 +69,37 @@ List<Reminder> planReminders(UserSettings settings, List<RoutineItem> activeItem
     }
   }
 
+  if (settings.educationReminders && recommendations.isNotEmpty) {
+    final top = recommendations.first;
+    reminders.add(Reminder(
+      id: 4000,
+      kind: ReminderKind.education,
+      title: top.title,
+      body: _firstSentence(top.body),
+      hour: settings.educationHour,
+      minute: 0,
+    ));
+  }
+
   return reminders;
+}
+
+/// Primeira frase do texto: notificação curta, mas com o conteúdo da diretriz.
+String _firstSentence(String text) {
+  final first = text.split('. ').first.trim();
+  return first.length <= 160 ? first : '${first.substring(0, 157)}...';
 }
 
 /// Salva a meta de água e os lembretes e reagenda as notificações.
 class UpdateSettings {
-  const UpdateSettings(this._settings, this._routine, this._scheduler);
+  const UpdateSettings(this._settings, this._routine, this._scheduler, [this._recommendations]);
 
   final SettingsRepository _settings;
   final RoutineRepository _routine;
   final ReminderScheduler _scheduler;
+
+  /// Motor de recomendações: usado só quando as dicas educacionais estão ligadas.
+  final BuildRecommendations? _recommendations;
 
   Future<SettingsUpdate> call(UserSettings wanted) async {
     if (wanted.hydrationGoalMl < UserSettings.minGoalMl || wanted.hydrationGoalMl > UserSettings.maxGoalMl) {
@@ -83,16 +111,32 @@ class UpdateSettings {
     if (wanted.waterStartHour < 0 || wanted.waterEndHour > 23 || wanted.waterStartHour > wanted.waterEndHour) {
       throw ArgumentError('O horário inicial dos lembretes deve vir antes do final.');
     }
+    if (wanted.educationHour < 0 || wanted.educationHour > 23) {
+      throw ArgumentError('O horário das dicas educativas deve ficar entre 0 e 23 horas.');
+    }
 
     var settings = wanted;
     var denied = false;
     if (settings.anyReminder && !await _scheduler.requestPermission()) {
-      settings = settings.copyWith(waterReminders: false, supplementReminders: false);
+      settings = settings.copyWith(
+        waterReminders: false,
+        supplementReminders: false,
+        educationReminders: false,
+      );
       denied = true;
     }
 
     final items = settings.supplementReminders ? await _routine.list(active: true) : const <RoutineItem>[];
-    await _scheduler.replaceAll(planReminders(settings, items));
+    var recommendations = const <Recommendation>[];
+    final engine = _recommendations;
+    if (settings.educationReminders && engine != null) {
+      try {
+        recommendations = await engine();
+      } catch (_) {
+        // Sem recomendações agora: os outros lembretes continuam sendo agendados.
+      }
+    }
+    await _scheduler.replaceAll(planReminders(settings, items, recommendations: recommendations));
     await _settings.save(settings);
     return SettingsUpdate(settings: settings, permissionDenied: denied);
   }

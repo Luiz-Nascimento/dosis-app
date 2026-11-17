@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/models/recommendation.dart';
 import '../../data/models/tracking.dart';
 import '../format.dart';
 import '../providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/dosis_widgets.dart';
+import '../widgets/recommendation_card.dart';
 import 'articles_page.dart';
+import 'recommendations_page.dart';
 import 'register_dose_page.dart';
 import 'risk_panel_page.dart';
 import 'symptoms_page.dart';
@@ -20,6 +23,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(todayStackProvider).value ?? const <RoutineItem>[];
+    final recommendations = ref.watch(recommendationsProvider).value ?? const <Recommendation>[];
     void openRegister() => _push(context, const RegisterDosePage());
 
     return ListView(
@@ -105,6 +109,26 @@ class HomePage extends ConsumerWidget {
           subtitle: 'Indicadores da semana e relatório de sintomas',
           onTap: () => _push(context, const RiskPanelPage()),
         ),
+        if (recommendations.isNotEmpty) ...[
+          const SizedBox(height: 22),
+          const SectionTitle('Recomendações para você', subtitle: 'Baseadas nas diretrizes do catálogo'),
+          const SizedBox(height: 12),
+          for (final recommendation in recommendations.take(2)) ...[
+            RecommendationCard(
+              recommendation: recommendation,
+              onTap: () => _push(context, const RecommendationsPage()),
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (recommendations.length > 2)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => _push(context, const RecommendationsPage()),
+                child: const Text('Ver todas', style: TextStyle(color: AppColors.yellow)),
+              ),
+            ),
+        ],
         const SizedBox(height: 22),
         const SectionTitle('Conteúdos educativos'),
         const SizedBox(height: 12),
