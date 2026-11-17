@@ -35,6 +35,53 @@ python manage.py runserver 0.0.0.0:8000
 Todo erro tem o formato `{"error": {"code", "message", "details"}}`. O app deve
 decidir pelo `code` e pode exibir a `message` direto ao usuário.
 
+## Docker + Cloudflare (link público)
+
+Sobe a API (gunicorn) e um túnel da Cloudflare que dá um link HTTPS público
+para o Swagger e para os endpoints. Precisa só do Docker Desktop aberto.
+
+```bash
+cd backend
+docker compose up -d --build
+docker compose logs tunnel        # procure https://<nome>.trycloudflare.com
+```
+
+A URL também aparece em http://localhost:2000/quicktunnel. Com ela:
+
+* Swagger: `https://<nome>.trycloudflare.com/api/docs/`
+* Base da API para o app: `https://<nome>.trycloudflare.com/api/v1`
+  (`flutter run --dart-define=API_BASE_URL=https://<nome>.trycloudflare.com/api/v1`)
+* Na sua máquina continua valendo `http://localhost:8000`.
+
+| Comando | O que faz |
+| --- | --- |
+| `docker compose ps` | status (a API tem healthcheck) |
+| `docker compose logs -f api` | requisições e, no modo mock, os códigos dos e-mails |
+| `docker compose up -d` | aplica mudanças do `.env` (recria só a API; a URL do túnel continua) |
+| `docker compose up -d --build` | aplica mudanças no código |
+| `docker compose down` | para tudo (os dados ficam no volume) |
+| `docker compose down -v` | para e apaga o volume (dados do mock e chaves geradas) |
+
+Como funciona:
+
+* **Sem `.env`, roda no modo mock.** O container gera `DJANGO_SECRET_KEY` e
+  `FIELD_ENCRYPTION_KEY` no primeiro start e guarda no volume `dosis-data`,
+  junto com os dados do mock. Valores definidos no `.env` têm prioridade.
+* O compose força `DJANGO_DEBUG=False` (a API fica exposta na internet) e libera
+  os hosts `*.trycloudflare.com`.
+* No modo `firebase`, o JSON da service account vem de `backend/secrets/`
+  (montada só para leitura) e o catálogo é gravado no Firestore a cada start,
+  sem sobrescrever o que já existe.
+* **A URL do Quick Tunnel muda sempre que o container `tunnel` reinicia** (ou
+  o computador desliga). Ela só funciona com o Docker Desktop aberto.
+
+**URL fixa:** precisa de um domínio na sua conta da Cloudflare. Em
+[Zero Trust](https://one.dash.cloudflare.com/) > **Networks > Tunnels**, crie um
+túnel do tipo *Cloudflared*, copie o token e adicione um *Public hostname*
+(ex.: `api.seudominio.com`) com serviço `http://api:8000`. No `.env`, defina
+`CLOUDFLARE_TUNNEL_TOKEN` e `PUBLIC_HOSTNAME=api.seudominio.com`, e rode
+`docker compose stop tunnel` e depois `docker compose up -d api tunnel-named`.
+
 ## Endpoints
 
 O `urls.py` da raiz (`backend/urls.py`) dá a rota de cada app e inclui o `urls.py` dele,
@@ -248,20 +295,58 @@ de confirmação e de recuperação de senha não são enviados: o `oob_code` ap
 no console do `runserver`, e você o usa em `/api/v1/auth/verify-email/confirm/` ou em
 `/api/v1/auth/password-reset/confirm/`.
 
-**`firebase`:** usa o projeto real. Passo a passo para ativar:
+**`firebase`:** usa o projeto real. Tudo cabe no plano gratuito (Spark).
+Passo a passo para ativar:
 
-1. Crie o projeto no [console do Firebase](https://console.firebase.google.com/).
-2. Em **Authentication > Método de login**, ative **Anônimo** e **E-mail/senha**.
-3. Crie o **Cloud Firestore** (modo produção, região `southamerica-east1`).
-4. Em **Configurações do projeto > Contas de serviço**, gere uma chave privada
-   (JSON) e salve em `backend/secrets/` (pasta ignorada pelo git).
-5. No `.env`: `FIREBASE_MODE=firebase`, `FIREBASE_PROJECT_ID`,
-   `FIREBASE_WEB_API_KEY` (Configurações > Geral), `FIREBASE_CREDENTIALS`
-   (caminho do JSON) e uma `FIELD_ENCRYPTION_KEY` nova (guarde-a bem: sem ela
-   os dados cifrados não abrem).
-6. Publique as regras e os índices: na pasta `backend/firebase/`, troque o projeto em
-   `.firebaserc` e rode `firebase deploy --only firestore`.
-7. Carregue o catálogo e os artigos: `python manage.py seed_content`.
+1. Crie o projeto no [console do Firebase](https://console.firebase.google.com/)
+   (o Google Analytics pode ficar desligado). Anote o **ID do projeto**: ele
+   pode ser diferente do nome (ex.: `dosis-app-1a2b3`).
+2. Em **Criação > Authentication > Começar > Método de login**, ative
+   **E-mail/senha** (só a primeira opção) e **Anônimo**.
+3. Em **Criação > Firestore Database > Criar banco de dados**, escolha a região
+   `southamerica-east1` (São Paulo) e o **modo de produção**.
+4. Em **Configurações do projeto (engrenagem) > Geral**, copie o **ID do projeto**
+   e a **Chave de API da Web** (ela aparece depois do passo 2).
+5. Em **Configurações do projeto > Contas de serviço > SDK Admin do Firebase**,
+   clique em **Gerar nova chave privada** e salve o JSON como
+   `backend/secrets/firebase-service-account.json` (pasta ignorada pelo git;
+   esse arquivo dá acesso total ao projeto, não o compartilhe).
+6. No `backend/.env`:
+
+   ```
+   FIREBASE_MODE=firebase
+   FIREBASE_PROJECT_ID=<ID do projeto>
+   FIREBASE_WEB_API_KEY=<Chave de API da Web>
+   FIREBASE_CREDENTIALS=secrets/firebase-service-account.json
+   DJANGO_SECRET_KEY=<gerada>
+   FIELD_ENCRYPTION_KEY=<gerada>
+   ```
+
+   Gere as duas chaves com os comandos do `.env.example` e guarde-as: sem a
+   `FIELD_ENCRYPTION_KEY` os dados cifrados no Firestore não abrem mais.
+7. Publique as regras e os índices (precisa do Node; o login abre o navegador):
+
+   ```bash
+   cd backend/firebase
+   npx firebase-tools login
+   npx firebase-tools deploy --only firestore --project <ID do projeto>
+   ```
+
+8. Suba de novo: `docker compose up -d` (o catálogo é gravado sozinho) ou, sem
+   Docker, `python manage.py seed_content` e `runserver`.
+9. Confira no Swagger: `POST /api/v1/auth/anonymous/`, **Authorize** com o
+   `id_token` e `POST /api/v1/system/diagnostics/firestore/`. O usuário aparece
+   em **Authentication > Users** e o documento em
+   `users/{uid}/diagnostics/firestore` no Firestore.
+
+Para dar acesso de administrador (monitoramento do sync), pegue o `uid` em
+`GET /api/v1/auth/me/` ou em **Authentication > Users** e rode
+`docker compose exec api python manage.py set_admin <uid>` (sem Docker,
+`python manage.py set_admin <uid>`). O acesso vale no próximo token
+(`/api/v1/auth/refresh/` ou novo login).
+
+O app Flutter não usa o SDK do Firebase direto: ele fala só com esta API, então
+não precisa de `google-services.json`.
 
 Para usar os **emuladores** do Firebase em vez do projeto real, rode
 `firebase emulators:start` na pasta `backend/firebase/` e defina
@@ -309,8 +394,12 @@ backend/
     sync/              fila de sincronização, criptografia do lote e auditoria
     backups/           backup criptografado e restauração
   firebase/            firebase.json, .firebaserc, firestore.rules, índices
+  secrets/             JSON da service account (não vai para o git)
   tests/
     unit/apps/<app>/   testes de cada app
     integration/       testes entre apps
+  docker/entrypoint.py chaves, catálogo no Firestore e gunicorn
+  Dockerfile
+  compose.yaml         API + túnel da Cloudflare
   requirements.txt
 ```

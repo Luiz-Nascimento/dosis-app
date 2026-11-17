@@ -1,0 +1,9 @@
+.venv
+.env
+.env.*
+!.env.example
+secrets
+staticfiles
+.mock_store.json*
+.pytest_cache
+**/__pycache__

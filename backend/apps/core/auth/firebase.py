@@ -68,12 +68,13 @@ class FirebaseAuthProvider(AuthProvider):
 
     def sign_up(self, email: str, password: str, name: str | None) -> AuthSession:
         data = self._call("accounts:signUp", {"email": email, "password": password, "returnSecureToken": True})
-        if name:
-            data = self._call(
-                "accounts:update", {"idToken": data["idToken"], "displayName": name, "returnSecureToken": True}
-            )
         self.send_email_verification(data["idToken"])
-        return self._session(data["idToken"], data["refreshToken"], data["expiresIn"])
+        if not name:
+            return self._session(data["idToken"], data["refreshToken"], data["expiresIn"])
+        # Mudar só o nome não devolve tokens novos: o refresh emite um ID token
+        # que já traz o nome.
+        self._call("accounts:update", {"idToken": data["idToken"], "displayName": name})
+        return self.refresh(data["refreshToken"])
 
     def sign_in(self, email: str, password: str) -> AuthSession:
         data = self._call(

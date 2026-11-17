@@ -1,0 +1,60 @@
+# API do Dosis + túnel da Cloudflare (link público com HTTPS).
+#   docker compose up -d --build
+#   docker compose logs tunnel   -> procure a URL https://....trycloudflare.com
+# Detalhes em backend/README.md, seção "Docker + Cloudflare".
+
+name: dosis
+
+x-healthy-api: &healthy-api
+  api:
+    condition: service_healthy
+
+services:
+  api:
+    build: .
+    image: dosis-api
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Exposto na internet: nunca com DEBUG.
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,10.0.2.2,api,.trycloudflare.com,${PUBLIC_HOSTNAME:-localhost}
+      # Dados do modo mock e chaves geradas ficam no volume (sobrevivem a rebuilds).
+      MOCK_STORE_PATH: /data/mock_store.json
+      DOSIS_KEYS_FILE: /data/keys.json
+    volumes:
+      - dosis-data:/data
+      - ./secrets:/app/secrets:ro
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/system/health/')"]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+    restart: unless-stopped
+
+  # Quick Tunnel: não precisa de conta. A URL muda sempre que o túnel reinicia.
+  tunnel:
+    image: cloudflare/cloudflared:2026.10.2
+    command: tunnel --no-autoupdate --metrics 0.0.0.0:2000 --url http://api:8000
+    ports:
+      - "127.0.0.1:2000:2000" # http://localhost:2000/quicktunnel mostra a URL
+    depends_on: *healthy-api
+    restart: unless-stopped
+
+  # Túnel com domínio próprio (URL fixa). Precisa de CLOUDFLARE_TUNNEL_TOKEN no .env:
+  #   docker compose up -d api tunnel-named
+  tunnel-named:
+    image: cloudflare/cloudflared:2026.10.2
+    profiles: [named]
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on: *healthy-api
+    restart: unless-stopped
+
+volumes:
+  dosis-data:

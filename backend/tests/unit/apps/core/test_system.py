@@ -31,3 +31,9 @@ def test_openapi_schema_and_swagger(api):
     assert b"/api/v1/auth/anonymous/" in schema.content
     assert b"FirebaseIdToken" in schema.content
     assert api.get("/api/docs/").status_code == 200
+
+
+def test_swagger_ui_is_served_by_the_api_not_a_cdn(api):
+    html = api.get("/api/docs/").content
+    assert b"/static/drf_spectacular_sidecar/swagger-ui-dist/" in html
+    assert b"cdn.jsdelivr.net" not in html

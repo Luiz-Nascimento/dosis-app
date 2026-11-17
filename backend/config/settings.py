@@ -10,9 +10,9 @@ env = environ.Env(
 
 env.read_env(BASE_DIR / ".env")
 
-# Em produção, defina DJANGO_SECRET_KEY no .env. O valor padrão serve apenas
-# para desenvolvimento local e para os testes.
-SECRET_KEY = env("DJANGO_SECRET_KEY", default="django-insecure-dosis-dev-only")
+# Em produção, defina DJANGO_SECRET_KEY no .env (o Docker gera uma no volume).
+# O valor padrão serve apenas para desenvolvimento local e para os testes.
+SECRET_KEY = env("DJANGO_SECRET_KEY", default="") or "django-insecure-dosis-dev-only"
 
 DEBUG = env("DJANGO_DEBUG")
 
@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'drf_spectacular',
+    'drf_spectacular_sidecar',
     'apps.core',
     'apps.accounts',
     'apps.profiles',
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -83,6 +85,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# No Docker o collectstatic grava em /app/staticfiles e o WhiteNoise serve os
+# arquivos do Swagger UI com DEBUG=False. Localmente o runserver serve sozinho.
+STATIC_ROOT = env('DJANGO_STATIC_ROOT', default=None)
 
 
 # Email
@@ -140,6 +146,10 @@ SPECTACULAR_SETTINGS = {
         'SyncResultStatusEnum': 'apps.sync.serializers.RESULT_CHOICES',
         'SyncBatchStatusEnum': 'apps.sync.serializers.BATCH_STATUS_CHOICES',
     },
+    # Swagger UI e ReDoc servidos pela própria API (sem depender de CDN).
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
     'SWAGGER_UI_SETTINGS': {
         'persistAuthorization': True,
         'displayRequestDuration': True,
@@ -155,7 +165,10 @@ SPECTACULAR_SETTINGS = {
 FIREBASE_MODE = env('FIREBASE_MODE', default='mock')
 FIREBASE_PROJECT_ID = env('FIREBASE_PROJECT_ID', default='dosis-app')
 FIREBASE_WEB_API_KEY = env('FIREBASE_WEB_API_KEY', default='')
+# Caminho relativo é resolvido a partir de backend/ (vale no venv e no Docker).
 FIREBASE_CREDENTIALS = env('FIREBASE_CREDENTIALS', default='')
+if FIREBASE_CREDENTIALS:
+    FIREBASE_CREDENTIALS = str(BASE_DIR / FIREBASE_CREDENTIALS)
 FIREBASE_AUTH_EMULATOR_HOST = env('FIREBASE_AUTH_EMULATOR_HOST', default='')
 FIRESTORE_EMULATOR_HOST = env('FIRESTORE_EMULATOR_HOST', default='')
 
@@ -193,5 +206,7 @@ LOGGING = {
     },
     'loggers': {
         'dosis': {'handlers': ['console'], 'level': 'INFO'},
+        # Erros 500 com traceback no console também com DEBUG=False (docker compose logs).
+        'django.request': {'handlers': ['console'], 'level': 'ERROR', 'propagate': False},
     },
 }
