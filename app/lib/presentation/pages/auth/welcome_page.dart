@@ -21,7 +21,11 @@ class WelcomePage extends StatelessWidget {
             children: [
               const SizedBox(height: 24),
               Text('Dosis', style: AppTheme.logo.copyWith(color: ink, fontSize: 40)),
-              const Expanded(child: Center(child: _PillsArt())),
+              Expanded(
+                child: Center(
+                  child: Image.asset('assets/images/dosis.png', width: 240, fit: BoxFit.contain),
+                ),
+              ),
               const Text(
                 'Cada dose na',
                 style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: ink, height: 1.1),
@@ -67,75 +71,6 @@ class WelcomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PillsArt extends StatelessWidget {
-  const _PillsArt();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 250,
-      height: 220,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 210,
-            height: 210,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.black.withValues(alpha: 0.12), width: 1.5),
-            ),
-          ),
-          const Positioned(
-            top: 28,
-            left: 14,
-            child: _Pill(left: Color(0xFFFF7A00), right: Color(0xFF111111), angle: -0.5, width: 104),
-          ),
-          const Positioned(
-            top: 78,
-            right: 6,
-            child: _Pill(left: Color(0xFF111111), right: Colors.white, angle: 0.65, width: 100),
-          ),
-          const Positioned(
-            bottom: 34,
-            left: 40,
-            child: _Pill(left: Colors.white, right: Color(0xFFFF7A00), angle: -0.12, width: 80),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  const _Pill({required this.left, required this.right, required this.angle, required this.width});
-
-  final Color left;
-  final Color right;
-  final double angle;
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: angle,
-      child: SizedBox(
-        width: width,
-        height: width * 0.42,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(width),
-          child: Row(
-            children: [
-              Expanded(child: ColoredBox(color: left)),
-              Expanded(child: ColoredBox(color: right)),
             ],
           ),
         ),

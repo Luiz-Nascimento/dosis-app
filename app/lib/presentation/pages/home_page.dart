@@ -33,7 +33,7 @@ class HomePage extends ConsumerWidget {
         const SectionTitle('Sua rotina'),
         const SizedBox(height: 12),
         SizedBox(
-          height: 128,
+          height: 140,
           child: Row(
             children: [
               Expanded(
@@ -158,7 +158,7 @@ class _ActiveCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '$count',
-                  style: const TextStyle(color: Colors.black, fontSize: 40, fontWeight: FontWeight.w800),
+                  style: const TextStyle(color: Colors.black, fontSize: 40, fontWeight: FontWeight.w800, height: 1.0),
                 ),
               ],
             ),
