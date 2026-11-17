@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app_dependencies.dart';
+import '../data/models/catalog.dart';
 import '../data/models/tracking.dart';
 import '../domain/usecases/build_risk_panel.dart';
 import '../domain/usecases/build_weekly_symptom_report.dart';
@@ -149,3 +150,15 @@ final symptomReportProvider = FutureProvider.family<WeeklySymptomReport, int>((r
   ref.watch(symptomHistoryProvider);
   return ref.watch(buildWeeklySymptomReportProvider)(weekOffset: weekOffset);
 });
+
+// ---- Conteúdos educativos ----
+
+/// Lista de artigos. O repositório devolve o conteúdo local quando não há rede.
+final articlesProvider = FutureProvider<List<ArticleSummary>>(
+  (ref) => ref.watch(dependenciesProvider).articles.list(),
+);
+
+/// Texto completo de um artigo, também disponível offline.
+final articleProvider = FutureProvider.family<Article, String>(
+  (ref, id) => ref.watch(dependenciesProvider).articles.get(id),
+);

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'data/dosis_api.dart';
 import 'data/notifications/reminder_schedulers.dart';
+import 'data/repositories/api_article_repository.dart';
 import 'data/repositories/api_auth_repository.dart';
 import 'data/repositories/api_catalog_repository.dart';
 import 'data/repositories/api_dose_repository.dart';
@@ -10,9 +11,11 @@ import 'data/repositories/api_routine_repository.dart';
 import 'data/repositories/api_symptom_repository.dart';
 import 'data/repositories/api_system_repository.dart';
 import 'data/repositories/fake_auth_repository.dart';
+import 'data/repositories/fake_article_repository.dart';
 import 'data/repositories/fake_catalog_repository.dart';
 import 'data/repositories/fake_repositories.dart';
 import 'data/repositories/settings_repositories.dart';
+import 'domain/repositories/article_repository.dart';
 import 'domain/repositories/auth_repository.dart';
 import 'domain/repositories/catalog_repository.dart';
 import 'domain/repositories/dose_repository.dart';
@@ -32,6 +35,7 @@ class AppDependencies {
     required this.routine,
     required this.doses,
     required this.catalog,
+    required this.articles,
     required this.symptoms,
     required this.hydration,
     required this.settings,
@@ -47,6 +51,7 @@ class AppDependencies {
       routine: ApiRoutineRepository(dosisApi.routine),
       doses: ApiDoseRepository(dosisApi.doses),
       catalog: ApiCatalogRepository(dosisApi.catalog),
+      articles: ApiArticleRepository(dosisApi.articles),
       symptoms: ApiSymptomRepository(dosisApi.symptoms),
       hydration: ApiHydrationRepository(dosisApi.hydration),
       settings: SecureSettingsRepository(),
@@ -63,6 +68,7 @@ class AppDependencies {
       routine: routine,
       doses: FakeDoseRepository(routine),
       catalog: FakeCatalogRepository(),
+      articles: FakeArticleRepository(),
       symptoms: FakeSymptomRepository(seeded: true),
       hydration: FakeHydrationRepository(),
       // Preferências e lembretes são do aparelho, não do backend: valem também no modo fake.
@@ -76,6 +82,7 @@ class AppDependencies {
   final RoutineRepository routine;
   final DoseRepository doses;
   final CatalogRepository catalog;
+  final ArticleRepository articles;
   final SymptomRepository symptoms;
   final HydrationRepository hydration;
   final SettingsRepository settings;

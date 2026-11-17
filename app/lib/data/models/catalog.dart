@@ -16,6 +16,8 @@ class Source {
   final String name;
   final String citation;
   final String url;
+
+  Json toJson() => {'id': id, 'name': name, 'citation': citation, 'url': url};
 }
 
 List<Source> _sources(Object? value) =>
@@ -126,6 +128,15 @@ class ArticleSummary {
   final List<String> tags;
   final int readingMinutes;
   final String publishedAt;
+
+  Json toJson() => {
+        'id': id,
+        'title': title,
+        'summary': summary,
+        'tags': tags,
+        'reading_minutes': readingMinutes,
+        'published_at': publishedAt,
+      };
 }
 
 class Article extends ArticleSummary {
@@ -157,6 +168,13 @@ class Article extends ArticleSummary {
   /// Texto em Markdown.
   final String body;
   final List<Source> sources;
+
+  @override
+  Json toJson() => {
+        ...super.toJson(),
+        'body': body,
+        'sources': sources.map((s) => s.toJson()).toList(),
+      };
 }
 
 /// Lista paginada (`count`, `page`, `page_size`, `results`).
