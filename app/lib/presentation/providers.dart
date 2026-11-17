@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app_dependencies.dart';
 import '../data/models/catalog.dart';
+import '../data/models/recommendation.dart';
 import '../data/models/tracking.dart';
+import '../domain/usecases/build_recommendations.dart';
 import '../domain/usecases/build_risk_panel.dart';
 import '../domain/usecases/build_weekly_symptom_report.dart';
 import '../domain/usecases/calculate_hydration.dart';
@@ -99,7 +101,12 @@ final removeWaterLogProvider =
     Provider<RemoveWaterLog>((ref) => RemoveWaterLog(ref.watch(dependenciesProvider).hydration));
 final updateSettingsProvider = Provider<UpdateSettings>((ref) {
   final deps = ref.watch(dependenciesProvider);
-  return UpdateSettings(deps.settings, deps.routine, deps.reminders);
+  return UpdateSettings(
+    deps.settings,
+    deps.routine,
+    deps.reminders,
+    ref.watch(buildRecommendationsProvider),
+  );
 });
 
 /// Preferências do aparelho. `save` valida, reagenda os lembretes e atualiza quem estiver ouvindo.
@@ -151,7 +158,7 @@ final symptomReportProvider = FutureProvider.family<WeeklySymptomReport, int>((r
   return ref.watch(buildWeeklySymptomReportProvider)(weekOffset: weekOffset);
 });
 
-// ---- Conteúdos educativos ----
+// ---- Conteúdos educativos e recomendações ----
 
 /// Lista de artigos. O repositório devolve o conteúdo local quando não há rede.
 final articlesProvider = FutureProvider<List<ArticleSummary>>(
@@ -162,3 +169,18 @@ final articlesProvider = FutureProvider<List<ArticleSummary>>(
 final articleProvider = FutureProvider.family<Article, String>(
   (ref, id) => ref.watch(dependenciesProvider).articles.get(id),
 );
+
+/// Motor que cruza as diretrizes do catálogo com os registros do usuário.
+final buildRecommendationsProvider = Provider<BuildRecommendations>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return BuildRecommendations(deps.doses, deps.catalog, deps.symptoms, deps.routine, deps.hydration, deps.settings);
+});
+
+/// Recomendações atuais. Recalcula quando entra dose, sintoma, água ou muda a meta.
+final recommendationsProvider = FutureProvider<List<Recommendation>>((ref) {
+  ref.watch(doseHistoryProvider);
+  ref.watch(symptomHistoryProvider);
+  ref.watch(hydrationProgressProvider);
+  ref.watch(settingsProvider);
+  return ref.watch(buildRecommendationsProvider)();
+});

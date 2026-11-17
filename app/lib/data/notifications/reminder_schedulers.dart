@@ -53,21 +53,31 @@ class LocalReminderScheduler implements ReminderScheduler {
     await _init();
     await _plugin.cancelAll();
     for (final reminder in reminders) {
-      final water = reminder.kind == ReminderKind.water;
+      final details = switch (reminder.kind) {
+        ReminderKind.water => const AndroidNotificationDetails(
+            'dosis_water',
+            'Lembretes de água',
+            channelDescription: 'Lembra de beber água ao longo do dia.',
+          ),
+        ReminderKind.supplement => const AndroidNotificationDetails(
+            'dosis_supplements',
+            'Lembretes de suplementos',
+            channelDescription: 'Lembra dos horários dos itens da sua rotina.',
+          ),
+        ReminderKind.education => const AndroidNotificationDetails(
+            'dosis_education',
+            'Dicas educativas',
+            channelDescription: 'Uma recomendação por dia, baseada em diretrizes de saúde.',
+          ),
+      };
       await _plugin.zonedSchedule(
         id: reminder.id,
         title: reminder.title,
         body: reminder.body,
         scheduledDate: _next(reminder.hour, reminder.minute),
         notificationDetails: NotificationDetails(
-          // Um canal por tipo: o usuário pode silenciar só a água nas configurações do Android.
-          android: AndroidNotificationDetails(
-            water ? 'dosis_water' : 'dosis_supplements',
-            water ? 'Lembretes de água' : 'Lembretes de suplementos',
-            channelDescription: water
-                ? 'Lembra de beber água ao longo do dia.'
-                : 'Lembra dos horários dos itens da sua rotina.',
-          ),
+          // Um canal por tipo: o usuário pode silenciar só as dicas nas configurações do Android.
+          android: details,
           iOS: const DarwinNotificationDetails(),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

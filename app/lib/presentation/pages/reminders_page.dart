@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/models/recommendation.dart';
 import '../../data/models/settings.dart';
 import '../../data/models/tracking.dart';
 import '../../domain/usecases/update_settings.dart';
@@ -40,6 +41,16 @@ class _RemindersPageState extends ConsumerState<RemindersPage> {
     });
   }
 
+  Future<void> _pickEducationHour(UserSettings draft) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: draft.educationHour, minute: 0),
+      helpText: 'Horário da dica educativa',
+    );
+    if (picked == null) return;
+    setState(() => _draft = draft.copyWith(educationHour: picked.hour));
+  }
+
   Future<void> _save(UserSettings draft) async {
     setState(() => _saving = true);
     try {
@@ -64,6 +75,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage> {
   Widget build(BuildContext context) {
     final saved = ref.watch(settingsProvider).value;
     final items = ref.watch(todayStackProvider).value ?? const <RoutineItem>[];
+    final recommendations = ref.watch(recommendationsProvider).value ?? const <Recommendation>[];
     final draft = _draft ?? saved;
 
     return Scaffold(
@@ -131,10 +143,26 @@ class _RemindersPageState extends ConsumerState<RemindersPage> {
                   value: draft.supplementReminders,
                   onChanged: (v) => setState(() => _draft = draft.copyWith(supplementReminders: v)),
                 ),
+                const SizedBox(height: 16),
+                _SwitchCard(
+                  icon: Icons.lightbulb_outline,
+                  title: 'Dicas educativas',
+                  subtitle: 'Uma recomendação por dia, baseada em ANVISA, SBEM, ISSN e outras fontes',
+                  value: draft.educationReminders,
+                  onChanged: (v) => setState(() => _draft = draft.copyWith(educationReminders: v)),
+                ),
+                if (draft.educationReminders) ...[
+                  const SizedBox(height: 14),
+                  _HourField(
+                    label: 'Às',
+                    hour: draft.educationHour,
+                    onTap: () => _pickEducationHour(draft),
+                  ),
+                ],
                 const SizedBox(height: 22),
                 const SectionTitle('O que você vai receber', subtitle: 'Todos os dias, nestes horários'),
                 const SizedBox(height: 12),
-                _Preview(draft: draft, items: items),
+                _Preview(draft: draft, items: items, recommendations: recommendations),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _saving ? null : () => _save(draft),
@@ -155,19 +183,22 @@ class _RemindersPageState extends ConsumerState<RemindersPage> {
 
 /// Lista o que seria agendado com o rascunho atual, usando a mesma regra do caso de uso.
 class _Preview extends StatelessWidget {
-  const _Preview({required this.draft, required this.items});
+  const _Preview({required this.draft, required this.items, required this.recommendations});
 
   final UserSettings draft;
   final List<RoutineItem> items;
+  final List<Recommendation> recommendations;
 
   static String _time(Reminder r) => '${r.hour.toString().padLeft(2, '0')}:${r.minute.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
     final valid = draft.waterStartHour <= draft.waterEndHour;
-    final reminders = valid ? planReminders(draft, items) : const <Reminder>[];
+    final reminders =
+        valid ? planReminders(draft, items, recommendations: recommendations) : const <Reminder>[];
     final water = reminders.where((r) => r.kind == ReminderKind.water).toList();
     final supplements = reminders.where((r) => r.kind == ReminderKind.supplement).toList();
+    final education = reminders.where((r) => r.kind == ReminderKind.education).toList();
 
     String? message;
     if (!valid) {
@@ -175,7 +206,9 @@ class _Preview extends StatelessWidget {
     } else if (!draft.anyReminder) {
       message = 'Nenhum lembrete ligado.';
     } else if (reminders.isEmpty) {
-      message = 'Nenhum item ativo da rotina tem horário definido.';
+      message = draft.educationReminders && recommendations.isEmpty
+          ? 'Nenhuma recomendação no momento para enviar como dica.'
+          : 'Nenhum item ativo da rotina tem horário definido.';
     }
 
     return DosisCard(
@@ -217,6 +250,34 @@ class _Preview extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'Suplementos: nenhum item ativo da rotina tem horário definido.',
+              style: TextStyle(color: AppColors.muted, fontSize: 13),
+            ),
+          ],
+          if ((water.isNotEmpty || supplements.isNotEmpty) && education.isNotEmpty) const SizedBox(height: 12),
+          for (final reminder in education)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _time(reminder),
+                    style: const TextStyle(color: AppColors.yellow, fontWeight: FontWeight.w800, fontSize: 14),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      reminder.title,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (draft.educationReminders && valid && education.isEmpty) ...[
+            const SizedBox(height: 12),
+            const Text(
+              'Dicas educativas: nenhuma recomendação no momento.',
               style: TextStyle(color: AppColors.muted, fontSize: 13),
             ),
           ],

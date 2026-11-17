@@ -9,6 +9,8 @@ class UserSettings {
     this.waterStartHour = 8,
     this.waterEndHour = 22,
     this.supplementReminders = false,
+    this.educationReminders = false,
+    this.educationHour = 9,
   });
 
   factory UserSettings.fromJson(Json json) => UserSettings(
@@ -18,6 +20,8 @@ class UserSettings {
         waterStartHour: toInt(json['water_start_hour']) ?? 8,
         waterEndHour: toInt(json['water_end_hour']) ?? 22,
         supplementReminders: json['supplement_reminders'] as bool? ?? false,
+        educationReminders: json['education_reminders'] as bool? ?? false,
+        educationHour: toInt(json['education_hour']) ?? 9,
       );
 
   /// Limites aceitos para a meta diária.
@@ -36,7 +40,11 @@ class UserSettings {
   /// Lembrete nos horários dos itens ativos da rotina.
   final bool supplementReminders;
 
-  bool get anyReminder => waterReminders || supplementReminders;
+  /// Uma notificação por dia com uma recomendação baseada nas diretrizes.
+  final bool educationReminders;
+  final int educationHour;
+
+  bool get anyReminder => waterReminders || supplementReminders || educationReminders;
 
   UserSettings copyWith({
     int? hydrationGoalMl,
@@ -45,6 +53,8 @@ class UserSettings {
     int? waterStartHour,
     int? waterEndHour,
     bool? supplementReminders,
+    bool? educationReminders,
+    int? educationHour,
   }) =>
       UserSettings(
         hydrationGoalMl: hydrationGoalMl ?? this.hydrationGoalMl,
@@ -53,6 +63,8 @@ class UserSettings {
         waterStartHour: waterStartHour ?? this.waterStartHour,
         waterEndHour: waterEndHour ?? this.waterEndHour,
         supplementReminders: supplementReminders ?? this.supplementReminders,
+        educationReminders: educationReminders ?? this.educationReminders,
+        educationHour: educationHour ?? this.educationHour,
       );
 
   Json toJson() => {
@@ -62,10 +74,12 @@ class UserSettings {
         'water_start_hour': waterStartHour,
         'water_end_hour': waterEndHour,
         'supplement_reminders': supplementReminders,
+        'education_reminders': educationReminders,
+        'education_hour': educationHour,
       };
 }
 
-enum ReminderKind { water, supplement }
+enum ReminderKind { water, supplement, education }
 
 /// Notificação local que se repete todo dia no mesmo horário.
 class Reminder {
