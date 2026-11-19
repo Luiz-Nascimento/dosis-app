@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/api/api_exception.dart';
+import '../../core/ids.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/tracking.dart';
 import '../../domain/usecases/check_dose_safety.dart';
 import '../format.dart';
 import '../providers.dart';
 import '../theme/app_theme.dart';
+import '../widgets/auth_widgets.dart' show errorMessage;
 import '../widgets/dosis_chrome.dart';
 import '../widgets/dosis_widgets.dart';
 
@@ -24,23 +27,45 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
   Protocol _protocol = Protocol.continuous;
   TimeOfDay _time = TimeOfDay.now();
 
+  /// `true` enquanto a dose é avaliada e enviada: o botão fica desativado.
+  bool _submitting = false;
+
+  /// Id da dose que está sendo registrada. Continua o mesmo se o envio falhar,
+  /// para que tocar em "Registrar" de novo não grave a dose duas vezes.
+  String? _attemptId;
+
+  @override
+  void initState() {
+    super.initState();
+    // Dose diferente = registro novo.
+    _dose.addListener(_newAttempt);
+  }
+
   @override
   void dispose() {
     _dose.dispose();
     super.dispose();
   }
 
+  void _newAttempt() => _attemptId = null;
+
   void _select(RoutineItem item) {
     setState(() {
       _selectedId = item.id;
       _protocol = item.protocol;
       _dose.text = item.doseAmount == null ? '' : formatAmount(item.doseAmount!);
+      _newAttempt();
     });
   }
 
   Future<void> _pickTime() async {
     final picked = await showTimePicker(context: context, initialTime: _time);
-    if (picked != null) setState(() => _time = picked);
+    if (picked != null) {
+      setState(() {
+        _time = picked;
+        _newAttempt();
+      });
+    }
   }
 
   void _toast(String message) => ScaffoldMessenger.of(context)
@@ -148,6 +173,9 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
   }
 
   Future<void> _submit(List<RoutineItem> items) async {
+    // Dois toques no mesmo quadro chegam aqui antes de o botão ser redesenhado desativado.
+    if (_submitting) return;
+
     final item = items.firstWhere((i) => i.id == _selectedId);
     final amount = double.tryParse(_dose.text.replaceAll(',', '.'));
     if (amount == null || amount <= 0) {
@@ -158,29 +186,45 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
     final now = DateTime.now();
     final takenAt = DateTime(now.year, now.month, now.day, _time.hour, _time.minute);
 
-    // Avaliação de segurança com as faixas do catálogo e as doses do dia (KAN-11).
-    // Se o catálogo não responder (ex.: sem internet), a dose é registrada sem o
-    // alerta: o aviso orienta, ele não pode impedir o registro.
-    DoseSafetyCheck? safetyCheck;
+    setState(() => _submitting = true);
     try {
-      safetyCheck = await ref
-          .read(checkDoseSafetyProvider)(item: item, amount: amount, protocol: _protocol, takenAt: takenAt);
-    } catch (_) {
-      safetyCheck = null;
-    }
-    if (!mounted) return;
-    if (safetyCheck != null && safetyCheck.needsConfirmation) {
-      if (!await _confirmDose(safetyCheck)) return;
-    }
-
-    try {
-      await ref.read(registerDoseProvider)(routineItemId: item.id, amount: amount, takenAt: takenAt);
-      ref.invalidate(doseHistoryProvider);
+      // Avaliação de segurança com as faixas do catálogo e as doses do dia (KAN-11).
+      // Se o catálogo não responder (ex.: sem internet), a dose é registrada sem o
+      // alerta: o aviso orienta, ele não pode impedir o registro.
+      DoseSafetyCheck? safetyCheck;
+      try {
+        safetyCheck = await ref
+            .read(checkDoseSafetyProvider)(item: item, amount: amount, protocol: _protocol, takenAt: takenAt);
+      } catch (_) {
+        safetyCheck = null;
+      }
       if (!mounted) return;
-      setState(() => _selectedId = null);
-      _toast('Dose registrada.');
-    } catch (error) {
-      if (mounted) _toast('Não foi possível registrar: $error');
+      if (safetyCheck != null && safetyCheck.needsConfirmation) {
+        if (!await _confirmDose(safetyCheck)) return;
+      }
+
+      final id = _attemptId ??= newId();
+      try {
+        await ref.read(registerDoseProvider)(id: id, routineItemId: item.id, amount: amount, takenAt: takenAt);
+        ref.invalidate(doseHistoryProvider);
+        if (!mounted) return;
+        setState(() {
+          _selectedId = null;
+          _newAttempt();
+        });
+        _toast('Dose registrada.');
+      } on ApiException catch (error) {
+        // O id é mantido: tentar de novo não duplica, mesmo que a dose já tenha chegado ao servidor.
+        if (!mounted) return;
+        _toast(error.isNetworkError
+            ? 'Sem conexão: não deu para confirmar o registro. Toque em Registrar para tentar de novo, '
+                'a dose não será duplicada.'
+            : 'Não foi possível registrar: ${errorMessage(error)}');
+      } catch (error) {
+        if (mounted) _toast('Não foi possível registrar: $error');
+      }
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
   }
 
@@ -302,7 +346,12 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
               ],
             ),
             const SizedBox(height: 24),
-            FilledButton(onPressed: () => _submit(items), child: const Text('Registrar')),
+            FilledButton(
+              onPressed: _submitting ? null : () => _submit(items),
+              child: _submitting
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Text('Registrar'),
+            ),
           ],
           const SizedBox(height: 24),
           const SectionTitle('Stack de hoje'),

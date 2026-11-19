@@ -107,14 +107,19 @@ class FakeDoseRepository implements DoseRepository {
 
   @override
   Future<DoseLog> register({
+    String? id,
     required String routineItemId,
     double? amount,
     DateTime? takenAt,
     String? notes,
   }) async {
+    // Mesmo comportamento da API: repetir o id devolve a dose já gravada.
+    final existing = id == null ? null : _logs.where((l) => l.id == id).firstOrNull;
+    if (existing != null) return existing;
+
     final item = (await _routine.list()).firstWhere((i) => i.id == routineItemId);
     final log = DoseLog(
-      id: newId(),
+      id: id ?? newId(),
       routineItemId: item.id,
       productId: item.productId,
       name: item.name,

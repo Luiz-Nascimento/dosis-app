@@ -7,7 +7,9 @@ class RegisterDose {
 
   final DoseRepository _doses;
 
+  /// Use o mesmo [id] ao tentar de novo a mesma dose: assim ela não é gravada duas vezes.
   Future<DoseLog> call({
+    String? id,
     required String routineItemId,
     double? amount,
     DateTime? takenAt,
@@ -16,6 +18,6 @@ class RegisterDose {
     if (amount != null && amount <= 0) {
       throw ArgumentError.value(amount, 'amount', 'A dose deve ser maior que zero.');
     }
-    return _doses.register(routineItemId: routineItemId, amount: amount, takenAt: takenAt, notes: notes);
+    return _doses.register(id: id, routineItemId: routineItemId, amount: amount, takenAt: takenAt, notes: notes);
   }
 }

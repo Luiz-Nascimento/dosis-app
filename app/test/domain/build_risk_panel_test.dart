@@ -15,7 +15,7 @@ class _Doses implements DoseRepository {
   Future<List<DoseLog>> list({DateTime? from, DateTime? to, String? routineItemId, int? limit}) async => logs;
 
   @override
-  Future<DoseLog> register({required String routineItemId, double? amount, DateTime? takenAt, String? notes}) =>
+  Future<DoseLog> register({String? id, required String routineItemId, double? amount, DateTime? takenAt, String? notes}) =>
       throw UnimplementedError();
 }
 

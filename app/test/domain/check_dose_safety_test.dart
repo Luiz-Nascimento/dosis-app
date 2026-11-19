@@ -16,7 +16,7 @@ class _DoseHistory implements DoseRepository {
       logs.where((l) => (from == null || !l.takenAt.isBefore(from)) && (to == null || !l.takenAt.isAfter(to))).toList();
 
   @override
-  Future<DoseLog> register({required String routineItemId, double? amount, DateTime? takenAt, String? notes}) =>
+  Future<DoseLog> register({String? id, required String routineItemId, double? amount, DateTime? takenAt, String? notes}) =>
       throw UnimplementedError();
 }
 

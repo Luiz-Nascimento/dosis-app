@@ -4,7 +4,12 @@ import '../../data/models/tracking.dart';
 abstract interface class DoseRepository {
   /// Registra uma dose de um item do stack. Se [amount] ou [takenAt] ficarem
   /// vazios, valem a dose padrão do item e o momento atual.
+  ///
+  /// [id] identifica a tentativa de registro. Repetir a chamada com o mesmo
+  /// [id] (ex.: depois de uma falha de rede) devolve a dose já gravada em vez
+  /// de criar outra. Sem [id], o repositório gera um novo.
   Future<DoseLog> register({
+    String? id,
     required String routineItemId,
     double? amount,
     DateTime? takenAt,

@@ -7,16 +7,19 @@ import 'package:dosis/domain/usecases/register_dose.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeDoseRepository implements DoseRepository {
+  String? lastId;
   String? lastRoutineItemId;
   double? lastAmount;
 
   @override
   Future<DoseLog> register({
+    String? id,
     required String routineItemId,
     double? amount,
     DateTime? takenAt,
     String? notes,
   }) async {
+    lastId = id;
     lastRoutineItemId = routineItemId;
     lastAmount = amount;
     return DoseLog(
@@ -62,6 +65,14 @@ void main() {
       expect(doses.lastRoutineItemId, 'r1');
       expect(doses.lastAmount, 5);
       expect(dose.amount, 5);
+    });
+
+    test('repassa o id da tentativa, para o reenvio não duplicar', () async {
+      final doses = _FakeDoseRepository();
+
+      await RegisterDose(doses)(id: 'tentativa-1', routineItemId: 'r1', amount: 5);
+
+      expect(doses.lastId, 'tentativa-1');
     });
 
     test('rejeita dose zero ou negativa sem chamar o repositório', () {
