@@ -146,6 +146,38 @@ class FakeCatalogRepository implements CatalogRepository {
       requiresMedicalSupervision: false,
       sources: [_efsaOmega3, _anvisa],
     ),
+    const Product(
+      id: 'bcaa',
+      name: 'BCAA',
+      kind: ProductKind.supplement,
+      defaultUnit: DoseUnit.g,
+      defaultDose: 5,
+      doseRanges: [],
+      caution: 'Se você já consome proteína suficiente no dia, o ganho extra do BCAA tende a ser pequeno.',
+      requiresMedicalSupervision: false,
+      sources: [_issnProteina, _anvisa],
+    ),
+    const Product(
+      id: 'hipercalorico',
+      name: 'Hipercalórico',
+      kind: ProductKind.supplement,
+      defaultUnit: DoseUnit.g,
+      doseRanges: [],
+      caution: 'Siga a porção do rótulo e lembre que as calorias entram no total do dia.',
+      requiresMedicalSupervision: false,
+      sources: [_anvisa],
+    ),
+    const Product(
+      id: 'multivitaminico',
+      name: 'Multivitamínico',
+      kind: ProductKind.supplement,
+      defaultUnit: DoseUnit.caps,
+      defaultDose: 1,
+      doseRanges: [],
+      caution: 'Siga a porção do rótulo: vitaminas A, D, E e K se acumulam no corpo em doses altas.',
+      requiresMedicalSupervision: false,
+      sources: [_anvisa],
+    ),
     _anabolic('testosterona', 'Testosterona'),
     _anabolic('nandrolona', 'Nandrolona'),
     _anabolic('oxandrolona', 'Oxandrolona', extraCaution: ' Por ser oral, exige atenção especial ao fígado.'),
@@ -154,6 +186,35 @@ class FakeCatalogRepository implements CatalogRepository {
 
   @override
   Future<Product?> productById(String id) async => products.where((p) => p.id == id).firstOrNull;
+
+  @override
+  Future<PageResult<Product>> search({ProductKind? kind, String? query, int page = 1, int pageSize = 4}) async {
+    final term = foldAccents(query?.trim() ?? '');
+    final matches = products
+        .where((p) => kind == null || p.kind == kind)
+        .where((p) => term.isEmpty || foldAccents(p.name).contains(term))
+        .toList();
+    final start = (page - 1) * pageSize;
+    return PageResult(
+      count: matches.length,
+      page: page,
+      pageSize: pageSize,
+      results: start >= matches.length ? const [] : matches.skip(start).take(pageSize).toList(),
+    );
+  }
+
+  /// Minúsculas e sem acento, como a busca do backend ("Ômega" → "omega").
+  static String foldAccents(String value) {
+    const from = 'áàâãäéèêëíìîïóòôõöúùûüç';
+    const to = 'aaaaaeeeeiiiiooooouuuuc';
+    final lower = value.toLowerCase();
+    final buffer = StringBuffer();
+    for (final char in lower.split('')) {
+      final index = from.indexOf(char);
+      buffer.write(index < 0 ? char : to[index]);
+    }
+    return buffer.toString();
+  }
 
   @override
   Future<Product?> productFor(RoutineItem item) async {

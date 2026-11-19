@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app_dependencies.dart';
 import '../data/models/catalog.dart';
+import '../data/models/enums.dart';
 import '../data/models/recommendation.dart';
 import '../data/models/tracking.dart';
 import '../domain/usecases/build_recommendations.dart';
+import '../domain/usecases/manage_routine.dart';
 import '../domain/usecases/build_risk_panel.dart';
 import '../domain/usecases/build_weekly_symptom_report.dart';
 import '../domain/usecases/calculate_hydration.dart';
@@ -46,6 +48,30 @@ final getSupplementHistoryProvider = Provider<GetSupplementHistory>((ref) {
 });
 
 final todayStackProvider = FutureProvider<List<RoutineItem>>((ref) => ref.watch(getTodayStackProvider)());
+
+// ---- Adicionar à rotina ----
+
+final addToRoutineProvider =
+    Provider<AddToRoutine>((ref) => AddToRoutine(ref.watch(dependenciesProvider).routine));
+final removeFromRoutineProvider =
+    Provider<RemoveFromRoutine>((ref) => RemoveFromRoutine(ref.watch(dependenciesProvider).routine));
+
+/// O que a tela "Adicionar à rotina" está pedindo ao catálogo. [page] começa em 1.
+typedef CatalogQuery = ({ProductKind kind, String search, int page});
+
+/// Produtos por página na tela "Adicionar à rotina".
+const catalogPageSize = 4;
+
+/// Uma página do catálogo. Cada combinação de tipo + busca + página fica em cache
+/// enquanto a tela está aberta, então voltar para uma página já vista não repete a chamada.
+final catalogSearchProvider = FutureProvider.autoDispose.family<PageResult<Product>, CatalogQuery>(
+  (ref, query) => ref.watch(dependenciesProvider).catalog.search(
+        kind: query.kind,
+        query: query.search,
+        page: query.page,
+        pageSize: catalogPageSize,
+      ),
+);
 final doseHistoryProvider = FutureProvider<List<DoseLog>>((ref) => ref.watch(getDoseHistoryProvider)());
 
 /// Histórico por suplemento dos últimos N dias (o parâmetro é o número de dias).

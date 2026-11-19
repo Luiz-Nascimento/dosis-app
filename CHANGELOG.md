@@ -157,3 +157,18 @@ Em **requisitos.md** foi adicionado:
 * Os lembretes de suplementos são montados ao salvar. Se a rotina mudar, é preciso salvar os lembretes de novo.
 * A meta e os lembretes ficam no aparelho: não acompanham a conta em outro celular.
 * O histórico e os relatórios leem até 500 registros por consulta (limite da API).
+
+## [0.10] — 19/11/2026
+
+### Correção: "Adicionar à rotina" usa o catálogo de verdade
+
+* **Bug:** a aba **Rotina** mostrava um catálogo fixo no código, e o botão "Salvar" só exibia uma mensagem, sem criar nada. Com a API, um usuário novo ficava com a rotina vazia e não tinha o que escolher em **Registrar dose**. No modo fake o bug não aparecia, porque a rotina já começava com creatina e whey.
+* A tela agora busca os produtos em `/catalog/products/`, com filtro por tipo (suplementos ou anabolizantes), busca sem acento (espera 350 ms após a digitação) e paginação de 4 itens.
+* "Salvar" adiciona o produto com `POST /tracking/routine-items/`, mandando só o `product_id`: nome, dose padrão e unidade vêm do catálogo. A Home e o **Registrar dose** são atualizados na hora.
+* A lixeira de "Seus suplementos" remove o item (com confirmação). As doses já registradas continuam no histórico.
+* Itens que já estão na rotina aparecem como "na rotina" e não podem ser adicionados de novo. Ao escolher um anabolizante, a tela mostra o aviso de acompanhamento médico.
+* Domain: casos de uso `AddToRoutine` e `RemoveFromRoutine`; `RoutineRepository` ganhou `add` e `remove`; `CatalogRepository` ganhou `search`.
+* Modo fake: o catálogo local ganhou BCAA, Hipercalórico e Multivitamínico (iguais ao backend), e a rotina fake passou a aceitar inclusões e remoções.
+
+### Testes
+* 10 testes novos em `test/domain/manage_routine_test.dart` (casos de uso, busca do catálogo fake e as chamadas HTTP de adicionar, remover e buscar).

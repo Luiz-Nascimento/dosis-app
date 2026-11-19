@@ -44,6 +44,12 @@ class _FakeRoutineRepository implements RoutineRepository {
     lastActive = active;
     return const [];
   }
+
+  @override
+  Future<RoutineItem> add({required String productId, List<String>? scheduleTimes}) => throw UnimplementedError();
+
+  @override
+  Future<void> remove(String id) => throw UnimplementedError();
 }
 
 void main() {
