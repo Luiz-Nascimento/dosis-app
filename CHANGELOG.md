@@ -196,3 +196,20 @@ Em **requisitos.md** foi adicionado:
 * O README agora segue o que a Atividade 05 pede: problema e solução, público e persona prioritária, principais funcionalidades, arquitetura, como executar e links para todos os documentos da entrega em `docs/`.
 * As responsabilidades de cada integrante foram organizadas por atividade. As que já estavam registradas foram mantidas, e foram incluídas as contribuições que aparecem no histórico do GitHub (estudo de caso, benchmark, backend, sincronização e funcionalidades do app).
 * Descrição e tópicos do repositório no GitHub atualizados.
+
+## [0.13] — 19/11/2026
+
+### Correção: dose registrada em duplicidade
+
+* **Bug:** na tela **Registrar dose**, o botão "Registrar" continuava ativo durante o envio, então dois toques gravavam duas doses. Além disso, cada tentativa gerava um id novo: se a dose chegava ao servidor mas a resposta se perdia (timeout ou queda de rede), tocar de novo criava uma segunda dose, apesar de o comentário no código dizer que o servidor responderia 409.
+* O botão fica desativado e mostra um indicador de carregamento enquanto a dose é avaliada e enviada. Um segundo toque no mesmo instante é ignorado.
+* Cada registro ganha um id gerado uma única vez. Se o envio falhar, o mesmo id é usado na próxima tentativa. O id só é descartado depois de um registro bem-sucedido ou quando o usuário muda o item, a dose ou o horário.
+* Se o servidor responder **409** (dose com esse id já gravada), o app busca a dose com `GET /tracking/doses/{id}/` e trata o reenvio como sucesso, sem duplicar.
+* Sem conexão, a mensagem agora explica que dá para tentar de novo sem duplicar, no lugar do texto técnico `ApiException(...)`.
+* Domain: `DoseRepository.register` e o caso de uso `RegisterDose` ganharam o parâmetro opcional `id`. O repositório fake se comporta como a API: repetir o id devolve a dose existente.
+* Os botões rápidos de água (+200, +300, +500) não foram bloqueados, porque dois toques ali costumam ser intencionais.
+
+### Testes
+* 5 testes novos em `app/test/data/dose_repository_test.dart` (id enviado no POST, id novo quando não informado, 409 devolvendo a dose gravada, outros erros repassados à tela e repositório fake sem duplicar).
+* 1 teste novo em `app/test/domain/usecases_test.dart` (o caso de uso repassa o id da tentativa).
+* Os 105 testes do app passam e o `flutter analyze` não aponta nenhum problema novo.
