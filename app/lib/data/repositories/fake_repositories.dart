@@ -7,6 +7,7 @@ import '../../domain/repositories/system_repository.dart';
 import '../models/auth.dart';
 import '../models/enums.dart';
 import '../models/tracking.dart';
+import 'fake_catalog_repository.dart';
 
 class FakeSystemRepository implements SystemRepository {
   @override
@@ -14,8 +15,9 @@ class FakeSystemRepository implements SystemRepository {
 }
 
 class FakeRoutineRepository implements RoutineRepository {
-  static const _items = <RoutineItem>[
-    RoutineItem(
+  /// Começa com creatina e whey para o app ter o que mostrar sem backend.
+  final List<RoutineItem> _items = [
+    const RoutineItem(
       id: 'r-creatina',
       productId: 'creatina',
       name: 'Creatina',
@@ -27,7 +29,7 @@ class FakeRoutineRepository implements RoutineRepository {
       scheduleTimes: ['08:00'],
       active: true,
     ),
-    RoutineItem(
+    const RoutineItem(
       id: 'r-whey',
       productId: 'whey-protein',
       name: 'Whey Protein',
@@ -43,7 +45,30 @@ class FakeRoutineRepository implements RoutineRepository {
 
   @override
   Future<List<RoutineItem>> list({bool? active}) async =>
-      active == null ? _items : _items.where((i) => i.active == active).toList();
+      List.unmodifiable(active == null ? _items : _items.where((i) => i.active == active));
+
+  /// Completa o item com os dados do catálogo, como o backend faz.
+  @override
+  Future<RoutineItem> add({required String productId, List<String>? scheduleTimes}) async {
+    final product = FakeCatalogRepository.products.where((p) => p.id == productId).firstOrNull;
+    if (product == null) throw ArgumentError.value(productId, 'productId', 'Produto não encontrado no catálogo.');
+    final item = RoutineItem(
+      id: newId(),
+      productId: product.id,
+      name: product.name,
+      kind: product.kind,
+      protocol: Protocol.continuous,
+      doseAmount: product.defaultDose,
+      doseUnit: product.defaultUnit,
+      scheduleTimes: [...?scheduleTimes]..sort(),
+      active: true,
+    );
+    _items.add(item);
+    return item;
+  }
+
+  @override
+  Future<void> remove(String id) async => _items.removeWhere((i) => i.id == id);
 }
 
 class FakeDoseRepository implements DoseRepository {

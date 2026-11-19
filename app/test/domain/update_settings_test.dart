@@ -14,6 +14,12 @@ class _Routine implements RoutineRepository {
 
   @override
   Future<List<RoutineItem>> list({bool? active}) async => items;
+
+  @override
+  Future<RoutineItem> add({required String productId, List<String>? scheduleTimes}) => throw UnimplementedError();
+
+  @override
+  Future<void> remove(String id) => throw UnimplementedError();
 }
 
 RoutineItem _item(String name, List<String> times) => RoutineItem(

@@ -1,6 +1,7 @@
 import '../../core/api/api_exception.dart';
 import '../../domain/repositories/catalog_repository.dart';
 import '../models/catalog.dart';
+import '../models/enums.dart';
 import '../models/tracking.dart';
 import '../services/catalog_service.dart';
 
@@ -26,6 +27,22 @@ class ApiCatalogRepository implements CatalogRepository {
       product = page.results.firstOrNull;
     }
     return _cache[key] = product;
+  }
+
+  @override
+  Future<PageResult<Product>> search({ProductKind? kind, String? query, int page = 1, int pageSize = 4}) async {
+    final trimmed = query?.trim();
+    final result = await _service.listProducts(
+      kind: kind,
+      search: trimmed == null || trimmed.isEmpty ? null : trimmed,
+      page: page,
+      pageSize: pageSize,
+    );
+    // Aproveita a busca para já guardar os produtos: o alerta de dose não precisa buscá-los de novo.
+    for (final product in result.results) {
+      _cache[product.id] = product;
+    }
+    return result;
   }
 
   @override
