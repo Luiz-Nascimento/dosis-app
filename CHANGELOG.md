@@ -188,3 +188,11 @@ Em **requisitos.md** foi adicionado:
 ### Testes
 * O teste `test_products_filter_by_kind_and_search_without_accents` agora monta a lista de anabolizantes esperados a partir de `PRODUCTS`, em vez de usar uma lista fixa. Assim, ele não quebra quando o catálogo ganha itens novos.
 * Os 7 testes de `tests/unit/apps/catalog` passam.
+
+## [0.12] — 19/11/2026
+
+### README reorganizado para a entrega final (Atividade 05)
+
+* O README agora segue o que a Atividade 05 pede: problema e solução, público e persona prioritária, principais funcionalidades, arquitetura, como executar e links para todos os documentos da entrega em `docs/`.
+* As responsabilidades de cada integrante foram organizadas por atividade. As que já estavam registradas foram mantidas, e foram incluídas as contribuições que aparecem no histórico do GitHub (estudo de caso, benchmark, backend, sincronização e funcionalidades do app).
+* Descrição e tópicos do repositório no GitHub atualizados.

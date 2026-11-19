@@ -60,3 +60,11 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Verificação feita pela IA:** Execução dos testes do catálogo no backend (`python -m pytest tests/unit/apps/catalog`, 7 testes passando).
 * **Documentação:** Escrita assistida da versão 0.11 do CHANGELOG e deste registro.
 * **Limitações da IA:** A IA não conferiu se as doses e os limites batem com as fontes, nem se os links ainda funcionam. Isso precisa ser validado pelo aluno.
+
+## 📅 Histórico de Contribuições (19/11 — README)
+### Reorganização do README para a entrega final
+
+* **Leitura dos requisitos:** A IA leu o enunciado da Atividade 05 e os documentos do repositório para montar o README com as seções pedidas.
+* **Responsabilidades:** As responsabilidades vieram do README anterior e do histórico de commits do GitHub. A IA não inventou nenhuma contribuição. A lista precisa ser revisada pela equipe antes do merge.
+* **Descrição do repositório:** Sugestão e atualização da descrição e dos tópicos do repositório no GitHub.
+* **Limitações da IA:** A IA não sabe o que cada integrante fez fora do GitHub (pesquisa, reuniões, slides). Isso precisa ser completado pela equipe.
