@@ -68,3 +68,12 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Responsabilidades:** As responsabilidades vieram do README anterior e do histórico de commits do GitHub. A IA não inventou nenhuma contribuição. A lista precisa ser revisada pela equipe antes do merge.
 * **Descrição do repositório:** Sugestão e atualização da descrição e dos tópicos do repositório no GitHub.
 * **Limitações da IA:** A IA não sabe o que cada integrante fez fora do GitHub (pesquisa, reuniões, slides). Isso precisa ser completado pela equipe.
+
+## 📅 Histórico de Contribuições (19/11 — revisão e dose duplicada)
+### Revisão completa do projeto e correção do registro de dose duplicado
+
+* **Revisão do código:** A IA leu o app e o backend da `main`, rodou o analisador e os testes (app e backend em modo `mock`) e conferiu a API publicada na VPS apenas com leituras (status e documentação), sem criar contas nem dados em produção. O resultado foi uma lista de bugs e de código sem uso, priorizada para corrigir um item por vez.
+* **Correção do registro duplicado:** Escrita assistida do bloqueio do botão "Registrar", do id de tentativa mantido entre reenvios, do tratamento do 409 no `ApiDoseRepository` e do mesmo comportamento no repositório fake, com testes unitários.
+* **Versionamento:** A IA criou a branch a partir da `main` atualizada, fez o commit só dos arquivos da correção (deixando de fora as alterações locais do aluno em `app/.metadata`, `app/analysis_options.yaml` e `app/linux/`), enviou a branch e abriu o pull request.
+* **Validação humana:** O aluno testou a correção no emulador antes do commit.
+* **Limitações da IA:** O caso em que a dose chega ao servidor e a resposta se perde não foi reproduzido manualmente, só nos testes unitários. Os outros bugs apontados na revisão ficaram para os próximos pull requests.
