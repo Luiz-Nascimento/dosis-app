@@ -80,6 +80,39 @@ SOURCES = {
         ),
         "url": "https://doi.org/10.5665/sleep.4716",
     },
+    "issn-cafeina-2021": {
+        "name": "ISSN",
+        "citation": (
+            "Guest NS et al. International Society of Sports Nutrition position stand: caffeine and "
+            "exercise performance. J Int Soc Sports Nutr. 2021;18:1."
+        ),
+        "url": "https://doi.org/10.1186/s12970-020-00383-4",
+    },
+    "efsa-cafeina-2015": {
+        "name": "EFSA",
+        "citation": (
+            "EFSA NDA Panel. Scientific Opinion on the safety of caffeine. "
+            "EFSA Journal 2015;13(5):4102."
+        ),
+        "url": "https://doi.org/10.2903/j.efsa.2015.4102",
+    },
+    "issn-beta-alanina-2015": {
+        "name": "ISSN",
+        "citation": (
+            "Trexler ET et al. International Society of Sports Nutrition position stand: Beta-Alanine. "
+            "J Int Soc Sports Nutr. 2015;12:30."
+        ),
+        "url": "https://doi.org/10.1186/s12970-015-0090-y",
+    },
+    "ms-melatonina": {
+        "name": "Ministério da Saúde",
+        "citation": (
+            "Ministério da Saúde / ANVISA. Melatonina: autorizada apenas como suplemento alimentar, "
+            "para pessoas a partir de 19 anos, com limite máximo de 0,21 mg por dia "
+            "(Instrução Normativa nº 28/2018, alterada em 2021)."
+        ),
+        "url": "https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/m/melatonina",
+    },
 }
 
 ANABOLIC_CAUTION = (
@@ -199,6 +232,110 @@ PRODUCTS = [
         "source_ids": ["anvisa-suplementos"],
     },
     {
+        "id": "cafeina",
+        "name": "Cafeína",
+        "kind": "supplement",
+        "default_unit": "mg",
+        "default_dose": 200,
+        "dose_ranges": [
+            {
+                "protocol": "as_needed",
+                "per": "dose",
+                "min": 200,
+                "max": 400,
+                "unit": "mg",
+                "note": (
+                    "Antes do treino: 3 a 6 mg por kg de peso, cerca de 60 minutos antes "
+                    "(a faixa acima corresponde a uma pessoa de cerca de 70 kg)."
+                ),
+                "source_ids": ["issn-cafeina-2021"],
+            },
+        ],
+        "caution": (
+            "Para adultos saudáveis, até 400 mg por dia somando todas as fontes (café, energéticos, "
+            "pré-treinos) é considerado seguro. Doses muito altas aumentam os efeitos colaterais sem "
+            "melhorar o desempenho. Pode atrapalhar o sono se usada perto da hora de dormir. Gestantes "
+            "e pessoas com problemas cardíacos ou ansiedade devem conversar com um médico antes."
+        ),
+        "requires_medical_supervision": False,
+        "source_ids": ["issn-cafeina-2021", "efsa-cafeina-2015", "anvisa-suplementos"],
+    },
+    {
+        "id": "beta-alanina",
+        "name": "Beta-alanina",
+        "kind": "supplement",
+        "default_unit": "g",
+        "default_dose": 1.6,
+        "dose_ranges": [
+            {
+                "protocol": "continuous",
+                "per": "day",
+                "min": 4,
+                "max": 6,
+                "unit": "g",
+                "note": (
+                    "4 a 6 g por dia, divididos em tomadas de até 1,6 g, por pelo menos 2 a 4 semanas."
+                ),
+                "source_ids": ["issn-beta-alanina-2015"],
+            },
+        ],
+        "caution": (
+            "O formigamento na pele (parestesia) é comum e inofensivo. Dividir o total do dia em doses "
+            "menores costuma reduzir esse efeito."
+        ),
+        "requires_medical_supervision": False,
+        "source_ids": ["issn-beta-alanina-2015", "anvisa-suplementos"],
+    },
+    {
+        "id": "caseina",
+        "name": "Caseína",
+        "kind": "supplement",
+        "default_unit": "g",
+        "default_dose": 30,
+        "dose_ranges": [
+            {
+                "protocol": "continuous",
+                "per": "dose",
+                "min": 30,
+                "max": 40,
+                "unit": "g",
+                "note": "Antes de dormir: 30 a 40 g de caseína.",
+                "source_ids": ["issn-proteina-2017"],
+            },
+        ],
+        "caution": (
+            "É uma proteína do leite: quem tem alergia à proteína do leite não deve usar. "
+            "Conta para o total de proteína do dia, junto com a alimentação."
+        ),
+        "requires_medical_supervision": False,
+        "source_ids": ["issn-proteina-2017", "anvisa-suplementos"],
+    },
+    {
+        "id": "melatonina",
+        "name": "Melatonina",
+        "kind": "supplement",
+        "default_unit": "mg",
+        "default_dose": 0.21,
+        "dose_ranges": [
+            {
+                "protocol": "continuous",
+                "per": "day",
+                "min": 0,
+                "max": 0.21,
+                "unit": "mg",
+                "note": "Limite máximo permitido pela ANVISA para suplementos: 0,21 mg por dia.",
+                "source_ids": ["ms-melatonina"],
+            },
+        ],
+        "caution": (
+            "Autorizada como suplemento apenas para pessoas a partir de 19 anos. Não deve ser usada por "
+            "gestantes, lactantes e crianças, nem antes de atividades que exigem atenção, como dirigir. "
+            "Produtos com doses acima de 0,21 mg por dia não são permitidos como suplemento no Brasil."
+        ),
+        "requires_medical_supervision": False,
+        "source_ids": ["ms-melatonina", "anvisa-suplementos"],
+    },
+    {
         "id": "testosterona",
         "name": "Testosterona",
         "kind": "anabolic",
@@ -239,6 +376,61 @@ PRODUCTS = [
         "default_dose": None,
         "dose_ranges": [],
         "caution": "Não tem uso aprovado em humanos. " + ANABOLIC_CAUTION,
+        "requires_medical_supervision": True,
+        "source_ids": ["cfm-2333-2023", "anvisa-controlados", "sbem"],
+    },
+    {
+        "id": "estanozolol",
+        "name": "Estanozolol",
+        "kind": "anabolic",
+        "default_unit": "mg",
+        "default_dose": None,
+        "dose_ranges": [],
+        "caution": ANABOLIC_CAUTION + " Na forma oral, exige atenção especial ao fígado.",
+        "requires_medical_supervision": True,
+        "source_ids": ["cfm-2333-2023", "anvisa-controlados", "sbem"],
+    },
+    {
+        "id": "boldenona",
+        "name": "Boldenona",
+        "kind": "anabolic",
+        "default_unit": "mg",
+        "default_dose": None,
+        "dose_ranges": [],
+        "caution": "Não tem uso aprovado em humanos. " + ANABOLIC_CAUTION,
+        "requires_medical_supervision": True,
+        "source_ids": ["cfm-2333-2023", "anvisa-controlados", "sbem"],
+    },
+    {
+        "id": "metandrostenolona",
+        "name": "Metandrostenolona",
+        "kind": "anabolic",
+        "default_unit": "mg",
+        "default_dose": None,
+        "dose_ranges": [],
+        "caution": ANABOLIC_CAUTION + " Por ser oral, exige atenção especial ao fígado.",
+        "requires_medical_supervision": True,
+        "source_ids": ["cfm-2333-2023", "anvisa-controlados", "sbem"],
+    },
+    {
+        "id": "oximetolona",
+        "name": "Oximetolona",
+        "kind": "anabolic",
+        "default_unit": "mg",
+        "default_dose": None,
+        "dose_ranges": [],
+        "caution": ANABOLIC_CAUTION + " Por ser oral, exige atenção especial ao fígado.",
+        "requires_medical_supervision": True,
+        "source_ids": ["cfm-2333-2023", "anvisa-controlados", "sbem"],
+    },
+    {
+        "id": "drostanolona",
+        "name": "Drostanolona",
+        "kind": "anabolic",
+        "default_unit": "mg",
+        "default_dose": None,
+        "dose_ranges": [],
+        "caution": ANABOLIC_CAUTION,
         "requires_medical_supervision": True,
         "source_ids": ["cfm-2333-2023", "anvisa-controlados", "sbem"],
     },
