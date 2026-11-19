@@ -15,7 +15,8 @@ def test_products_are_seeded_and_paginated(client):
 
 def test_products_filter_by_kind_and_search_without_accents(client):
     anabolics = client.get("/api/v1/catalog/products/", {"kind": "anabolic"}).data["results"]
-    assert {p["id"] for p in anabolics} == {"testosterona", "nandrolona", "oxandrolona", "trembolona"}
+    expected = {p["id"] for p in PRODUCTS if p["kind"] == "anabolic"}
+    assert {p["id"] for p in anabolics} == expected
     assert all(p["requires_medical_supervision"] for p in anabolics)
 
     found = client.get("/api/v1/catalog/products/", {"search": "omega"}).data["results"]
