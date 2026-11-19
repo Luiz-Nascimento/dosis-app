@@ -50,3 +50,13 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Painel de risco e relatório semanal de sintomas:** Escrita assistida dos casos de uso `BuildRiskPanel` e `BuildWeeklySymptomReport` e das duas telas, com testes unitários.
 * **Verificação feita pela IA:** execução dos testes e do analisador, compilação do APK de depuração e conferência visual das telas renderizadas em imagem.
 * **Limitações da IA:** a IA não executou o app em um celular. O disparo real das notificações no aparelho precisa ser validado pelo aluno.
+
+
+## 📅 Histórico de Contribuições (19/11)
+### Catálogo: novos suplementos e anabolizantes
+
+* **Conteúdo do catálogo:** Os novos suplementos, anabolizantes e fontes, e a mudança no teste, foram escritos pelo aluno. A IA não escreveu nem revisou as doses, os textos de cuidado ou as fontes citadas.
+* **Versionamento:** A IA conferiu se havia outras alterações locais, levou as alterações para uma branch nova criada a partir da `main`, fez os commits só dos arquivos combinados, enviou a branch e abriu o pull request.
+* **Verificação feita pela IA:** Execução dos testes do catálogo no backend (`python -m pytest tests/unit/apps/catalog`, 7 testes passando).
+* **Documentação:** Escrita assistida da versão 0.11 do CHANGELOG e deste registro.
+* **Limitações da IA:** A IA não conferiu se as doses e os limites batem com as fontes, nem se os links ainda funcionam. Isso precisa ser validado pelo aluno.

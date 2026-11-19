@@ -172,3 +172,19 @@ Em **requisitos.md** foi adicionado:
 
 ### Testes
 * 10 testes novos em `test/domain/manage_routine_test.dart` (casos de uso, busca do catálogo fake e as chamadas HTTP de adicionar, remover e buscar).
+
+## [0.11] — 19/11/2026
+
+### Catálogo: novos suplementos e anabolizantes
+
+* **4 suplementos novos** no catálogo do backend (`backend/apps/catalog/content.py`), cada um com faixa de dose, cuidados e fontes:
+  * **Cafeína:** 200 a 400 mg por tomada antes do treino (3 a 6 mg/kg, cerca de 60 minutos antes), com limite de 400 mg por dia somando todas as fontes.
+  * **Beta-alanina:** 4 a 6 g por dia, divididos em tomadas de até 1,6 g. Avisa que o formigamento é comum e inofensivo.
+  * **Caseína:** 30 a 40 g antes de dormir. Avisa sobre alergia à proteína do leite.
+  * **Melatonina:** até 0,21 mg por dia, o limite da ANVISA para suplementos, permitida só a partir de 19 anos.
+* **5 anabolizantes novos:** Estanozolol, Boldenona, Metandrostenolona, Oximetolona e Drostanolona. Todos exigem acompanhamento médico, não têm faixa de dose e usam o aviso padrão de anabolizantes. Os orais têm um aviso extra sobre o fígado, e a Boldenona avisa que não tem uso aprovado em humanos.
+* **4 fontes novas:** ISSN sobre cafeína (2021), EFSA sobre a segurança da cafeína (2015), ISSN sobre beta-alanina (2015) e Ministério da Saúde/ANVISA sobre melatonina.
+
+### Testes
+* O teste `test_products_filter_by_kind_and_search_without_accents` agora monta a lista de anabolizantes esperados a partir de `PRODUCTS`, em vez de usar uma lista fixa. Assim, ele não quebra quando o catálogo ganha itens novos.
+* Os 7 testes de `tests/unit/apps/catalog` passam.
