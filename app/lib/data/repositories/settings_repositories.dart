@@ -39,6 +39,16 @@ class SecureSettingsRepository implements SettingsRepository {
       // Segue valendo em memória.
     }
   }
+
+  @override
+  Future<void> clear() async {
+    _cached = const UserSettings();
+    try {
+      await _storage.delete(key: _key);
+    } catch (_) {
+      // Armazenamento indisponível: o padrão em memória já vale.
+    }
+  }
 }
 
 /// Preferências em memória, para os testes.
@@ -52,4 +62,7 @@ class FakeSettingsRepository implements SettingsRepository {
 
   @override
   Future<void> save(UserSettings settings) async => _settings = settings;
+
+  @override
+  Future<void> clear() async => _settings = const UserSettings();
 }

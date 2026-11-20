@@ -16,6 +16,7 @@ import '../domain/usecases/get_supplement_history.dart';
 import '../domain/usecases/get_today_stack.dart';
 import '../domain/usecases/register_dose.dart';
 import '../domain/usecases/register_symptoms.dart';
+import '../domain/usecases/sign_out.dart';
 import '../data/models/auth.dart';
 import '../data/models/settings.dart';
 import '../domain/usecases/hydration_goals.dart';
@@ -47,7 +48,10 @@ final getSupplementHistoryProvider = Provider<GetSupplementHistory>((ref) {
   return GetSupplementHistory(deps.doses, deps.catalog);
 });
 
-final todayStackProvider = FutureProvider<List<RoutineItem>>((ref) => ref.watch(getTodayStackProvider)());
+final todayStackProvider = FutureProvider<List<RoutineItem>>((ref) {
+  _userData(ref);
+  return ref.watch(getTodayStackProvider)();
+});
 
 // ---- Adicionar à rotina ----
 
@@ -72,7 +76,10 @@ final catalogSearchProvider = FutureProvider.autoDispose.family<PageResult<Produ
         pageSize: catalogPageSize,
       ),
 );
-final doseHistoryProvider = FutureProvider<List<DoseLog>>((ref) => ref.watch(getDoseHistoryProvider)());
+final doseHistoryProvider = FutureProvider<List<DoseLog>>((ref) {
+  _userData(ref);
+  return ref.watch(getDoseHistoryProvider)();
+});
 
 /// Histórico por suplemento dos últimos N dias (o parâmetro é o número de dias).
 final supplementHistoryProvider = FutureProvider.family<List<SupplementHistory>, int>((ref, days) {
@@ -95,6 +102,16 @@ final tabIndexProvider = NotifierProvider<TabIndex, int>(TabIndex.new);
 final authRepositoryProvider =
     Provider<AuthRepository>((ref) => ref.watch(dependenciesProvider).auth);
 
+final signOutProvider = Provider<SignOut>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return SignOut(deps.auth, deps.settings, deps.reminders);
+});
+
+/// Marca um provider como dado da conta: ele é refeito quando alguém entra ou sai.
+/// Sem isso, a próxima conta a entrar no aparelho veria os dados guardados da anterior.
+/// Quem depende desses providers (histórico, painel, recomendações...) é refeito junto.
+void _userData(Ref ref) => ref.watch(sessionProvider);
+
 /// `true` quando há sessão aberta. Decide entre a tela de boas-vindas e o app.
 class Session extends AsyncNotifier<bool> {
   @override
@@ -102,8 +119,9 @@ class Session extends AsyncNotifier<bool> {
 
   void signedIn() => state = const AsyncData(true);
 
+  /// Sai da conta e apaga do aparelho os lembretes e as preferências da pessoa.
   Future<void> signOut() async {
-    await ref.read(authRepositoryProvider).signOut();
+    await ref.read(signOutProvider)();
     ref.read(tabIndexProvider.notifier).select(0);
     state = const AsyncData(false);
   }
@@ -138,7 +156,10 @@ final updateSettingsProvider = Provider<UpdateSettings>((ref) {
 /// Preferências do aparelho. `save` valida, reagenda os lembretes e atualiza quem estiver ouvindo.
 class Settings extends AsyncNotifier<UserSettings> {
   @override
-  Future<UserSettings> build() => ref.read(dependenciesProvider).settings.load();
+  Future<UserSettings> build() {
+    _userData(ref);
+    return ref.read(dependenciesProvider).settings.load();
+  }
 
   Future<SettingsUpdate> save(UserSettings settings) async {
     final update = await ref.read(updateSettingsProvider)(settings);
@@ -151,6 +172,7 @@ final settingsProvider = AsyncNotifierProvider<Settings, UserSettings>(Settings.
 
 /// Progresso de hoje e dos últimos 7 dias. Recalcula quando a meta muda.
 final hydrationProgressProvider = FutureProvider<HydrationProgress>((ref) {
+  _userData(ref);
   ref.watch(settingsProvider);
   return ref.watch(getHydrationProgressProvider)();
 });
@@ -167,9 +189,10 @@ final buildWeeklySymptomReportProvider = Provider<BuildWeeklySymptomReport>(
 
 /// Sintomas registrados, mais recentes primeiro. Invalide depois de gravar um
 /// registro novo: o painel, o relatório e a aba Registros dependem dele.
-final symptomHistoryProvider = FutureProvider<List<SymptomLog>>(
-  (ref) => ref.watch(dependenciesProvider).symptoms.list(limit: 500),
-);
+final symptomHistoryProvider = FutureProvider<List<SymptomLog>>((ref) {
+  _userData(ref);
+  return ref.watch(dependenciesProvider).symptoms.list(limit: 500);
+});
 
 /// Painel dos últimos 7 dias. Recalcula quando entra uma dose ou um sintoma novo.
 final riskPanelProvider = FutureProvider<RiskPanel>((ref) {

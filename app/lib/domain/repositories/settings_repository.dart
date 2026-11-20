@@ -6,4 +6,7 @@ abstract interface class SettingsRepository {
   Future<UserSettings> load();
 
   Future<void> save(UserSettings settings);
+
+  /// Apaga as preferências salvas (ao sair da conta). Depois disso, [load] devolve o padrão.
+  Future<void> clear();
 }
