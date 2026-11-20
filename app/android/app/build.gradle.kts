@@ -34,6 +34,16 @@ android {
         versionName = flutter.versionName
     }
 
+    packaging {
+        jniLibs {
+            // RNF09 (APK de no máximo 20 MB): com minSdk 26, o padrão é guardar
+            // as bibliotecas nativas (libflutter.so e libapp.so) sem compressão.
+            // Comprimidas, elas são extraídas na instalação e o APK fica com
+            // menos da metade do tamanho.
+            useLegacyPackaging = true
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
