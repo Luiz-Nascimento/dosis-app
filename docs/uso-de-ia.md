@@ -77,3 +77,13 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Versionamento:** A IA criou a branch a partir da `main` atualizada, fez o commit só dos arquivos da correção (deixando de fora as alterações locais do aluno em `app/.metadata`, `app/analysis_options.yaml` e `app/linux/`), enviou a branch e abriu o pull request.
 * **Validação humana:** O aluno testou a correção no emulador antes do commit.
 * **Limitações da IA:** O caso em que a dose chega ao servidor e a resposta se perde não foi reproduzido manualmente, só nos testes unitários. Os outros bugs apontados na revisão ficaram para os próximos pull requests.
+
+## 📅 Histórico de Contribuições (19/11 — dados entre contas)
+### Correção dos dados de uma conta aparecendo na próxima
+
+* **Análise:** A IA identificou, na revisão do projeto, que os providers de dados do usuário não dependiam da sessão e que os lembretes e as preferências ficavam no aparelho depois do logout.
+* **Correção:** Escrita assistida do caso de uso `SignOut`, do `clear()` no `SettingsRepository` e da ligação dos providers de dados do usuário com a sessão, com testes unitários.
+* **Verificação feita pela IA:** Execução do analisador e dos testes, e confirmação de que os testes novos falham com o código anterior e passam com a correção.
+* **Decisão humana:** O aluno aprovou que sair da conta volte as preferências ao padrão e testou a correção no emulador antes do commit.
+* **Versionamento:** A IA criou a branch a partir da `main` atualizada, fez o commit só dos arquivos da correção (deixando de fora as alterações locais do aluno), enviou a branch e abriu o pull request.
+* **Limitações da IA:** A IA não conferiu no aparelho se um lembrete agendado deixa de disparar depois do logout; isso foi coberto só pelo teste unitário do `SignOut`.

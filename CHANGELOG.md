@@ -213,3 +213,18 @@ Em **requisitos.md** foi adicionado:
 * 5 testes novos em `app/test/data/dose_repository_test.dart` (id enviado no POST, id novo quando não informado, 409 devolvendo a dose gravada, outros erros repassados à tela e repositório fake sem duplicar).
 * 1 teste novo em `app/test/domain/usecases_test.dart` (o caso de uso repassa o id da tentativa).
 * Os 105 testes do app passam e o `flutter analyze` não aponta nenhum problema novo.
+
+## [0.14] — 19/11/2026
+
+### Correção: dados de uma conta aparecendo na próxima
+
+* **Bug:** ao sair de uma conta e entrar em outra no mesmo aparelho, o app continuava mostrando o stack, as doses, os sintomas, a hidratação e as preferências da conta anterior até ser fechado, porque esses dados ficavam guardados em memória e não dependiam da sessão. Além disso, os lembretes agendados (com os nomes dos itens da rotina) continuavam disparando depois do logout, e a meta de água calculada pelo peso passava para a próxima conta.
+* Novo caso de uso `SignOut` na camada **Domain** (`app/lib/domain/usecases/sign_out.dart`): encerra a sessão, cancela todos os lembretes agendados e apaga as preferências salvas no aparelho. A sessão é encerrada primeiro, e uma falha em uma das limpezas não impede a outra.
+* `SettingsRepository` ganhou `clear()`: a versão real apaga a chave `dosis.settings` do armazenamento seguro e volta aos valores padrão.
+* Em `providers.dart`, o stack, as doses, os sintomas, o progresso de hidratação e as preferências passaram a depender da sessão (`_userData`) e são recarregados quando alguém entra ou sai. O histórico por suplemento, o painel de risco, o relatório semanal e as recomendações são recarregados junto.
+* **Decisão:** sair da conta volta a meta de água e os lembretes ao padrão, inclusive se a mesma pessoa entrar de novo. Guardar as preferências separadas por conta fica como melhoria futura.
+
+### Testes
+* 2 testes novos em `app/test/domain/sign_out_test.dart` (sair cancela os lembretes e limpa as preferências; uma falha no plugin de notificações não impede o resto).
+* 2 testes novos em `app/test/presentation/session_test.dart` (ao trocar de conta, a nova conta vê o próprio stack e a meta padrão). Com o `providers.dart` anterior, esses testes falham mostrando os dados da conta anterior.
+* Os 109 testes do app passam e o `flutter analyze` não aponta nenhum problema novo.
