@@ -18,7 +18,8 @@ class _Doses implements DoseRepository {
   }
 
   @override
-  Future<DoseLog> register({String? id, required String routineItemId, double? amount, DateTime? takenAt, String? notes}) =>
+  Future<DoseLog> register(
+          {String? id, required String routineItemId, double? amount, Protocol? protocol, DateTime? takenAt, String? notes}) =>
       throw UnimplementedError();
 }
 

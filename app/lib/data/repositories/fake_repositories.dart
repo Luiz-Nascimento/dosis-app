@@ -110,6 +110,7 @@ class FakeDoseRepository implements DoseRepository {
     String? id,
     required String routineItemId,
     double? amount,
+    Protocol? protocol,
     DateTime? takenAt,
     String? notes,
   }) async {
@@ -124,7 +125,7 @@ class FakeDoseRepository implements DoseRepository {
       productId: item.productId,
       name: item.name,
       kind: item.kind,
-      protocol: item.protocol,
+      protocol: protocol ?? item.protocol,
       amount: amount ?? item.doseAmount ?? 0,
       unit: item.doseUnit,
       takenAt: takenAt ?? DateTime.now(),

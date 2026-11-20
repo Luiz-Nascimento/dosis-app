@@ -1,6 +1,7 @@
 import '../../core/api/api_exception.dart';
 import '../../core/ids.dart';
 import '../../domain/repositories/dose_repository.dart';
+import '../models/enums.dart';
 import '../models/tracking.dart';
 import '../services/tracking_services.dart';
 
@@ -18,6 +19,7 @@ class ApiDoseRepository implements DoseRepository {
     String? id,
     required String routineItemId,
     double? amount,
+    Protocol? protocol,
     DateTime? takenAt,
     String? notes,
   }) async {
@@ -27,6 +29,7 @@ class ApiDoseRepository implements DoseRepository {
         id: doseId,
         routineItemId: routineItemId,
         amount: amount,
+        protocol: protocol,
         takenAt: takenAt,
         notes: notes,
       );

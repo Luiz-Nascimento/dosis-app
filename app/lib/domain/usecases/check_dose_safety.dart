@@ -114,9 +114,9 @@ class CheckDoseSafety {
       totalToday: perDay ? total : null,
       message: perDay && total > dose
           ? 'Somando as doses de hoje, você chegaria a ${_fmt(total)} $unit de ${product.name}, '
-              'acima da faixa usual de ${protocol.label.toLowerCase()} ($limits por dia).'
+              'acima da faixa usual de ${range.protocol.label.toLowerCase()} ($limits por dia).'
           : 'A dose informada (${_fmt(total)} $unit) está acima da faixa usual de '
-              '${protocol.label.toLowerCase()} ($limits ${perDay ? 'por dia' : 'por tomada'}).',
+              '${range.protocol.label.toLowerCase()} ($limits ${perDay ? 'por dia' : 'por tomada'}).',
       caution: product.caution,
       sources: range.sources.isEmpty ? product.sources : range.sources,
     );

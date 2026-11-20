@@ -94,12 +94,28 @@ class Product {
   final bool requiresMedicalSupervision;
   final List<Source> sources;
 
-  /// Faixa de referência do protocolo, se existir (anabolizantes não têm).
+  /// Protocolos de uso que fazem sentido para o produto, na ordem do catálogo.
+  ///
+  /// São os protocolos que têm faixa de referência, para que o alerta de dose
+  /// funcione em qualquer um que o usuário escolher (ex.: creatina tem uso
+  /// contínuo e saturação; whey, só uso contínuo; cafeína, só quando
+  /// necessário). Sem faixa, vale o protocolo típico do tipo: ciclo para
+  /// anabolizantes e uso contínuo para suplementos.
+  List<Protocol> get protocols {
+    final withRange = <Protocol>{for (final range in doseRanges) range.protocol};
+    if (withRange.isNotEmpty) return withRange.toList();
+    return [kind == ProductKind.anabolic ? Protocol.cycle : Protocol.continuous];
+  }
+
+  /// Faixa de referência do protocolo. Se o produto não usa esse protocolo
+  /// (ex.: dose antiga de whey gravada como saturação), vale a faixa do
+  /// protocolo principal do produto, para a dose não ficar sem comparação.
+  /// Produtos sem faixa (ex.: anabolizantes) devolvem `null`.
   DoseRange? rangeFor(Protocol protocol) {
     for (final range in doseRanges) {
       if (range.protocol == protocol) return range;
     }
-    return null;
+    return doseRanges.firstOrNull;
   }
 }
 

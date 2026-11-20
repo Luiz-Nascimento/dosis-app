@@ -16,7 +16,8 @@ class _DoseHistory implements DoseRepository {
       logs.where((l) => (from == null || !l.takenAt.isBefore(from)) && (to == null || !l.takenAt.isAfter(to))).toList();
 
   @override
-  Future<DoseLog> register({String? id, required String routineItemId, double? amount, DateTime? takenAt, String? notes}) =>
+  Future<DoseLog> register(
+          {String? id, required String routineItemId, double? amount, Protocol? protocol, DateTime? takenAt, String? notes}) =>
       throw UnimplementedError();
 }
 
@@ -116,6 +117,14 @@ void main() {
 
       expect(result.isAboveRange, isTrue);
       expect(result.message, contains('por tomada'));
+    });
+
+    test('protocolo que o whey não usa (saturação) ainda alerta pela faixa de uso contínuo', () async {
+      final result = await check()(item: whey, amount: 60, protocol: Protocol.loading, takenAt: today);
+
+      expect(result.isAboveRange, isTrue);
+      expect(result.range?.protocol, Protocol.continuous);
+      expect(result.message, contains('faixa usual de uso contínuo (20 a 40 g por tomada)'));
     });
 
     test('duas tomadas de 30 g no dia não somam (a faixa é por tomada)', () async {

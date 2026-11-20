@@ -260,3 +260,33 @@ Em **requisitos.md** foi adicionado:
 ### Testes
 * Os 109 testes do app passam e o `flutter analyze` não aponta nenhum problema novo.
 * O APK de release x86_64 foi instalado no emulador (Pixel 6, Android 15): o app abriu, carregou as bibliotecas comprimidas e mostrou a tela inicial com os dados da API publicada.
+
+## [0.16] — 19/11/2026
+
+### Correção: protocolos de uso que não fazem sentido para o produto
+
+* **Bug:** a tela **Registrar dose** oferecia os quatro protocolos (uso contínuo, saturação, ciclo e quando necessário) para qualquer item, como saturação para whey ou ciclo para creatina. O catálogo só tem faixa de dose para alguns pares de produto e protocolo, então escolher um protocolo sem faixa desligava o alerta: 60 g de whey em "saturação" não geravam aviso nenhum.
+* **Bug:** o protocolo escolhido na tela só era usado no alerta. A dose era gravada com o protocolo do item da rotina.
+* A tela agora mostra só os protocolos que têm faixa de referência no catálogo (`Product.protocols`), então qualquer protocolo escolhido tem alerta:
+
+| Produto | Protocolos |
+| --- | --- |
+| Creatina | Uso contínuo e Saturação |
+| Whey, caseína, ômega 3, beta-alanina e melatonina | Uso contínuo |
+| Cafeína | Quando necessário |
+| Anabolizantes | Ciclo |
+| Suplementos sem faixa (BCAA, hipercalórico, multivitamínico) | Uso contínuo |
+| Item cadastrado à mão | Uso contínuo ou Quando necessário (anabolizante: Ciclo) |
+
+* Quando há uma opção só, a tela mostra o nome do protocolo, sem lista para escolher. Se o protocolo salvo no item não serve para o produto (ex.: cafeína salva como uso contínuo), a tela já começa no protocolo certo.
+* Novo caso de uso `GetDoseProtocols` na camada **Domain** (`app/lib/domain/usecases/get_dose_protocols.dart`). Se o catálogo não responder, vale a regra do item cadastrado à mão, e a dose continua podendo ser registrada.
+* O protocolo escolhido passa a ser enviado no registro: `DoseRepository.register` e `RegisterDose` ganharam o parâmetro `protocol`. O backend já aceitava esse campo, então a API não mudou.
+* `Product.rangeFor` passa a devolver a faixa principal do produto quando ele não usa o protocolo informado. Assim, doses antigas gravadas com um protocolo que não se aplica (ex.: cafeína como uso contínuo) passam a ser comparadas com a faixa no histórico, no painel de risco e nas recomendações.
+* **Decisão:** os protocolos de cada produto vêm das faixas de `backend/apps/catalog/content.py` (a regra foi anotada no próprio arquivo). Para oferecer um protocolo novo a um produto, basta cadastrar a faixa dele.
+
+### Testes
+* 10 testes novos em `app/test/domain/get_dose_protocols_test.dart` (protocolos da creatina, do whey, de anabolizantes, de suplementos sem faixa, de itens cadastrados à mão e sem resposta do catálogo, e a faixa principal no `rangeFor`).
+* 1 teste novo em `app/test/domain/check_dose_safety_test.dart` (60 g de whey em saturação alertam pela faixa de uso contínuo). Com o código anterior, esse teste falha.
+* 3 testes novos do protocolo gravado com a dose (`RegisterDose`, `ApiDoseRepository` e `FakeDoseRepository`).
+* Os 123 testes do app passam e o `flutter analyze` não aponta nenhum problema novo.
+* Testado num celular Android, em modo de dados falsos: a creatina mostra uso contínuo e saturação, o whey mostra só uso contínuo, a testosterona mostra só ciclo, e 60 g de whey geram o alerta com a faixa de uso contínuo.
