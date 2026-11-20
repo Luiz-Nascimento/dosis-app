@@ -97,3 +97,14 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Decisão humana:** O aluno decidiu que o app deve usar a API publicada por padrão, deixando o `--dart-define` só para quem testa com o Django local, e aprovou a compressão das bibliotecas nativas.
 * **Versionamento:** A IA criou a branch a partir da `main` atualizada, fez os commits só dos arquivos desta alteração (deixando de fora um arquivo local do aluno), enviou a branch e abriu o pull request.
 * **Limitações da IA:** O APK foi testado só no emulador x86_64, não em um celular arm64 de verdade. Login, cadastro e registro de dados no APK de release não foram testados.
+
+## 📅 Histórico de Contribuições (19/11 — protocolos por produto)
+### Protocolos de uso de acordo com o suplemento
+
+* **Análise:** A partir do relato do aluno (saturação aparecendo para whey, ciclo para creatina e nenhum alerta fora do uso contínuo), a IA leu a tela "Registrar dose", o caso de uso do alerta e o catálogo do backend. Ela identificou que a tela listava todos os protocolos, que o alerta só funciona nos protocolos com faixa no catálogo e que o protocolo escolhido não era gravado com a dose.
+* **Correção:** Escrita assistida de `Product.protocols`, do caso de uso `GetDoseProtocols`, da nova lista de protocolos na tela, do envio do protocolo no registro da dose e do ajuste em `Product.rangeFor`, com testes unitários.
+* **Verificação feita pela IA:** Execução do analisador e dos testes, confirmação de que o teste do whey em saturação falha com o código anterior e teste da tela no celular do aluno, em modo de dados falsos (creatina, whey e testosterona), sem gravar nada na API publicada.
+* **Decisão humana:** O aluno definiu a regra (cada produto mostra só os protocolos que fazem sentido, como saturação para creatina e ciclo para anabolizantes) e autorizou o teste no próprio celular.
+* **Proposta da IA, a revisar pela equipe:** Usar as faixas do catálogo como fonte dos protocolos de cada produto, para que todo protocolo oferecido tenha alerta, e oferecer uso contínuo ou quando necessário para itens cadastrados à mão.
+* **Versionamento:** A IA atualizou a branch com a `main` depois do merge do pull request anterior, fez os commits só dos arquivos desta correção, enviou a branch e abriu o pull request.
+* **Limitações da IA:** O teste no celular usou o catálogo em memória, que não tem a cafeína. O caso da cafeína e o dos itens cadastrados à mão foram cobertos só pelos testes unitários. As doses já gravadas na API continuam com o protocolo antigo; a correção muda só a forma como elas são comparadas.
