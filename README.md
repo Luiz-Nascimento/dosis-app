@@ -50,6 +50,17 @@ A arquitetura do app está explicada em [`docs/arquitetura.md`](docs/arquitetura
 
 ## Como executar
 
+O app usa por padrão a API publicada em `https://api-dosis.duckdns.org`:
+
+```bash
+cd app
+flutter pub get
+flutter run                               # usa a API publicada
+flutter run --dart-define=USE_API=false   # usa dados falsos em memória, sem backend
+```
+
+Para testar com o backend rodando no computador:
+
 ```bash
 # Backend
 cd backend
@@ -59,11 +70,9 @@ pip install -r requirements.txt
 cp .env.example .env              # Windows: copy .env.example .env
 python manage.py runserver 0.0.0.0:8000
 
-# App (em outro terminal)
+# App (em outro terminal; no emulador Android, 10.0.2.2 é o computador)
 cd app
-flutter pub get
-flutter run                              # usa dados falsos em memória
-flutter run --dart-define=USE_API=true   # usa a API Django
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
 ```
 
 Testes: `python -m pytest` em `backend/` e `flutter test` em `app/`.

@@ -24,7 +24,7 @@ python manage.py runserver 0.0.0.0:8000
 ```
 
 * Swagger: http://localhost:8000/api/docs/ (ReDoc em `/api/redoc/`, OpenAPI em `/api/schema/`)
-* No emulador Android, o backend fica em `http://10.0.2.2:8000`.
+* No emulador Android, o backend fica em `http://10.0.2.2:8000`. O app usa a API publicada por padrão; para usar o backend local, rode `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1`.
 
 ### Testando no Swagger
 

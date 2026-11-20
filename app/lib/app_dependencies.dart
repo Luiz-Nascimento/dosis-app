@@ -42,7 +42,7 @@ class AppDependencies {
     required this.reminders,
   });
 
-  /// API Django (`--dart-define=USE_API=true`).
+  /// API Django (padrão).
   factory AppDependencies.create({DosisApi? api}) {
     final dosisApi = api ?? DosisApi.secure();
     return AppDependencies(
@@ -59,7 +59,7 @@ class AppDependencies {
     );
   }
 
-  /// Dados em memória: o app roda sem backend.
+  /// Dados em memória: o app roda sem backend (`--dart-define=USE_API=false`).
   factory AppDependencies.fake() {
     final routine = FakeRoutineRepository();
     return AppDependencies(
