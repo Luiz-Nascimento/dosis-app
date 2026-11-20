@@ -6,6 +6,12 @@ Cada faixa aponta para a fonte que o alerta deve citar. Para anabolizantes não
 existe faixa "segura" de uso sem prescrição, então eles não têm faixa e são
 marcados como de uso exclusivo com acompanhamento médico.
 
+Na tela "Registrar dose", o app oferece para cada produto só os protocolos que
+têm faixa aqui (ex.: creatina, uso contínuo e saturação; whey, só uso contínuo),
+para que o alerta funcione em qualquer um deles. Produtos sem faixa ficam com
+ciclo (anabolizantes) ou uso contínuo (suplementos). Para oferecer outro
+protocolo a um produto, cadastre a faixa dele.
+
 Revise este arquivo com cuidado antes de mudar valores: é o que o usuário lê.
 """
 

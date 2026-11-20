@@ -1,3 +1,4 @@
+import '../../data/models/enums.dart';
 import '../../data/models/tracking.dart';
 import '../repositories/dose_repository.dart';
 
@@ -12,12 +13,20 @@ class RegisterDose {
     String? id,
     required String routineItemId,
     double? amount,
+    Protocol? protocol,
     DateTime? takenAt,
     String? notes,
   }) {
     if (amount != null && amount <= 0) {
       throw ArgumentError.value(amount, 'amount', 'A dose deve ser maior que zero.');
     }
-    return _doses.register(id: id, routineItemId: routineItemId, amount: amount, takenAt: takenAt, notes: notes);
+    return _doses.register(
+      id: id,
+      routineItemId: routineItemId,
+      amount: amount,
+      protocol: protocol,
+      takenAt: takenAt,
+      notes: notes,
+    );
   }
 }

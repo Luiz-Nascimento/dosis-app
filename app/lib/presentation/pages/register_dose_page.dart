@@ -49,6 +49,10 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
 
   void _newAttempt() => _attemptId = null;
 
+  /// Protocolo escolhido, se o produto usa esse protocolo; senão, o principal do
+  /// produto (ex.: item de cafeína salvo como uso contínuo vira "quando necessário").
+  Protocol _protocolAmong(List<Protocol> options) => options.contains(_protocol) ? _protocol : options.first;
+
   void _select(RoutineItem item) {
     setState(() {
       _selectedId = item.id;
@@ -188,13 +192,15 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
 
     setState(() => _submitting = true);
     try {
+      final protocol = _protocolAmong(await ref.read(doseProtocolsProvider(item).future));
+
       // Avaliação de segurança com as faixas do catálogo e as doses do dia (KAN-11).
       // Se o catálogo não responder (ex.: sem internet), a dose é registrada sem o
       // alerta: o aviso orienta, ele não pode impedir o registro.
       DoseSafetyCheck? safetyCheck;
       try {
         safetyCheck = await ref
-            .read(checkDoseSafetyProvider)(item: item, amount: amount, protocol: _protocol, takenAt: takenAt);
+            .read(checkDoseSafetyProvider)(item: item, amount: amount, protocol: protocol, takenAt: takenAt);
       } catch (_) {
         safetyCheck = null;
       }
@@ -205,7 +211,13 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
 
       final id = _attemptId ??= newId();
       try {
-        await ref.read(registerDoseProvider)(id: id, routineItemId: item.id, amount: amount, takenAt: takenAt);
+        await ref.read(registerDoseProvider)(
+          id: id,
+          routineItemId: item.id,
+          amount: amount,
+          protocol: protocol,
+          takenAt: takenAt,
+        );
         ref.invalidate(doseHistoryProvider);
         if (!mounted) return;
         setState(() {
@@ -233,6 +245,8 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
     final items = ref.watch(todayStackProvider).value ?? const <RoutineItem>[];
     final visible = items.where((i) => i.name.toLowerCase().contains(_query.toLowerCase())).toList();
     final selected = items.where((i) => i.id == _selectedId).firstOrNull;
+    // Só os protocolos que fazem sentido para o produto (null enquanto carrega).
+    final protocols = selected == null ? null : ref.watch(doseProtocolsProvider(selected)).value;
 
     return Scaffold(
       appBar: const DosisTopBar(),
@@ -261,26 +275,14 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
             const SizedBox(height: 24),
             const SectionTitle('Protocolo de utilização'),
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<Protocol>(
-                  value: _protocol,
-                  isExpanded: true,
-                  dropdownColor: AppColors.surface,
-                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.yellow, size: 32),
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: Colors.white),
-                  items: [
-                    for (final p in Protocol.values) DropdownMenuItem(value: p, child: Text(p.label)),
-                  ],
-                  onChanged: (p) => setState(() => _protocol = p ?? _protocol),
-                ),
-              ),
+            _ProtocolField(
+              options: protocols,
+              value: protocols == null ? _protocol : _protocolAmong(protocols),
+              // Protocolo diferente = registro novo.
+              onChanged: (p) => setState(() {
+                _protocol = p;
+                _newAttempt();
+              }),
             ),
             const SizedBox(height: 20),
             Row(
@@ -366,6 +368,65 @@ class _RegisterDosePageState extends ConsumerState<RegisterDosePage> {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Protocolo de utilização: lista para escolher quando o produto tem mais de um
+/// protocolo, ou só o nome do protocolo quando tem um.
+class _ProtocolField extends StatelessWidget {
+  const _ProtocolField({required this.options, required this.value, required this.onChanged});
+
+  /// `null` enquanto os protocolos do produto carregam.
+  final List<Protocol>? options;
+  final Protocol value;
+  final ValueChanged<Protocol> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    const style = TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: Colors.white);
+    final options = this.options;
+
+    // Mesma altura da lista (kMinInteractiveDimension), para a tela não pular ao trocar de item.
+    final Widget child;
+    if (options == null) {
+      child = const SizedBox(
+        height: kMinInteractiveDimension,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
+      );
+    } else if (options.length == 1) {
+      child = SizedBox(
+        height: kMinInteractiveDimension,
+        child: Align(alignment: Alignment.centerLeft, child: Text(options.single.label, style: style)),
+      );
+    } else {
+      child = DropdownButtonHideUnderline(
+        child: DropdownButton<Protocol>(
+          value: value,
+          isExpanded: true,
+          dropdownColor: AppColors.surface,
+          icon: const Icon(Icons.arrow_drop_down, color: AppColors.yellow, size: 32),
+          style: style,
+          items: [for (final p in options) DropdownMenuItem(value: p, child: Text(p.label))],
+          onChanged: (p) {
+            if (p != null) onChanged(p);
+          },
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: child,
     );
   }
 }

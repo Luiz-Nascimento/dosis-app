@@ -10,16 +10,19 @@ class _FakeDoseRepository implements DoseRepository {
   String? lastId;
   String? lastRoutineItemId;
   double? lastAmount;
+  Protocol? lastProtocol;
 
   @override
   Future<DoseLog> register({
     String? id,
     required String routineItemId,
     double? amount,
+    Protocol? protocol,
     DateTime? takenAt,
     String? notes,
   }) async {
     lastId = id;
+    lastProtocol = protocol;
     lastRoutineItemId = routineItemId;
     lastAmount = amount;
     return DoseLog(
@@ -73,6 +76,14 @@ void main() {
       await RegisterDose(doses)(id: 'tentativa-1', routineItemId: 'r1', amount: 5);
 
       expect(doses.lastId, 'tentativa-1');
+    });
+
+    test('repassa o protocolo escolhido na tela', () async {
+      final doses = _FakeDoseRepository();
+
+      await RegisterDose(doses)(routineItemId: 'r1', amount: 20, protocol: Protocol.loading);
+
+      expect(doses.lastProtocol, Protocol.loading);
     });
 
     test('rejeita dose zero ou negativa sem chamar o repositório', () {

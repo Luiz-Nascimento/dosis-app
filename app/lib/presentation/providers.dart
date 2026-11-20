@@ -12,6 +12,7 @@ import '../domain/usecases/build_weekly_symptom_report.dart';
 import '../domain/usecases/calculate_hydration.dart';
 import '../domain/usecases/check_dose_safety.dart';
 import '../domain/usecases/get_dose_history.dart';
+import '../domain/usecases/get_dose_protocols.dart';
 import '../domain/usecases/get_supplement_history.dart';
 import '../domain/usecases/get_today_stack.dart';
 import '../domain/usecases/register_dose.dart';
@@ -42,6 +43,13 @@ final checkDoseSafetyProvider = Provider<CheckDoseSafety>((ref) {
   final deps = ref.watch(dependenciesProvider);
   return CheckDoseSafety(deps.catalog, deps.doses);
 });
+final getDoseProtocolsProvider =
+    Provider<GetDoseProtocols>((ref) => GetDoseProtocols(ref.watch(dependenciesProvider).catalog));
+
+/// Protocolos que fazem sentido para o item escolhido em "Registrar dose".
+final doseProtocolsProvider = FutureProvider.autoDispose.family<List<Protocol>, RoutineItem>(
+  (ref, item) => ref.watch(getDoseProtocolsProvider)(item),
+);
 
 final getSupplementHistoryProvider = Provider<GetSupplementHistory>((ref) {
   final deps = ref.watch(dependenciesProvider);
