@@ -50,6 +50,17 @@ A arquitetura do app está explicada em [`docs/arquitetura.md`](docs/arquitetura
 
 ## Como executar
 
+O app usa por padrão a API publicada em `https://api-dosis.duckdns.org`:
+
+```bash
+cd app
+flutter pub get
+flutter run                               # usa a API publicada
+flutter run --dart-define=USE_API=false   # usa dados falsos em memória, sem backend
+```
+
+Para testar com o backend rodando no computador:
+
 ```bash
 # Backend
 cd backend
@@ -59,14 +70,25 @@ pip install -r requirements.txt
 cp .env.example .env              # Windows: copy .env.example .env
 python manage.py runserver 0.0.0.0:8000
 
-# App (em outro terminal)
+# App (em outro terminal; no emulador Android, 10.0.2.2 é o computador)
 cd app
-flutter pub get
-flutter run                              # usa dados falsos em memória
-flutter run --dart-define=USE_API=true   # usa a API Django
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
 ```
 
 Testes: `python -m pytest` em `backend/` e `flutter test` em `app/`.
+
+### Gerar o APK
+
+O APK de entrega é o de release, um por arquitetura (RNF09: no máximo 20 MB):
+
+```bash
+cd app
+flutter build apk --release --split-per-abi
+# build/app/outputs/flutter-apk/app-arm64-v8a-release.apk     (~9 MB, celulares atuais)
+# build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk   (~8,6 MB, celulares 32 bits)
+```
+
+O APK de debug (`flutter run`) passa de 140 MB e não serve para medir o tamanho. O APK universal (`flutter build apk --release`, sem `--split-per-abi`) tem cerca de 25 MB porque leva as três arquiteturas.
 
 ## Documentação
 

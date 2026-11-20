@@ -6,7 +6,8 @@ import 'presentation/app.dart';
 import 'presentation/providers.dart';
 
 void main() {
-  const useApi = bool.fromEnvironment('USE_API');
+  // Usa a API por padrão; `--dart-define=USE_API=false` roda com dados em memória.
+  const useApi = bool.fromEnvironment('USE_API', defaultValue: true);
   final dependencies = useApi ? AppDependencies.create() : AppDependencies.fake();
 
   runApp(

@@ -87,3 +87,13 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Decisão humana:** O aluno aprovou que sair da conta volte as preferências ao padrão e testou a correção no emulador antes do commit.
 * **Versionamento:** A IA criou a branch a partir da `main` atualizada, fez o commit só dos arquivos da correção (deixando de fora as alterações locais do aluno), enviou a branch e abriu o pull request.
 * **Limitações da IA:** A IA não conferiu no aparelho se um lembrete agendado deixa de disparar depois do logout; isso foi coberto só pelo teste unitário do `SignOut`.
+
+## 📅 Histórico de Contribuições (19/11 — APK de entrega)
+### API publicada por padrão e redução do tamanho do APK
+
+* **Análise:** A pedido do aluno, a IA gerou os APKs de debug e de release e comparou o tamanho de cada um com o limite de 20 MB do RNF09. Ela explicou que o APK de debug não serve para essa medição e, listando os arquivos de dentro do APK de release, identificou que as bibliotecas nativas do Flutter, sem compressão e repetidas para três arquiteturas, ocupavam quase todo o espaço.
+* **Alterações:** Escrita assistida da troca da URL e do `USE_API` padrão, da opção `useLegacyPackaging` no `build.gradle.kts` e das instruções nos READMEs.
+* **Verificação feita pela IA:** Conferência de que a API publicada responde em HTTPS (`/api/v1/system/health/`), execução do analisador e dos testes, conferência de que a URL compilada no APK de release é a da API publicada, medição dos APKs antes e depois da compressão e instalação do APK de release no emulador para confirmar que o app abre. A IA não criou contas nem dados em produção.
+* **Decisão humana:** O aluno decidiu que o app deve usar a API publicada por padrão, deixando o `--dart-define` só para quem testa com o Django local, e aprovou a compressão das bibliotecas nativas.
+* **Versionamento:** A IA criou a branch a partir da `main` atualizada, fez os commits só dos arquivos desta alteração (deixando de fora um arquivo local do aluno), enviou a branch e abriu o pull request.
+* **Limitações da IA:** O APK foi testado só no emulador x86_64, não em um celular arm64 de verdade. Login, cadastro e registro de dados no APK de release não foram testados.

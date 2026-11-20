@@ -7,13 +7,16 @@ dados**: os services que consomem todos os endpoints do backend
 ## Rodando
 
 ```bash
-cd backend && python manage.py runserver 0.0.0.0:8000   # em outro terminal
 cd app
 flutter pub get
-flutter run                     # emulador Android: a API fica em http://10.0.2.2:8000
+flutter run                               # API publicada: https://api-dosis.duckdns.org/api/v1
+flutter run --dart-define=USE_API=false   # dados falsos em memória, sem backend
 ```
 
-Para outro servidor: `flutter run --dart-define=API_BASE_URL=https://.../api/v1`.
+Com o Django rodando no computador (`cd backend && python manage.py runserver 0.0.0.0:8000`):
+`flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1`. No
+emulador Android, `10.0.2.2` é o computador; num celular, use o IP do
+computador na rede.
 A tela inicial só confere se a API responde.
 
 ## Como usar

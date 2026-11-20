@@ -228,3 +228,35 @@ Em **requisitos.md** foi adicionado:
 * 2 testes novos em `app/test/domain/sign_out_test.dart` (sair cancela os lembretes e limpa as preferências; uma falha no plugin de notificações não impede o resto).
 * 2 testes novos em `app/test/presentation/session_test.dart` (ao trocar de conta, a nova conta vê o próprio stack e a meta padrão). Com o `providers.dart` anterior, esses testes falham mostrando os dados da conta anterior.
 * Os 109 testes do app passam e o `flutter analyze` não aponta nenhum problema novo.
+
+## [0.15] — 19/11/2026
+
+### App usa a API publicada por padrão
+
+* O app passou a usar por padrão a API publicada em `https://api-dosis.duckdns.org/api/v1`. Antes, `flutter run` usava dados falsos em memória e, com `USE_API=true`, apontava para `http://10.0.2.2:8000`, endereço que só funciona no emulador com o Django rodando no computador.
+* `USE_API` passou a valer `true` por padrão (`app/lib/main.dart`), e a URL padrão de `ApiConfig.baseUrl` agora é a da API publicada (`app/lib/core/api/api_config.dart`).
+* Para testar com o Django local: `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1`. Para rodar sem backend: `flutter run --dart-define=USE_API=false`.
+* Como a API publicada usa HTTPS, o APK de release consegue acessá-la sem liberar o tráfego HTTP no manifesto (`usesCleartextTraffic` continua só no manifesto de debug).
+* **Atenção:** `flutter run` sem parâmetros agora cria contas e dados no Firebase de produção. Para testes que geram dados de teste, use o Django local ou `USE_API=false`.
+* Os READMEs (raiz, `app/` e `backend/`) foram atualizados com os novos comandos.
+
+### APK menor (RNF09)
+
+* **Problema:** o APK de release universal tinha 56 MB, e o APK só para arm64 tinha 19,5 MB, quase no limite de 20 MB do RNF09. Com `minSdk 26`, o Android Gradle Plugin guarda as bibliotecas nativas (`libflutter.so` e `libapp.so`) sem compressão, e o APK universal as repete para três arquiteturas.
+* Em `app/android/app/build.gradle.kts`, `packaging.jniLibs.useLegacyPackaging = true` comprime as bibliotecas dentro do APK. O Android as extrai na instalação.
+* Tamanho dos APKs de release:
+
+| APK | Antes | Depois |
+| --- | --- | --- |
+| `app-arm64-v8a-release.apk` | 19,5 MB | 9,0 MB |
+| `app-armeabi-v7a-release.apk` | 17,0 MB | 8,6 MB |
+| `app-x86_64-release.apk` (emulador) | 21,0 MB | 9,2 MB |
+| `app-release.apk` (universal) | 56,0 MB | 25,3 MB |
+
+* **Decisão:** o APK de entrega é o `app-arm64-v8a-release.apk`, gerado com `flutter build apk --release --split-per-abi`. O APK universal continua acima de 20 MB mesmo comprimido, porque leva as três arquiteturas.
+* **Custo:** depois de instalado, o app ocupa um pouco mais de espaço no celular, porque as bibliotecas ficam extraídas.
+* Nova seção **Gerar o APK** no README.
+
+### Testes
+* Os 109 testes do app passam e o `flutter analyze` não aponta nenhum problema novo.
+* O APK de release x86_64 foi instalado no emulador (Pixel 6, Android 15): o app abriu, carregou as bibliotecas comprimidas e mostrou a tela inicial com os dados da API publicada.
