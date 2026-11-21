@@ -23,6 +23,8 @@ import '../data/models/settings.dart';
 import '../domain/usecases/hydration_goals.dart';
 import '../domain/usecases/update_settings.dart';
 import '../domain/repositories/auth_repository.dart';
+import '../data/models/profile.dart';
+import '../domain/usecases/update_profile.dart';
 
 /// Preenchido no `main` com a implementação escolhida (fake ou API).
 final dependenciesProvider = Provider<AppDependencies>(
@@ -141,6 +143,16 @@ final accountProvider = FutureProvider<Account>((ref) {
   ref.watch(sessionProvider);
   return ref.watch(authRepositoryProvider).account();
 });
+
+
+/// Perfil salvo na API (Meus dados e Meu objetivo).
+final profileProvider = FutureProvider<Profile>((ref) {
+  ref.watch(sessionProvider);
+  return ref.watch(dependenciesProvider).profile.get();
+});
+
+final updateProfileProvider =
+    Provider<UpdateProfile>((ref) => UpdateProfile(ref.watch(dependenciesProvider).profile));
 
 // ---- Meta de hidratação e lembretes ----
 
