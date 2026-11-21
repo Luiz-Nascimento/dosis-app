@@ -8,6 +8,8 @@ import 'data/repositories/api_catalog_repository.dart';
 import 'data/repositories/api_dose_repository.dart';
 import 'data/repositories/api_hydration_repository.dart';
 import 'data/repositories/api_routine_repository.dart';
+import 'data/repositories/api_profile_repository.dart';
+import 'data/repositories/fake_profile_repository.dart';
 import 'data/repositories/api_symptom_repository.dart';
 import 'data/repositories/api_system_repository.dart';
 import 'data/repositories/fake_auth_repository.dart';
@@ -20,6 +22,7 @@ import 'domain/repositories/auth_repository.dart';
 import 'domain/repositories/catalog_repository.dart';
 import 'domain/repositories/dose_repository.dart';
 import 'domain/repositories/hydration_repository.dart';
+import 'domain/repositories/profile_repository.dart';
 import 'domain/repositories/reminder_scheduler.dart';
 import 'domain/repositories/routine_repository.dart';
 import 'domain/repositories/settings_repository.dart';
@@ -38,6 +41,7 @@ class AppDependencies {
     required this.articles,
     required this.symptoms,
     required this.hydration,
+    required this.profile,
     required this.settings,
     required this.reminders,
   });
@@ -54,6 +58,7 @@ class AppDependencies {
       articles: ApiArticleRepository(dosisApi.articles),
       symptoms: ApiSymptomRepository(dosisApi.symptoms),
       hydration: ApiHydrationRepository(dosisApi.hydration),
+      profile: ApiProfileRepository(dosisApi.profile),
       settings: SecureSettingsRepository(),
       reminders: _platformScheduler(),
     );
@@ -71,6 +76,7 @@ class AppDependencies {
       articles: FakeArticleRepository(),
       symptoms: FakeSymptomRepository(seeded: true),
       hydration: FakeHydrationRepository(),
+      profile: FakeProfileRepository(),
       // Preferências e lembretes são do aparelho, não do backend: valem também no modo fake.
       settings: SecureSettingsRepository(),
       reminders: _platformScheduler(),
@@ -85,6 +91,7 @@ class AppDependencies {
   final ArticleRepository articles;
   final SymptomRepository symptoms;
   final HydrationRepository hydration;
+  final ProfileRepository profile;
   final SettingsRepository settings;
   final ReminderScheduler reminders;
 

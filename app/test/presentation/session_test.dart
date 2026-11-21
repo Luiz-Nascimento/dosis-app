@@ -7,6 +7,7 @@ import 'package:dosis/data/repositories/fake_article_repository.dart';
 import 'package:dosis/data/repositories/fake_auth_repository.dart';
 import 'package:dosis/data/repositories/fake_catalog_repository.dart';
 import 'package:dosis/data/repositories/fake_repositories.dart';
+import 'package:dosis/data/repositories/fake_profile_repository.dart';
 import 'package:dosis/data/repositories/settings_repositories.dart';
 import 'package:dosis/domain/repositories/routine_repository.dart';
 import 'package:dosis/presentation/providers.dart';
@@ -57,6 +58,7 @@ void main() {
       articles: FakeArticleRepository(),
       symptoms: FakeSymptomRepository(),
       hydration: FakeHydrationRepository(),
+      profile: FakeProfileRepository(),
       settings: settings,
       reminders: NoopReminderScheduler(),
     );

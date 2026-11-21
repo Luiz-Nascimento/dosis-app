@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
+import 'my_data_page.dart';
+import 'my_goal_page.dart';
 import 'reminders_page.dart';
 import '../theme/app_theme.dart';
 import '../widgets/dosis_chrome.dart';
@@ -13,8 +15,6 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final name = ref.watch(accountProvider).value?.name ?? '';
-
-    void soon() => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Em breve.')));
 
     return Scaffold(
       bottomNavigationBar: const DosisBottomNav(popToRoot: true),
@@ -33,9 +33,23 @@ class ProfilePage extends ConsumerWidget {
             const SizedBox(height: 18),
             Center(child: Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800))),
             const SizedBox(height: 32),
-            _Item(icon: Icons.edit_outlined, title: 'Meus dados', subtitle: 'Altura, peso, idade...', onTap: soon),
+            _Item(
+              icon: Icons.edit_outlined,
+              title: 'Meus dados',
+              subtitle: 'Altura, peso, idade...',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const MyDataPage()),
+              ),
+            ),
             const SizedBox(height: 18),
-            _Item(icon: Icons.edit_outlined, title: 'Meu objetivo', subtitle: 'O que eu quero?', onTap: soon),
+            _Item(
+              icon: Icons.edit_outlined,
+              title: 'Meu objetivo',
+              subtitle: 'O que eu quero?',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const MyGoalPage()),
+              ),
+            ),
             const SizedBox(height: 18),
             _Item(
               icon: Icons.edit_outlined,
