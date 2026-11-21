@@ -8,9 +8,11 @@ import '../providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/dosis_chrome.dart';
 import '../widgets/dosis_widgets.dart';
+import '../widgets/edit_day_stack_sheet.dart';
+import '../widgets/edit_day_symptoms_sheet.dart';
 
 /// Detalhe de um dia da aba Registros: doses, sintomas e observação.
-/// [localDate] vem no formato AAAA-MM-DD.
+/// Tocar no stack ou nos sintomas abre a edição. [localDate] vem no formato AAAA-MM-DD.
 class DayDetailPage extends ConsumerWidget {
   const DayDetailPage({super.key, required this.localDate});
 
@@ -41,6 +43,13 @@ class DayDetailPage extends ConsumerWidget {
     return labels.toList();
   }
 
+  void _saved(BuildContext context, bool? ok) {
+    if (ok != true || !context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('Alterações salvas.')));
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final doses = (ref.watch(doseHistoryProvider).value ?? const <DoseLog>[])
@@ -55,6 +64,11 @@ class DayDetailPage extends ConsumerWidget {
       for (final log in symptomLogs)
         if ((log.notes ?? '').trim().isNotEmpty) log.notes!.trim(),
     ];
+
+    Future<void> editStack() async =>
+        _saved(context, await showEditDayStackSheet(context, localDate: localDate, doses: doses));
+    Future<void> editSymptoms() async =>
+        _saved(context, await showEditDaySymptomsSheet(context, localDate: localDate, logs: symptomLogs));
 
     return Scaffold(
       appBar: const DosisTopBar(),
@@ -76,34 +90,68 @@ class DayDetailPage extends ConsumerWidget {
           const SizedBox(height: 16),
           const SectionTitle('Stack do dia'),
           const SizedBox(height: 12),
-          if (doses.isEmpty)
-            const Text('Nenhuma dose registrada neste dia.', style: TextStyle(color: AppColors.muted)),
-          for (final dose in doses) ...[
-            StackRow(time: formatTime(dose.takenAt), name: dose.name, amount: formatDose(dose.amount, dose.unit)),
-            const SizedBox(height: 12),
-          ],
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: editStack,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (doses.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      'Nenhuma dose registrada neste dia. Toque para adicionar.',
+                      style: TextStyle(color: AppColors.muted),
+                    ),
+                  ),
+                for (final dose in doses) ...[
+                  StackRow(
+                    time: formatTime(dose.takenAt),
+                    name: dose.name,
+                    amount: formatDose(dose.amount, dose.unit),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ],
+            ),
+          ),
           const SizedBox(height: 10),
           const SectionTitle('Como você se sentiu'),
           const SizedBox(height: 12),
-          if (symptomLogs.isEmpty)
-            const Text('Sem registro de sintomas neste dia.', style: TextStyle(color: AppColors.muted))
-          else
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: editSymptoms,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final label in labels.isEmpty ? const ['Nenhum sintoma'] : labels) _Chip(label),
+                if (symptomLogs.isEmpty)
+                  const Text(
+                    'Sem registro de sintomas neste dia. Toque para adicionar.',
+                    style: TextStyle(color: AppColors.muted),
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final label in labels.isEmpty ? const ['Nenhum sintoma'] : labels) _Chip(label),
+                    ],
+                  ),
+                const SizedBox(height: 22),
+                const SectionTitle('Observação'),
+                const SizedBox(height: 12),
+                DosisCard(
+                  radius: 14,
+                  padding: const EdgeInsets.all(14),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      notes.isEmpty ? 'Sem observações.' : notes.join('\n'),
+                      style: TextStyle(fontSize: 13, color: notes.isEmpty ? AppColors.muted : null),
+                    ),
+                  ),
+                ),
               ],
-            ),
-          const SizedBox(height: 22),
-          const SectionTitle('Observação'),
-          const SizedBox(height: 12),
-          DosisCard(
-            radius: 14,
-            padding: const EdgeInsets.all(14),
-            child: Text(
-              notes.isEmpty ? 'Sem observações.' : notes.join('\n'),
-              style: TextStyle(fontSize: 13, color: notes.isEmpty ? AppColors.muted : null),
             ),
           ),
         ],

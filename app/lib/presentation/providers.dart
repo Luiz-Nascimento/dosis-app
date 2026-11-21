@@ -25,33 +25,43 @@ import '../domain/usecases/update_settings.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../data/models/profile.dart';
 import '../domain/usecases/update_profile.dart';
+import '../domain/usecases/edit_day_records.dart';
 
 /// Preenchido no `main` com a implementação escolhida (fake ou API).
 final dependenciesProvider = Provider<AppDependencies>(
-  (ref) => throw UnimplementedError('dependenciesProvider precisa de override no ProviderScope'),
+  (ref) => throw UnimplementedError(
+    'dependenciesProvider precisa de override no ProviderScope',
+  ),
 );
 
-final getTodayStackProvider =
-    Provider<GetTodayStack>((ref) => GetTodayStack(ref.watch(dependenciesProvider).routine));
-final registerDoseProvider =
-    Provider<RegisterDose>((ref) => RegisterDose(ref.watch(dependenciesProvider).doses));
-final registerSymptomsProvider =
-    Provider<RegisterSymptoms>((ref) => RegisterSymptoms(ref.watch(dependenciesProvider).symptoms));
-final getDoseHistoryProvider =
-    Provider<GetDoseHistory>((ref) => GetDoseHistory(ref.watch(dependenciesProvider).doses));
-final calculateHydrationProvider =
-    Provider<CalculateHydration>((ref) => const CalculateHydration());
+final getTodayStackProvider = Provider<GetTodayStack>(
+  (ref) => GetTodayStack(ref.watch(dependenciesProvider).routine),
+);
+final registerDoseProvider = Provider<RegisterDose>(
+  (ref) => RegisterDose(ref.watch(dependenciesProvider).doses),
+);
+final registerSymptomsProvider = Provider<RegisterSymptoms>(
+  (ref) => RegisterSymptoms(ref.watch(dependenciesProvider).symptoms),
+);
+final getDoseHistoryProvider = Provider<GetDoseHistory>(
+  (ref) => GetDoseHistory(ref.watch(dependenciesProvider).doses),
+);
+final calculateHydrationProvider = Provider<CalculateHydration>(
+  (ref) => const CalculateHydration(),
+);
 final checkDoseSafetyProvider = Provider<CheckDoseSafety>((ref) {
   final deps = ref.watch(dependenciesProvider);
   return CheckDoseSafety(deps.catalog, deps.doses);
 });
-final getDoseProtocolsProvider =
-    Provider<GetDoseProtocols>((ref) => GetDoseProtocols(ref.watch(dependenciesProvider).catalog));
+final getDoseProtocolsProvider = Provider<GetDoseProtocols>(
+  (ref) => GetDoseProtocols(ref.watch(dependenciesProvider).catalog),
+);
 
 /// Protocolos que fazem sentido para o item escolhido em "Registrar dose".
-final doseProtocolsProvider = FutureProvider.autoDispose.family<List<Protocol>, RoutineItem>(
-  (ref, item) => ref.watch(getDoseProtocolsProvider)(item),
-);
+final doseProtocolsProvider = FutureProvider.autoDispose
+    .family<List<Protocol>, RoutineItem>(
+      (ref, item) => ref.watch(getDoseProtocolsProvider)(item),
+    );
 
 final getSupplementHistoryProvider = Provider<GetSupplementHistory>((ref) {
   final deps = ref.watch(dependenciesProvider);
@@ -65,10 +75,12 @@ final todayStackProvider = FutureProvider<List<RoutineItem>>((ref) {
 
 // ---- Adicionar à rotina ----
 
-final addToRoutineProvider =
-    Provider<AddToRoutine>((ref) => AddToRoutine(ref.watch(dependenciesProvider).routine));
-final removeFromRoutineProvider =
-    Provider<RemoveFromRoutine>((ref) => RemoveFromRoutine(ref.watch(dependenciesProvider).routine));
+final addToRoutineProvider = Provider<AddToRoutine>(
+  (ref) => AddToRoutine(ref.watch(dependenciesProvider).routine),
+);
+final removeFromRoutineProvider = Provider<RemoveFromRoutine>(
+  (ref) => RemoveFromRoutine(ref.watch(dependenciesProvider).routine),
+);
 
 /// O que a tela "Adicionar à rotina" está pedindo ao catálogo. [page] começa em 1.
 typedef CatalogQuery = ({ProductKind kind, String search, int page});
@@ -78,25 +90,30 @@ const catalogPageSize = 4;
 
 /// Uma página do catálogo. Cada combinação de tipo + busca + página fica em cache
 /// enquanto a tela está aberta, então voltar para uma página já vista não repete a chamada.
-final catalogSearchProvider = FutureProvider.autoDispose.family<PageResult<Product>, CatalogQuery>(
-  (ref, query) => ref.watch(dependenciesProvider).catalog.search(
-        kind: query.kind,
-        query: query.search,
-        page: query.page,
-        pageSize: catalogPageSize,
-      ),
-);
+final catalogSearchProvider = FutureProvider.autoDispose
+    .family<PageResult<Product>, CatalogQuery>(
+      (ref, query) => ref
+          .watch(dependenciesProvider)
+          .catalog
+          .search(
+            kind: query.kind,
+            query: query.search,
+            page: query.page,
+            pageSize: catalogPageSize,
+          ),
+    );
 final doseHistoryProvider = FutureProvider<List<DoseLog>>((ref) {
   _userData(ref);
   return ref.watch(getDoseHistoryProvider)();
 });
 
 /// Histórico por suplemento dos últimos N dias (o parâmetro é o número de dias).
-final supplementHistoryProvider = FutureProvider.family<List<SupplementHistory>, int>((ref, days) {
-  // Depende do histórico geral: registrar uma dose nova recalcula os gráficos.
-  ref.watch(doseHistoryProvider);
-  return ref.watch(getSupplementHistoryProvider)(days: days);
-});
+final supplementHistoryProvider =
+    FutureProvider.family<List<SupplementHistory>, int>((ref, days) {
+      // Depende do histórico geral: registrar uma dose nova recalcula os gráficos.
+      ref.watch(doseHistoryProvider);
+      return ref.watch(getSupplementHistoryProvider)(days: days);
+    });
 
 /// Aba selecionada do menu de baixo (0 início, 1 rotina, 2 hidratação, 3 registros).
 class TabIndex extends Notifier<int> {
@@ -108,9 +125,9 @@ class TabIndex extends Notifier<int> {
 
 final tabIndexProvider = NotifierProvider<TabIndex, int>(TabIndex.new);
 
-
-final authRepositoryProvider =
-    Provider<AuthRepository>((ref) => ref.watch(dependenciesProvider).auth);
+final authRepositoryProvider = Provider<AuthRepository>(
+  (ref) => ref.watch(dependenciesProvider).auth,
+);
 
 final signOutProvider = Provider<SignOut>((ref) {
   final deps = ref.watch(dependenciesProvider);
@@ -144,15 +161,25 @@ final accountProvider = FutureProvider<Account>((ref) {
   return ref.watch(authRepositoryProvider).account();
 });
 
-
 /// Perfil salvo na API (Meus dados e Meu objetivo).
 final profileProvider = FutureProvider<Profile>((ref) {
   ref.watch(sessionProvider);
   return ref.watch(dependenciesProvider).profile.get();
 });
 
-final updateProfileProvider =
-    Provider<UpdateProfile>((ref) => UpdateProfile(ref.watch(dependenciesProvider).profile));
+final updateProfileProvider = Provider<UpdateProfile>(
+  (ref) => UpdateProfile(ref.watch(dependenciesProvider).profile),
+);
+
+final saveDayStackProvider = Provider<SaveDayStack>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return SaveDayStack(deps.edits, deps.doses);
+});
+
+final saveDaySymptomsProvider = Provider<SaveDaySymptoms>((ref) {
+  final deps = ref.watch(dependenciesProvider);
+  return SaveDaySymptoms(deps.edits, deps.symptoms);
+});
 
 // ---- Meta de hidratação e lembretes ----
 
@@ -160,9 +187,12 @@ final getHydrationProgressProvider = Provider<GetHydrationProgress>((ref) {
   final deps = ref.watch(dependenciesProvider);
   return GetHydrationProgress(deps.hydration, deps.settings);
 });
-final logWaterProvider = Provider<LogWater>((ref) => LogWater(ref.watch(dependenciesProvider).hydration));
-final removeWaterLogProvider =
-    Provider<RemoveWaterLog>((ref) => RemoveWaterLog(ref.watch(dependenciesProvider).hydration));
+final logWaterProvider = Provider<LogWater>(
+  (ref) => LogWater(ref.watch(dependenciesProvider).hydration),
+);
+final removeWaterLogProvider = Provider<RemoveWaterLog>(
+  (ref) => RemoveWaterLog(ref.watch(dependenciesProvider).hydration),
+);
 final updateSettingsProvider = Provider<UpdateSettings>((ref) {
   final deps = ref.watch(dependenciesProvider);
   return UpdateSettings(
@@ -188,7 +218,9 @@ class Settings extends AsyncNotifier<UserSettings> {
   }
 }
 
-final settingsProvider = AsyncNotifierProvider<Settings, UserSettings>(Settings.new);
+final settingsProvider = AsyncNotifierProvider<Settings, UserSettings>(
+  Settings.new,
+);
 
 /// Progresso de hoje e dos últimos 7 dias. Recalcula quando a meta muda.
 final hydrationProgressProvider = FutureProvider<HydrationProgress>((ref) {
@@ -222,7 +254,10 @@ final riskPanelProvider = FutureProvider<RiskPanel>((ref) {
 });
 
 /// Relatório de uma semana (o parâmetro é o deslocamento: 0 = atual, -1 = anterior).
-final symptomReportProvider = FutureProvider.family<WeeklySymptomReport, int>((ref, weekOffset) {
+final symptomReportProvider = FutureProvider.family<WeeklySymptomReport, int>((
+  ref,
+  weekOffset,
+) {
   ref.watch(symptomHistoryProvider);
   return ref.watch(buildWeeklySymptomReportProvider)(weekOffset: weekOffset);
 });
@@ -242,7 +277,14 @@ final articleProvider = FutureProvider.family<Article, String>(
 /// Motor que cruza as diretrizes do catálogo com os registros do usuário.
 final buildRecommendationsProvider = Provider<BuildRecommendations>((ref) {
   final deps = ref.watch(dependenciesProvider);
-  return BuildRecommendations(deps.doses, deps.catalog, deps.symptoms, deps.routine, deps.hydration, deps.settings);
+  return BuildRecommendations(
+    deps.doses,
+    deps.catalog,
+    deps.symptoms,
+    deps.routine,
+    deps.hydration,
+    deps.settings,
+  );
 });
 
 /// Recomendações atuais. Recalcula quando entra dose, sintoma, água ou muda a meta.

@@ -11,7 +11,8 @@ import 'fake_catalog_repository.dart';
 
 class FakeSystemRepository implements SystemRepository {
   @override
-  Future<HealthStatus> health() async => const HealthStatus(status: 'ok', firebaseMode: 'mock');
+  Future<HealthStatus> health() async =>
+      const HealthStatus(status: 'ok', firebaseMode: 'mock');
 }
 
 class FakeRoutineRepository implements RoutineRepository {
@@ -44,14 +45,25 @@ class FakeRoutineRepository implements RoutineRepository {
   ];
 
   @override
-  Future<List<RoutineItem>> list({bool? active}) async =>
-      List.unmodifiable(active == null ? _items : _items.where((i) => i.active == active));
+  Future<List<RoutineItem>> list({bool? active}) async => List.unmodifiable(
+    active == null ? _items : _items.where((i) => i.active == active),
+  );
 
   /// Completa o item com os dados do catálogo, como o backend faz.
   @override
-  Future<RoutineItem> add({required String productId, List<String>? scheduleTimes}) async {
-    final product = FakeCatalogRepository.products.where((p) => p.id == productId).firstOrNull;
-    if (product == null) throw ArgumentError.value(productId, 'productId', 'Produto não encontrado no catálogo.');
+  Future<RoutineItem> add({
+    required String productId,
+    List<String>? scheduleTimes,
+  }) async {
+    final product = FakeCatalogRepository.products
+        .where((p) => p.id == productId)
+        .firstOrNull;
+    if (product == null)
+      throw ArgumentError.value(
+        productId,
+        'productId',
+        'Produto não encontrado no catálogo.',
+      );
     final item = RoutineItem(
       id: newId(),
       productId: product.id,
@@ -81,26 +93,51 @@ class FakeDoseRepository implements DoseRepository {
     final now = DateTime.now();
     final logs = <DoseLog>[];
     for (var back = 1; back <= 7; back++) {
-      final day = DateTime(now.year, now.month, now.day).subtract(Duration(days: back));
-      logs.add(_log('Creatina', 5, DateTime(day.year, day.month, day.day, 8), routineItemId: 'r-creatina', productId: 'creatina'));
-      logs.add(_log('Whey Protein', 60, DateTime(day.year, day.month, day.day, 12, 30),
-          routineItemId: 'r-whey', productId: 'whey-protein'));
+      final day = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: back));
+      logs.add(
+        _log(
+          'Creatina',
+          5,
+          DateTime(day.year, day.month, day.day, 8),
+          routineItemId: 'r-creatina',
+          productId: 'creatina',
+        ),
+      );
+      logs.add(
+        _log(
+          'Whey Protein',
+          60,
+          DateTime(day.year, day.month, day.day, 12, 30),
+          routineItemId: 'r-whey',
+          productId: 'whey-protein',
+        ),
+      );
     }
     return logs;
   }
 
-  DoseLog _log(String name, double amount, DateTime at, {String? routineItemId, String? productId}) => DoseLog(
-        id: newId(),
-        routineItemId: routineItemId,
-        productId: productId,
-        name: name,
-        kind: ProductKind.supplement,
-        protocol: Protocol.continuous,
-        amount: amount,
-        unit: DoseUnit.g,
-        takenAt: at,
-        localDate: _date(at),
-      );
+  DoseLog _log(
+    String name,
+    double amount,
+    DateTime at, {
+    String? routineItemId,
+    String? productId,
+  }) => DoseLog(
+    id: newId(),
+    routineItemId: routineItemId,
+    productId: productId,
+    name: name,
+    kind: ProductKind.supplement,
+    protocol: Protocol.continuous,
+    amount: amount,
+    unit: DoseUnit.g,
+    takenAt: at,
+    localDate: _date(at),
+  );
 
   static String _date(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -115,10 +152,14 @@ class FakeDoseRepository implements DoseRepository {
     String? notes,
   }) async {
     // Mesmo comportamento da API: repetir o id devolve a dose já gravada.
-    final existing = id == null ? null : _logs.where((l) => l.id == id).firstOrNull;
+    final existing = id == null
+        ? null
+        : _logs.where((l) => l.id == id).firstOrNull;
     if (existing != null) return existing;
 
-    final item = (await _routine.list()).firstWhere((i) => i.id == routineItemId);
+    final item = (await _routine.list()).firstWhere(
+      (i) => i.id == routineItemId,
+    );
     final log = DoseLog(
       id: id ?? newId(),
       routineItemId: item.id,
@@ -136,16 +177,48 @@ class FakeDoseRepository implements DoseRepository {
     return log;
   }
 
+  /// Usado pela edição do dia (modo fake).
+  DoseLog replaceLog(
+    String id, {
+    required double amount,
+    required DateTime takenAt,
+    RoutineItem? item,
+  }) {
+    final index = _logs.indexWhere((l) => l.id == id);
+    final old = _logs[index];
+    return _logs[index] = DoseLog(
+      id: old.id,
+      routineItemId: item?.id ?? old.routineItemId,
+      productId: item == null ? old.productId : item.productId,
+      name: item?.name ?? old.name,
+      kind: item?.kind ?? old.kind,
+      protocol: item?.protocol ?? old.protocol,
+      amount: amount,
+      unit: item?.doseUnit ?? old.unit,
+      takenAt: takenAt,
+      localDate: _date(takenAt),
+      notes: old.notes,
+    );
+  }
+
+  void removeLog(String id) => _logs.removeWhere((l) => l.id == id);
+
   @override
-  Future<List<DoseLog>> list({DateTime? from, DateTime? to, String? routineItemId, int? limit}) async {
+  Future<List<DoseLog>> list({
+    DateTime? from,
+    DateTime? to,
+    String? routineItemId,
+    int? limit,
+  }) async {
     var result = _logs.where((l) {
       if (from != null && l.takenAt.isBefore(from)) return false;
       if (to != null && l.takenAt.isAfter(to)) return false;
-      if (routineItemId != null && l.routineItemId != routineItemId) return false;
+      if (routineItemId != null && l.routineItemId != routineItemId)
+        return false;
       return true;
-    }).toList()
-      ..sort((a, b) => b.takenAt.compareTo(a.takenAt));
-    if (limit != null && result.length > limit) result = result.sublist(0, limit);
+    }).toList()..sort((a, b) => b.takenAt.compareTo(a.takenAt));
+    if (limit != null && result.length > limit)
+      result = result.sublist(0, limit);
     return result;
   }
 }
@@ -156,11 +229,18 @@ class FakeSymptomRepository implements SymptomRepository {
   FakeSymptomRepository({bool seeded = false}) {
     if (!seeded) return;
     final now = DateTime.now();
-    SymptomLog at(int daysAgo, int hour, List<Symptom> symptoms, {String? notes}) {
+    SymptomLog at(
+      int daysAgo,
+      int hour,
+      List<Symptom> symptoms, {
+      String? notes,
+    }) {
       final when = DateTime(now.year, now.month, now.day - daysAgo, hour);
       return SymptomLog(
         id: newId(),
-        status: symptoms.isEmpty ? SymptomStatus.normal : SymptomStatus.different,
+        status: symptoms.isEmpty
+            ? SymptomStatus.normal
+            : SymptomStatus.different,
         symptoms: symptoms,
         notes: notes,
         loggedAt: when,
@@ -202,15 +282,42 @@ class FakeSymptomRepository implements SymptomRepository {
     return log;
   }
 
+  /// Usado pela edição do dia (modo fake).
+  SymptomLog replaceLog(
+    String id, {
+    required SymptomStatus status,
+    required List<Symptom> symptoms,
+    String? otherDescription,
+    String? notes,
+  }) {
+    final index = _logs.indexWhere((l) => l.id == id);
+    final old = _logs[index];
+    return _logs[index] = SymptomLog(
+      id: old.id,
+      status: status,
+      symptoms: symptoms,
+      otherDescription: otherDescription,
+      notes: notes,
+      loggedAt: old.loggedAt,
+      localDate: old.localDate,
+    );
+  }
+
+  void removeLog(String id) => _logs.removeWhere((l) => l.id == id);
+
   @override
-  Future<List<SymptomLog>> list({DateTime? from, DateTime? to, int? limit}) async {
+  Future<List<SymptomLog>> list({
+    DateTime? from,
+    DateTime? to,
+    int? limit,
+  }) async {
     var result = _logs.where((l) {
       if (from != null && l.loggedAt.isBefore(from)) return false;
       if (to != null && l.loggedAt.isAfter(to)) return false;
       return true;
-    }).toList()
-      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
-    if (limit != null && result.length > limit) result = result.sublist(0, limit);
+    }).toList()..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+    if (limit != null && result.length > limit)
+      result = result.sublist(0, limit);
     return result;
   }
 }
@@ -221,20 +328,29 @@ class FakeHydrationRepository implements HydrationRepository {
   @override
   Future<HydrationLog> log({required int amountMl, DateTime? loggedAt}) async {
     final at = loggedAt ?? DateTime.now();
-    final log = HydrationLog(id: newId(), amountMl: amountMl, loggedAt: at, localDate: FakeDoseRepository._date(at));
+    final log = HydrationLog(
+      id: newId(),
+      amountMl: amountMl,
+      loggedAt: at,
+      localDate: FakeDoseRepository._date(at),
+    );
     _logs.add(log);
     return log;
   }
 
   @override
-  Future<List<HydrationLog>> list({DateTime? from, DateTime? to, int? limit}) async {
+  Future<List<HydrationLog>> list({
+    DateTime? from,
+    DateTime? to,
+    int? limit,
+  }) async {
     var result = _logs.where((l) {
       if (from != null && l.loggedAt.isBefore(from)) return false;
       if (to != null && l.loggedAt.isAfter(to)) return false;
       return true;
-    }).toList()
-      ..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
-    if (limit != null && result.length > limit) result = result.sublist(0, limit);
+    }).toList()..sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+    if (limit != null && result.length > limit)
+      result = result.sublist(0, limit);
     return result;
   }
 
