@@ -108,3 +108,15 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Proposta da IA, a revisar pela equipe:** Usar as faixas do catálogo como fonte dos protocolos de cada produto, para que todo protocolo oferecido tenha alerta, e oferecer uso contínuo ou quando necessário para itens cadastrados à mão.
 * **Versionamento:** A IA atualizou a branch com a `main` depois do merge do pull request anterior, fez os commits só dos arquivos desta correção, enviou a branch e abriu o pull request.
 * **Limitações da IA:** O teste no celular usou o catálogo em memória, que não tem a cafeína. O caso da cafeína e o dos itens cadastrados à mão foram cobertos só pelos testes unitários. As doses já gravadas na API continuam com o protocolo antigo; a correção muda só a forma como elas são comparadas.
+
+
+
+## 📅 Histórico de Contribuições (21/11 — perfil e detalhe do dia)
+### Telas Meus dados e Meu objetivo, e detalhe do dia em Registros
+
+* **Análise:** A pedido do aluno, a IA leu o endpoint `/profile/` do backend (serializer, view e repositório) e confirmou que ele já aceitava nome, idade, peso, altura, sexo biológico e objetivo, com os limites de cada campo. No app, identificou que já existiam o `ProfileService`, o modelo `Profile` e os enums, e que faltavam o repositório, o provider e as telas. Para o detalhe do dia, a IA comparou a tela atual de Registros com o protótipo de alta fidelidade do repositório.
+* **Alterações:** Escrita assistida de `ProfileRepository` (interface, implementação da API e versão fake), do caso de uso `UpdateProfile` (que repete os limites do backend), do `profileProvider`, das telas `MyDataPage` e `MyGoalPage`, da ligação delas na tela de Perfil e da tela `DayDetailPage`, aberta ao tocar em um dia da aba Registros. Também foi escrito um teste unitário do `UpdateProfile`.
+* **Decisão humana:** O aluno definiu o escopo (inserir dados e objetivo no perfil, e o resumo do dia clicável como no protótipo), decidiu que as telas usam a API real, e colou, adaptou e integrou o código no projeto.
+* **Verificação feita pela IA:** Leitura do código do backend e do app e comparação visual com o protótipo. A IA não compilou o app nem executou o analisador ou os testes.
+* **Versionamento:** A IA não fez commit nem push. O aluno criou a branch e fez os commits.
+* **Limitações da IA:** O código não foi compilado nem testado pela IA; a verificação dependeu do aluno. A tela de detalhe do dia é só de leitura, e o "Editar sintomas" do protótipo não foi feito. Em Meus dados, o usuário não consegue apagar um valor já salvo, apenas trocá-lo.
