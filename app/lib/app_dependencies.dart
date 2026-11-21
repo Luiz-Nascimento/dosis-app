@@ -9,7 +9,9 @@ import 'data/repositories/api_dose_repository.dart';
 import 'data/repositories/api_hydration_repository.dart';
 import 'data/repositories/api_routine_repository.dart';
 import 'data/repositories/api_profile_repository.dart';
+import 'data/repositories/api_record_edit_repository.dart';
 import 'data/repositories/fake_profile_repository.dart';
+import 'data/repositories/fake_record_edit_repository.dart';
 import 'data/repositories/api_symptom_repository.dart';
 import 'data/repositories/api_system_repository.dart';
 import 'data/repositories/fake_auth_repository.dart';
@@ -23,6 +25,7 @@ import 'domain/repositories/catalog_repository.dart';
 import 'domain/repositories/dose_repository.dart';
 import 'domain/repositories/hydration_repository.dart';
 import 'domain/repositories/profile_repository.dart';
+import 'domain/repositories/record_edit_repository.dart';
 import 'domain/repositories/reminder_scheduler.dart';
 import 'domain/repositories/routine_repository.dart';
 import 'domain/repositories/settings_repository.dart';
@@ -42,6 +45,7 @@ class AppDependencies {
     required this.symptoms,
     required this.hydration,
     required this.profile,
+    required this.edits,
     required this.settings,
     required this.reminders,
   });
@@ -59,6 +63,7 @@ class AppDependencies {
       symptoms: ApiSymptomRepository(dosisApi.symptoms),
       hydration: ApiHydrationRepository(dosisApi.hydration),
       profile: ApiProfileRepository(dosisApi.profile),
+      edits: ApiRecordEditRepository(dosisApi.doses, dosisApi.symptoms),
       settings: SecureSettingsRepository(),
       reminders: _platformScheduler(),
     );
@@ -67,16 +72,19 @@ class AppDependencies {
   /// Dados em memória: o app roda sem backend (`--dart-define=USE_API=false`).
   factory AppDependencies.fake() {
     final routine = FakeRoutineRepository();
+    final doses = FakeDoseRepository(routine);
+    final symptoms = FakeSymptomRepository(seeded: true);
     return AppDependencies(
       system: FakeSystemRepository(),
       auth: FakeAuthRepository(),
       routine: routine,
-      doses: FakeDoseRepository(routine),
+      doses: doses,
       catalog: FakeCatalogRepository(),
       articles: FakeArticleRepository(),
-      symptoms: FakeSymptomRepository(seeded: true),
+      symptoms: symptoms,
       hydration: FakeHydrationRepository(),
       profile: FakeProfileRepository(),
+      edits: FakeRecordEditRepository(doses, symptoms),
       // Preferências e lembretes são do aparelho, não do backend: valem também no modo fake.
       settings: SecureSettingsRepository(),
       reminders: _platformScheduler(),
@@ -92,6 +100,7 @@ class AppDependencies {
   final SymptomRepository symptoms;
   final HydrationRepository hydration;
   final ProfileRepository profile;
+  final RecordEditRepository edits;
   final SettingsRepository settings;
   final ReminderScheduler reminders;
 
