@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import requests
@@ -31,6 +32,8 @@ from .base import (
 )
 
 _TIMEOUT_SECONDS = 10
+
+logger = logging.getLogger("dosis.auth")
 
 _ERRORS: dict[str, type[AuthError]] = {
     "EMAIL_EXISTS": EmailAlreadyInUse,
@@ -69,11 +72,16 @@ class FirebaseAuthProvider(AuthProvider):
     def sign_up(self, email: str, password: str, name: str | None) -> AuthSession:
         data = self._call("accounts:signUp", {"email": email, "password": password, "returnSecureToken": True})
         if name:
-            data = self._call(
-                "accounts:update", {"idToken": data["idToken"], "displayName": name, "returnSecureToken": True}
-            )
-        self.send_email_verification(data["idToken"])
-        return self._session(data["idToken"], data["refreshToken"], data["expiresIn"])
+            # Mudar só o displayName não devolve tokens novos (eles só vêm quando
+            # muda e-mail ou senha). Ler data["idToken"] da resposta derrubava o
+            # cadastro com erro 500 depois de a conta já existir. O refresh gera
+            # um id_token que já traz o nome.
+            self._call("accounts:update", {"idToken": data["idToken"], "displayName": name})
+            session = self.refresh(data["refreshToken"])
+        else:
+            session = self._session(data["idToken"], data["refreshToken"], data["expiresIn"])
+        self._try_send_email_verification(session.id_token)
+        return session
 
     def sign_in(self, email: str, password: str) -> AuthSession:
         data = self._call(
@@ -102,11 +110,22 @@ class FirebaseAuthProvider(AuthProvider):
         if name:
             payload["displayName"] = name
         data = self._call("accounts:update", payload)
-        self.send_email_verification(data["idToken"])
+        self._try_send_email_verification(data["idToken"])
         return self._session(data["idToken"], data["refreshToken"], data["expiresIn"])
 
     def send_email_verification(self, id_token: str) -> None:
         self._call("accounts:sendOobCode", {"requestType": "VERIFY_EMAIL", "idToken": id_token})
+
+    def _try_send_email_verification(self, id_token: str) -> None:
+        """No cadastro, a conta já existe quando o e-mail é enviado.
+
+        Uma falha no envio não pode virar erro da requisição: o app mostraria
+        erro para uma conta criada. A pessoa pede o reenvio em /auth/verify-email/.
+        """
+        try:
+            self.send_email_verification(id_token)
+        except AuthError:
+            logger.warning("Conta criada, mas o e-mail de confirmação não foi enviado.", exc_info=True)
 
     def confirm_email_verification(self, oob_code: str) -> None:
         self._call("accounts:update", {"oobCode": oob_code})
@@ -167,6 +186,9 @@ class FirebaseAuthProvider(AuthProvider):
             raise AuthUnavailable()
         # Ex.: "WEAK_PASSWORD : Password should be at least 6 characters"
         code = message.split(" ")[0].split(":")[0]
+        if code not in _ERRORS:
+            # Erros sem tradução viram "auth_error" genérico; o log guarda o motivo real.
+            logger.warning("Firebase Auth respondeu %s: %s", response.status_code, message)
         raise _ERRORS.get(code, AuthError)()
 
     def _session(self, id_token: str, refresh_token: str, expires_in: str | int) -> AuthSession:

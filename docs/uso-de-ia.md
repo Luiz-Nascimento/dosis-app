@@ -120,3 +120,15 @@ validação de regras de negócio e testes em runtime, enquanto a IA otimizou o 
 * **Verificação feita pela IA:** Leitura do código do backend e do app e comparação visual com o protótipo. A IA não compilou o app nem executou o analisador ou os testes.
 * **Versionamento:** A IA não fez commit nem push. O aluno criou a branch e fez os commits.
 * **Limitações da IA:** O código não foi compilado nem testado pela IA; a verificação dependeu do aluno. A tela de detalhe do dia é só de leitura, e o "Editar sintomas" do protótipo não foi feito. Em Meus dados, o usuário não consegue apagar um valor já salvo, apenas trocá-lo.
+
+## 📅 Histórico de Contribuições (23/11 — cadastro com erro 500)
+### Correção do erro 500 ao criar conta
+
+* **Ambiente:** A pedido do aluno, a IA instalou no computador dele o Flutter 3.47.8 (a versão em que o projeto foi criado), o JDK 21 e o Android SDK com emulador. Depois rodou o analisador e os testes, gerou os APKs de release por arquitetura e copiou o `app-arm64-v8a-release.apk` (8,7 MB) para o celular do aluno.
+* **Análise:** A partir do relato do aluno (ao criar conta, o app mostrava erro 500, mas a conta existia e o login funcionava), a IA leu o fluxo de cadastro no app e no backend. Com autorização do aluno, criou uma conta de teste na API publicada e reproduziu o erro. Testando cada passo isolado (`/auth/me/`, `/profile/` e `/auth/verify-email/`), concluiu que o `sign_up` quebrava ao ler `idToken` da resposta do `accounts:update`, que não traz tokens quando muda só o nome. Também encontrou um segundo problema: o envio do e-mail de confirmação falha no Firebase.
+* **Correção:** Escrita assistida da renovação da sessão depois de gravar o nome, do envio do e-mail de confirmação que não derruba mais o cadastro e do log com o código real dos erros do Firebase Auth, com testes do provedor real e as respostas HTTP simuladas.
+* **Verificação feita pela IA:** Confirmação de que o código publicado é o mesmo do repositório (comparando o schema OpenAPI) e de que 3 dos testes novos falham com o código anterior (`KeyError: 'idToken'`), e execução da suíte do backend (137 testes passando).
+* **Dados em produção:** A conta de teste foi criada com um e-mail descartável e excluída pelo próprio endpoint de exclusão (`DELETE /auth/me/`) no fim da investigação.
+* **Decisão humana:** O aluno autorizou a conta de teste na API publicada e pediu os commits no padrão do projeto, com o perfil dele.
+* **Versionamento:** A IA criou a branch a partir da `main` atualizada e fez os commits só dos arquivos desta correção, com a identidade do aluno.
+* **Limitações da IA:** A correção vale só depois do deploy do backend, que a IA não fez. O motivo de o Firebase recusar o e-mail de confirmação não foi descoberto, porque a API devolve só um erro genérico. Com a correção, o código real passa a aparecer no log do servidor. A tela "Confirme seu e-mail" do app continua exigindo a confirmação para entrar.

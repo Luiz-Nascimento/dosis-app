@@ -290,3 +290,18 @@ Em **requisitos.md** foi adicionado:
 * 3 testes novos do protocolo gravado com a dose (`RegisterDose`, `ApiDoseRepository` e `FakeDoseRepository`).
 * Os 123 testes do app passam e o `flutter analyze` não aponta nenhum problema novo.
 * Testado num celular Android, em modo de dados falsos: a creatina mostra uso contínuo e saturação, o whey mostra só uso contínuo, a testosterona mostra só ciclo, e 60 g de whey geram o alerta com a faixa de uso contínuo.
+
+## [0.17] — 23/11/2026
+
+### Correção: criar conta dava erro 500, mas a conta era criada
+
+* **Bug:** ao criar uma conta com nome, a API respondia `500` e o app mostrava "Erro inesperado no servidor (500)". A conta já existia no Firebase, então era possível entrar pela tela de login.
+* **Causa:** `FirebaseAuthProvider.sign_up` (`backend/apps/core/auth/firebase.py`) lia `idToken` da resposta do `accounts:update`. O Firebase não devolve tokens novos quando muda só o nome, e o `KeyError` derrubava a requisição. Por isso o e-mail de confirmação não era enviado e o documento `users/{uid}` (nome e aceite dos termos) não era gravado.
+* **Correção:** depois de gravar o nome, o backend renova a sessão com o `refresh_token` do cadastro. O novo `id_token` já traz o nome.
+* Uma falha no envio do e-mail de confirmação não derruba mais o cadastro nem o vínculo de conta anônima, porque a conta já foi criada. A falha fica no log, e a pessoa pode pedir o reenvio (`/auth/verify-email/`).
+* Erros do Firebase Auth sem tradução continuam chegando ao app como `auth_error`, mas agora o código real do Firebase fica no log (`dosis.auth`).
+
+### Testes
+* Novo `backend/tests/unit/apps/accounts/test_firebase_provider.py`, com 5 testes do provedor real e as respostas HTTP do Firebase simuladas: cadastro com e sem nome, falha no envio do e-mail, reenvio com erro e o endpoint `/auth/register/` respondendo 201. Com o código anterior, 3 deles falham com `KeyError: 'idToken'`.
+* Os 137 testes do backend passam.
+* Reproduzido na API publicada antes da correção: o cadastro respondia 500, o login funcionava e o perfil não tinha nome nem aceite dos termos. A conta de teste foi excluída depois.
